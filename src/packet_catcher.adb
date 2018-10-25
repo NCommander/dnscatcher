@@ -1,4 +1,5 @@
 with Ada.Text_IO; use Ada.Text_IO;
+with Ada.Integer_Text_IO; use Ada.Integer_Text_IO;
 
 with Ada.Exceptions; use Ada.Exceptions;
 
@@ -12,11 +13,11 @@ with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 
 with Ada.Unchecked_Conversion;
 
+with Raw_Dns_Packets;
+
 package body Packet_Catcher is
    -- Input and Output Sockets
-   Receiving_Socket : Socket_Type;
-   Transmit_Socket  : Socket_Type;
-   --From_Client: Sock_Addr_Type;
+   DNS_Socket           : Socket_Type;
    To_Resolver          : Inet_Addr_Type := Inet_Addr ("4.2.2.2");
    Inbound_Packet_Queue : Raw_DNS_Packet_Queue;
 
@@ -30,17 +31,20 @@ package body Packet_Catcher is
       entry Process_Queue;
    end Send_Packet;
 
-   -- Handles DNS Packets in a FIFO queue; built around the
+   -- Handles DNS Packets in a FIFO queue; built around Vectors, this may
+   -- need to be changed for performance reasons at some point
    protected body Raw_DNS_Packet_Queue is
       entry Put (Packet : in Raw_DNS_Packet) when True is
       begin
          Stored_Packets.Append (Packet);
       end Put;
+
       entry Get (Packet : out Raw_DNS_Packet) when True is
       begin
          Packet := Stored_Packets.First_Element;
          Stored_Packets.Delete_First;
       end Get;
+
       function Count return Integer is
       begin
          return Integer (Stored_Packets.Length);
@@ -48,33 +52,48 @@ package body Packet_Catcher is
 
    end Raw_DNS_Packet_Queue;
 
+   function SEA_To_Dns_Packet_Header is new
+     Ada.Unchecked_Conversion(Source => Stream_Element_Array,
+                              Target => Raw_Dns_Packets.Dns_Packet_Header);
+
    task body Receive_Packet is
 
-      Buffer : access Stream_Element_Array;
+      Buffer           : access Stream_Element_Array;
       Offset           : Stream_Element_Offset;
       Incoming_Address : Sock_Addr_Type;
       DNS_Packet       : Raw_DNS_Packet;
+      Packet_Header    : Raw_DNS_Packets.DNS_Packet_Header;
    begin
       accept Start;
 
-      Buffer := new Stream_Element_Array(1 .. Stream_Element_Offset (1500));
+      Buffer := new Stream_Element_Array (1 .. Stream_Element_Offset (1500));
       Ada.Text_IO.Put_Line ("Test Receive Packet");
       loop -- Main receiving loop
          Receive_Packet_Loop :
          loop -- Receive the packet
             Receive_Socket
-              (Socket => Receiving_Socket, Item => Buffer.all, Last => Offset,
+              (Socket => DNS_Socket, Item => Buffer.all, Last => Offset,
                From   => Incoming_Address);
             exit when Buffer'Last = -1;
 
             Put ("Received UDP Packet From ");
             Put_Line (Image (Incoming_Address.Addr));
-            Put_Line("Read " & Stream_Element_Offset'Image(Offset) & " bytes");
+            Put_Line
+              ("Read " & Stream_Element_Offset'Image (Offset) & " bytes");
+
+            -- See if we can successfully decode some information from
+            -- the packet
+            Packet_Header := SEA_To_Dns_Packet_Header(Buffer.all);
+            Put("  DNS Transaction ID: ");
+            Put(Standard_Output, Integer(Packet_Header.Identifier), Base => 16);
+            New_Line;
+
+
             -- Copy the packet for further processing
             DNS_Packet.From_Address :=
               To_Unbounded_String (Image (Incoming_Address.Addr));
-            DNS_Packet.To_Address := To_Unbounded_String ("8.8.8.8");
-            DNS_Packet.Raw_Data := Buffer;
+            DNS_Packet.To_Address      := To_Unbounded_String ("4.4.2.2");
+            DNS_Packet.Raw_Data        := Buffer;
             DNS_Packet.Raw_Data_Length := Offset;
             Inbound_Packet_Queue.Put (Packet => DNS_Packet);
 
@@ -90,13 +109,13 @@ package body Packet_Catcher is
             Packet_Catcher.Stop_Catcher;
          end;
 
-      -- Test
+         -- Test
    end Receive_Packet;
 
    task body Send_Packet is
-      DNS_Packet : Raw_DNS_Packet;
+      DNS_Packet       : Raw_DNS_Packet;
       Outgoing_Address : Inet_Addr_Type;
-      Length : Stream_Element_Offset;
+      Length           : Stream_Element_Offset;
 
    begin
       accept Start;
@@ -111,13 +130,16 @@ package body Packet_Catcher is
                  Inet_Addr (To_String (DNS_Packet.To_Address));
 
                -- And send the damn thing
-                  Send_Socket
-                    (Socket => Transmit_Socket, Item => DNS_Packet.Raw_Data.all(1..DNS_Packet.Raw_Data_Length), Last => Length,
-                     To     =>
-                       (Family => Family_Inet, Addr => Outgoing_Address,
-                        Port   => 53));
-                  Put ("Sent packet to ");
-                  Put_Line (Image (Outgoing_Address));
+               Send_Socket
+                 (Socket => DNS_Socket,
+                  Item   =>
+                    DNS_Packet.Raw_Data.all (1 .. DNS_Packet.Raw_Data_Length),
+                  Last => Length,
+                  To   =>
+                    (Family => Family_Inet, Addr => Outgoing_Address,
+                     Port   => 53));
+               Put ("Sent packet to ");
+               Put_Line (Image (Outgoing_Address));
             end Process_Queue;
          or
             delay 0.1;
@@ -136,20 +158,14 @@ package body Packet_Catcher is
    begin
       -- Setup the inbound port 53 socket
       GNAT.Sockets.Initialize;
-      Create_Socket (Socket => Receiving_Socket, Mode => Socket_Datagram);
+      Create_Socket (Socket => DNS_Socket, Mode => Socket_Datagram);
       Bind_Socket
-        (Socket  => Receiving_Socket,
+        (Socket  => DNS_Socket,
          Address =>
-           (Family => Family_Inet, Addr => Any_Inet_Addr, Port => 5555));
-      Receive_Packet.Start;
-
-      -- Now create the outbound socket
-      Create_Socket (Socket => Transmit_Socket, Mode => Socket_Datagram);
-      Connect_Socket
-        (Socket => Transmit_Socket,
-         Server => (Family => Family_Inet, Addr => To_Resolver, Port => 53));
+           (Family => Family_Inet, Addr => Any_Inet_Addr, Port => 53));
 
       -- Start our processing loops
+      Receive_Packet.Start;
       Send_Packet.Start;
    end Run_Catcher;
 
