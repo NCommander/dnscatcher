@@ -1,4 +1,4 @@
-with Ada.Text_IO; use Ada.Text_IO;
+with Ada.Text_IO;         use Ada.Text_IO;
 with Ada.Integer_Text_IO; use Ada.Integer_Text_IO;
 
 with Ada.Exceptions; use Ada.Exceptions;
@@ -9,6 +9,8 @@ with Ada.Task_Identification; use Ada.Task_Identification;
 
 with Ada.Streams; use Ada.Streams;
 
+with Ada.Strings;           use Ada.Strings;
+with Ada.Strings.Hash;
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 
 with Ada.Unchecked_Conversion;
@@ -17,9 +19,16 @@ with Raw_Dns_Packets;
 
 package body Packet_Catcher is
    -- Input and Output Sockets
+   UPSTREAM_DNS_SERVER  : String         := "4.2.2.2";
    DNS_Socket           : Socket_Type;
    To_Resolver          : Inet_Addr_Type := Inet_Addr ("4.2.2.2");
    Inbound_Packet_Queue : Raw_DNS_Packet_Queue;
+   DNS_Transactions     : DNS_Transaction_Manager;
+
+   -- Conversion functions
+   function SEA_To_Dns_Packet_Header is new Ada.Unchecked_Conversion
+     (Source => Stream_Element_Array,
+      Target => Raw_Dns_Packets.Dns_Packet_Header);
 
    -- Tasks Definition
    task Receive_Packet is
@@ -31,8 +40,8 @@ package body Packet_Catcher is
       entry Process_Queue;
    end Send_Packet;
 
-   -- Handles DNS Packets in a FIFO queue; built around Vectors, this may
-   -- need to be changed for performance reasons at some point
+   -- Handles DNS Packets in a FIFO queue; built around Vectors, this may need
+   -- to be changed for performance reasons at some point
    protected body Raw_DNS_Packet_Queue is
       entry Put (Packet : in Raw_DNS_Packet) when True is
       begin
@@ -49,25 +58,66 @@ package body Packet_Catcher is
       begin
          return Integer (Stored_Packets.Length);
       end Count;
-
    end Raw_DNS_Packet_Queue;
 
-   function SEA_To_Dns_Packet_Header is new
-     Ada.Unchecked_Conversion(Source => Stream_Element_Array,
-                              Target => Raw_Dns_Packets.Dns_Packet_Header);
+   -- Handle the map for tracking transactions to/from source
+   protected body DNS_Transaction_Manager is
+      entry Append_Client_Resolver_Packet (Packet : Raw_DNS_Packet)
+        when True is
+         Transaction    : DNS_Transaction;
+         Packet_Header  : Raw_DNS_Packets.DNS_Packet_Header;
+         Hashmap_Key    : IP_Transaction_Key;
+         Hashmap_Cursor : DNS_Transaction_Maps.Cursor;
+      begin
+
+         Packet_Header := SEA_To_Dns_Packet_Header (Packet.Raw_Data.all);
+         Put ("  DNS Transaction ID: ");
+         Put (Standard_Output, Integer (Packet_Header.Identifier), Base => 16);
+         New_Line;
+
+         Hashmap_Key :=
+           IP_Transaction_Key
+             (Packet.From_Address & Packet.From_Port'Image &
+              Packet_Header.Identifier'Image);
+
+         -- Create the key if necessary
+         if Transaction_Hashmap.Contains (Hashmap_Key) = True then
+            Transaction.Client_Resolver_Address := Packet.From_Address;
+            Transaction.Client_Resolver_Port    := Packet.From_Port;
+            Transaction.Server_Resolver_Address := Packet.To_Address;
+            Transaction.Server_Resolver_Port    := Packet.To_Port;
+            Transaction.DNS_Transaction_Id      := Packet_Header.Identifier;
+            Transaction_Hashmap.Insert (Hashmap_Key, Transaction);
+         end if;
+         Hashmap_Cursor := Transaction_Hashmap.Find (Hashmap_Key);
+
+         -- Now append to the vector
+         Transaction := Transaction_Hashmap(Hashmap_Cursor).Element;
+      end Append_Client_Resolver_Packet;
+
+      entry Append_Upstream_Resolver_Packet (Packet : Raw_DNS_Packet)
+        when True is
+      begin
+         null;
+      end Append_Upstream_Resolver_Packet;
+
+   end DNS_Transaction_Manager;
+
+   function IP_Transaction_Key_HashID
+     (id : IP_Transaction_Key) return Hash_Type is
+   begin
+      return Ada.Strings.Hash (To_String (id));
+   end IP_Transaction_Key_HashID;
 
    task body Receive_Packet is
-
       Buffer           : access Stream_Element_Array;
       Offset           : Stream_Element_Offset;
       Incoming_Address : Sock_Addr_Type;
       DNS_Packet       : Raw_DNS_Packet;
-      Packet_Header    : Raw_DNS_Packets.DNS_Packet_Header;
    begin
       accept Start;
 
       Buffer := new Stream_Element_Array (1 .. Stream_Element_Offset (1500));
-      Ada.Text_IO.Put_Line ("Test Receive Packet");
       loop -- Main receiving loop
          Receive_Packet_Loop :
          loop -- Receive the packet
@@ -76,26 +126,29 @@ package body Packet_Catcher is
                From   => Incoming_Address);
             exit when Buffer'Last = -1;
 
-            Put ("Received UDP Packet From ");
-            Put_Line (Image (Incoming_Address.Addr));
+            Put_Line
+              ("Received UDP Packet From " & Image (Incoming_Address.Addr) &
+               ":" & Port_Type'Image (Incoming_Address.Port));
+
             Put_Line
               ("Read " & Stream_Element_Offset'Image (Offset) & " bytes");
-
-            -- See if we can successfully decode some information from
-            -- the packet
-            Packet_Header := SEA_To_Dns_Packet_Header(Buffer.all);
-            Put("  DNS Transaction ID: ");
-            Put(Standard_Output, Integer(Packet_Header.Identifier), Base => 16);
-            New_Line;
-
 
             -- Copy the packet for further processing
             DNS_Packet.From_Address :=
               To_Unbounded_String (Image (Incoming_Address.Addr));
-            DNS_Packet.To_Address      := To_Unbounded_String ("4.4.2.2");
+            DNS_Packet.To_Address := To_Unbounded_String (UPSTREAM_DNS_SERVER);
             DNS_Packet.Raw_Data        := Buffer;
             DNS_Packet.Raw_Data_Length := Offset;
             Inbound_Packet_Queue.Put (Packet => DNS_Packet);
+
+            -- Was this a server response, or client response?
+            if UPSTREAM_DNS_SERVER = DNS_Packet.To_Address then
+               DNS_Transactions.Append_Client_Resolver_Packet
+                 (Packet => DNS_Packet);
+            else
+               DNS_Transactions.Append_Upstream_Resolver_Packet
+                 (Packet => DNS_Packet);
+            end if;
 
             -- Tell Send Packet to go do stuff
             Send_Packet.Process_Queue;
