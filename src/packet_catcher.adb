@@ -10,20 +10,21 @@ with Ada.Task_Identification; use Ada.Task_Identification;
 with Ada.Streams; use Ada.Streams;
 
 with Ada.Strings;           use Ada.Strings;
-with Ada.Strings.Hash;
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
+with Ada.Strings.Hash;
 
 with Ada.Unchecked_Conversion;
 
+with Ada.Containers; use Ada.Containers;
 with Raw_Dns_Packets;
 
 package body Packet_Catcher is
    -- Input and Output Sockets
-   UPSTREAM_DNS_SERVER  : String         := "4.2.2.2";
-   DNS_Socket           : Socket_Type;
-   To_Resolver          : Inet_Addr_Type := Inet_Addr ("4.2.2.2");
-   Inbound_Packet_Queue : Raw_DNS_Packet_Queue;
-   DNS_Transactions     : DNS_Transaction_Manager;
+   UPSTREAM_DNS_SERVER   : String         := "4.2.2.2";
+   DNS_Socket            : Socket_Type;
+   To_Resolver           : Inet_Addr_Type := Inet_Addr ("4.2.2.2");
+   Outbound_Packet_Queue : Raw_DNS_Packet_Queue;
+   DNS_Transactions      : DNS_Transaction_Manager;
 
    -- Conversion functions
    function SEA_To_Dns_Packet_Header is new Ada.Unchecked_Conversion
@@ -37,38 +38,103 @@ package body Packet_Catcher is
 
    task Send_Packet is
       entry Start;
-      entry Process_Queue;
    end Send_Packet;
 
    -- Handles DNS Packets in a FIFO queue; built around Vectors, this may need
    -- to be changed for performance reasons at some point
-   protected body Raw_DNS_Packet_Queue is
-      entry Put (Packet : in Raw_DNS_Packet) when True is
-      begin
-         Stored_Packets.Append (Packet);
-      end Put;
+   task body Raw_DNS_Packet_Queue is
+      Stored_Packets : Vector;
+      Count          : Integer := 0;
+   begin
+      loop
+         select
+            accept Put (Packet : in Raw_DNS_Packet) do
+               Stored_Packets.Append (Packet);
+            end Put;
+            Count := Count + 1;
+         or when Count > 0 =>
+            accept Get (Packet : out Raw_DNS_Packet) do
+               Packet := Stored_Packets.First_Element;
+               Stored_Packets.Delete_First;
+            end Get;
+            Count := Count - 1;
+         end select;
+      end loop;
 
-      entry Get (Packet : out Raw_DNS_Packet) when True is
-      begin
-         Packet := Stored_Packets.First_Element;
-         Stored_Packets.Delete_First;
-      end Get;
-
-      function Count return Integer is
-      begin
-         return Integer (Stored_Packets.Length);
-      end Count;
    end Raw_DNS_Packet_Queue;
 
    -- Handle the map for tracking transactions to/from source
    protected body DNS_Transaction_Manager is
-      entry Append_Client_Resolver_Packet (Packet : Raw_DNS_Packet)
+      entry From_Client_Resolver_Packet (Packet : Raw_DNS_Packet) when True is
+         Transaction     : DNS_Transaction;
+         Packet_Header   : Raw_DNS_Packets.DNS_Packet_Header;
+         Hashmap_Key     : IP_Transaction_Key;
+         Hashmap_Cursor  : DNS_Transaction_Maps.Cursor;
+         Outbound_Packet : Raw_DNS_Packet;
+      begin
+         Put_Line ("HERE!!!");
+         New_Line;
+
+         Packet_Header := SEA_To_Dns_Packet_Header (Packet.Raw_Data.all);
+         Put ("  DNS Transaction ID: ");
+         Put (Standard_Output, Integer (Packet_Header.Identifier), Base => 16);
+         New_Line;
+
+         Hashmap_Key :=
+           IP_Transaction_Key
+             (Packet.To_Address & Packet.To_Port'Image &
+              Packet_Header.Identifier'Image);
+
+         Put_Line (To_String (Hashmap_Key));
+         -- Create the key if necessary
+         Hashmap_Cursor := Transaction_Hashmap.Find (Hashmap_Key);
+
+         if Hashmap_Cursor = DNS_Transaction_Maps.No_Element then
+            Transaction.Client_Resolver_Address := Packet.From_Address;
+            Transaction.Client_Resolver_Port    := Packet.From_Port;
+            Transaction.Server_Resolver_Address := Packet.To_Address;
+            Transaction.Server_Resolver_Port    := Packet.To_Port;
+            Transaction.DNS_Transaction_Id      := Packet_Header.Identifier;
+            Transaction_Hashmap.Insert (Hashmap_Key, Transaction);
+         end if;
+
+         -- Now append to the vector
+         -- FIXME: This likely needs to be a ordered hashmap ...
+         Transaction_Hashmap.Reference (Hashmap_Key)
+           .From_Client_Resolver_Packets
+           .Append
+           (Packet);
+
+         Put_Line
+           ("Inbound has" &
+            Transaction_Hashmap.Reference (Hashmap_Key)
+              .From_Client_Resolver_Packets
+              .Length'
+              Image);
+         Put_Line
+           ("Server Resolver" &
+            Transaction_Hashmap.Reference (Hashmap_Key)
+              .From_Upstream_Resolver_Packets
+              .Length'
+              Image);
+
+         -- Rewrite the DNS Packet and send it on it's way
+         Outbound_Packet              := Packet;
+         Outbound_Packet.Raw_Data.all := Packet.Raw_Data.all;
+         Outbound_Packet_Queue.Put (Outbound_Packet);
+
+      end From_Client_Resolver_Packet;
+
+      entry From_Upstream_Resolver_Packet (Packet : Raw_DNS_Packet)
         when True is
          Transaction    : DNS_Transaction;
          Packet_Header  : Raw_DNS_Packets.DNS_Packet_Header;
          Hashmap_Key    : IP_Transaction_Key;
          Hashmap_Cursor : DNS_Transaction_Maps.Cursor;
+         Outbound_Packet : Raw_DNS_Packet;
       begin
+         Put_Line ("HERE2!!!");
+         New_Line;
 
          Packet_Header := SEA_To_Dns_Packet_Header (Packet.Raw_Data.all);
          Put ("  DNS Transaction ID: ");
@@ -80,26 +146,47 @@ package body Packet_Catcher is
              (Packet.From_Address & Packet.From_Port'Image &
               Packet_Header.Identifier'Image);
 
+         Put_Line (To_String (Hashmap_Key));
          -- Create the key if necessary
-         if Transaction_Hashmap.Contains (Hashmap_Key) = True then
-            Transaction.Client_Resolver_Address := Packet.From_Address;
-            Transaction.Client_Resolver_Port    := Packet.From_Port;
-            Transaction.Server_Resolver_Address := Packet.To_Address;
-            Transaction.Server_Resolver_Port    := Packet.To_Port;
+         Hashmap_Cursor := Transaction_Hashmap.Find (Hashmap_Key);
+
+         if Hashmap_Cursor = DNS_Transaction_Maps.No_Element then
+            Transaction.Client_Resolver_Address := Packet.To_Address;
+            Transaction.Client_Resolver_Port    := Packet.To_Port;
+            Transaction.Server_Resolver_Address := Packet.From_Address;
+            Transaction.Server_Resolver_Port    := Packet.From_Port;
             Transaction.DNS_Transaction_Id      := Packet_Header.Identifier;
             Transaction_Hashmap.Insert (Hashmap_Key, Transaction);
          end if;
-         Hashmap_Cursor := Transaction_Hashmap.Find (Hashmap_Key);
 
          -- Now append to the vector
-         Transaction := Transaction_Hashmap(Hashmap_Cursor).Element;
-      end Append_Client_Resolver_Packet;
+         -- FIXME: This likely needs to be a ordered hashmap ...
+         Transaction := Transaction_Hashmap.Reference (Hashmap_Key);
+         Transaction_Hashmap.Reference (Hashmap_Key)
+           .From_Upstream_Resolver_Packets
+           .Append
+           (Packet);
 
-      entry Append_Upstream_Resolver_Packet (Packet : Raw_DNS_Packet)
-        when True is
-      begin
-         null;
-      end Append_Upstream_Resolver_Packet;
+         Put_Line
+           ("To Upstream has" &
+            Transaction_Hashmap.Reference (Hashmap_Key)
+              .From_Client_Resolver_Packets
+              .Length'
+              Image);
+         Put_Line
+           ("Server Resolver" &
+            Transaction_Hashmap.Reference (Hashmap_Key)
+              .From_Client_Resolver_Packets
+              .Length'
+              Image);
+
+         -- Flip the packet around so it goes to the right place
+         Outbound_Packet              := Packet;
+         Outbound_Packet.To_Address := Transaction.Client_Resolver_Address;
+         Outbound_Packet.To_Port := Transaction.Client_Resolver_Port;
+         Outbound_Packet.Raw_Data.all := Packet.Raw_Data.all;
+         Outbound_Packet_Queue.Put (Outbound_Packet);
+      end From_Upstream_Resolver_Packet;
 
    end DNS_Transaction_Manager;
 
@@ -136,22 +223,20 @@ package body Packet_Catcher is
             -- Copy the packet for further processing
             DNS_Packet.From_Address :=
               To_Unbounded_String (Image (Incoming_Address.Addr));
+            DNS_Packet.From_Port := Incoming_Address.Port;
             DNS_Packet.To_Address := To_Unbounded_String (UPSTREAM_DNS_SERVER);
+            DNS_Packet.To_Port := 53;
             DNS_Packet.Raw_Data        := Buffer;
             DNS_Packet.Raw_Data_Length := Offset;
-            Inbound_Packet_Queue.Put (Packet => DNS_Packet);
 
             -- Was this a server response, or client response?
-            if UPSTREAM_DNS_SERVER = DNS_Packet.To_Address then
-               DNS_Transactions.Append_Client_Resolver_Packet
+            if UPSTREAM_DNS_SERVER /= (Image (Incoming_Address.Addr)) then
+               DNS_Transactions.From_Client_Resolver_Packet
                  (Packet => DNS_Packet);
             else
-               DNS_Transactions.Append_Upstream_Resolver_Packet
+               DNS_Transactions.From_Upstream_Resolver_Packet
                  (Packet => DNS_Packet);
             end if;
-
-            -- Tell Send Packet to go do stuff
-            Send_Packet.Process_Queue;
          end loop Receive_Packet_Loop;
       end loop;
    exception
@@ -168,6 +253,7 @@ package body Packet_Catcher is
    task body Send_Packet is
       DNS_Packet       : Raw_DNS_Packet;
       Outgoing_Address : Inet_Addr_Type;
+      Outgoing_Port    : Port_Type;
       Length           : Stream_Element_Offset;
 
    begin
@@ -176,27 +262,24 @@ package body Packet_Catcher is
       -- Safely convert buffer to string element
 
       loop
-         select
-            accept Process_Queue do
-               Inbound_Packet_Queue.Get (DNS_Packet);
-               Outgoing_Address :=
-                 Inet_Addr (To_String (DNS_Packet.To_Address));
+         Outbound_Packet_Queue.Get (DNS_Packet);
+         Outgoing_Address := Inet_Addr (To_String (DNS_Packet.To_Address));
+         Outgoing_Port := Port_Type (DNS_Packet.To_Port);
 
-               -- And send the damn thing
-               Send_Socket
-                 (Socket => DNS_Socket,
-                  Item   =>
-                    DNS_Packet.Raw_Data.all (1 .. DNS_Packet.Raw_Data_Length),
-                  Last => Length,
-                  To   =>
-                    (Family => Family_Inet, Addr => Outgoing_Address,
-                     Port   => 53));
-               Put ("Sent packet to ");
-               Put_Line (Image (Outgoing_Address));
-            end Process_Queue;
-         or
-            delay 0.1;
-         end select;
+         -- And send the damn thing
+         Put ("Sent packet to ");
+         Put_Line (Image (Outgoing_Address));
+         Put_Line ( Port_Type'Image(Outgoing_Port));
+
+         Send_Socket
+           (Socket => DNS_Socket,
+            Item => DNS_Packet.Raw_Data.all (1 .. DNS_Packet.Raw_Data_Length),
+            Last   => Length,
+            To     =>
+              (Family => Family_Inet, Addr => Outgoing_Address,
+               Port   => Outgoing_Port));
+         Put ("Sent packet to ");
+         Put_Line (Image (Outgoing_Address));
       end loop;
    exception
       when Error : others =>
