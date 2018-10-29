@@ -7,7 +7,7 @@ package DNS_Network_Sender_Interface is
    type Sender_Interface is abstract tagged null record;
 
    procedure Initialize (This : in out Sender_Interface; Config : Configuration_Ptr;
-                         Transaction_Manager     :        DNS_Transaction_Manager_Task_Ptr) is abstract;
+      Transaction_Manager     :        DNS_Transaction_Manager_Task_Ptr) is abstract;
    -- Initializes a network interface and does any necessary prep work. It MUST be called before
    -- calling any other method
 

@@ -27,21 +27,21 @@ with DNS_Sender_Interface_IPv4_UDP;
 with DNS_Transaction_Manager; use DNS_Transaction_Manager;
 
 package body Packet_Catcher is
-   Shutting_Down         : Boolean := False;
+   Shutting_Down : Boolean := False;
 
    procedure Run_Catcher is
       -- Input and Output Sockets
-      DNS_Transactions    : DNS_Transaction_Manager.DNS_Transaction_Manager_Task;
-      Capture_Config : DNSCatcher_Config.Configuration_Ptr;
-      Receiver_Interface : DNS_Receiver_Interface_IPv4_UDP.IPv4_UDP_Receiver_Interface;
-      Sender_Interface : DNS_Sender_Interface_IPv4_UDP.IPv4_UDP_Sender_Interface;
+      DNS_Transactions        : DNS_Transaction_Manager.DNS_Transaction_Manager_Task;
+      Capture_Config          : DNSCatcher_Config.Configuration_Ptr;
+      Receiver_Interface      : DNS_Receiver_Interface_IPv4_UDP.IPv4_UDP_Receiver_Interface;
+      Sender_Interface        : DNS_Sender_Interface_IPv4_UDP.IPv4_UDP_Sender_Interface;
       Transaction_Manager_Ptr : DNS_Transaction_Manager_Task_Ptr;
-      Socket : Socket_Type;
+      Socket                  : Socket_Type;
 
    begin
-      Capture_Config := new DNSCatcher_Config.Configuration;
-      Capture_Config.Local_Listen_Port := 53;
-      Capture_Config.Upstream_DNS_Server := To_Unbounded_String("4.2.2.2");
+      Capture_Config                          := new DNSCatcher_Config.Configuration;
+      Capture_Config.Local_Listen_Port        := 53;
+      Capture_Config.Upstream_DNS_Server      := To_Unbounded_String ("4.2.2.2");
       Capture_Config.Upstream_DNS_Server_Port := 53;
 
       Transaction_Manager_Ptr := new DNS_Transaction_Manager_Task;
@@ -53,13 +53,15 @@ package body Packet_Catcher is
         (Socket => Socket, Option => (GNAT.Sockets.Receive_Timeout, Timeout => 1.0));
       Bind_Socket
         (Socket  => Socket,
-         Address => (Family => Family_Inet, Addr => Any_Inet_Addr, Port => Capture_Config.Local_Listen_Port));
+         Address =>
+           (Family => Family_Inet, Addr => Any_Inet_Addr,
+            Port   => Capture_Config.Local_Listen_Port));
 
-      Receiver_Interface.Initialize(Capture_Config, Transaction_Manager_Ptr, Socket);
-      Sender_Interface.Initialize(Capture_Config, Transaction_Manager_Ptr, Socket);
+      Receiver_Interface.Initialize (Capture_Config, Transaction_Manager_Ptr, Socket);
+      Sender_Interface.Initialize (Capture_Config, Transaction_Manager_Ptr, Socket);
 
       -- Connect the packet queue and start it all up
-      Transaction_Manager_Ptr.Set_Packet_Queue(Sender_Interface.Get_Packet_Queue_Ptr);
+      Transaction_Manager_Ptr.Set_Packet_Queue (Sender_Interface.Get_Packet_Queue_Ptr);
       Receiver_Interface.Start;
       Sender_Interface.Start;
 

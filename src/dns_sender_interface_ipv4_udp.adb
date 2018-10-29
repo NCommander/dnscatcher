@@ -105,15 +105,14 @@ package body DNS_Sender_Interface_IPv4_UDP is
    end Send_Packet_Task;
 
    procedure Initialize (This : in out IPv4_UDP_Sender_Interface; Config : Configuration_Ptr;
-                         Transaction_Manager     :        DNS_Transaction_Manager_Task_Ptr;
-                         Socket : Socket_Type) is
+      Transaction_Manager     :        DNS_Transaction_Manager_Task_Ptr; Socket : Socket_Type) is
    begin
       GNAT.Sockets.Initialize;
 
       -- Save our config for good measure
       This.Config := Config;
 
-      This.Sender_Socket := Socket;
+      This.Sender_Socket       := Socket;
       This.Transaction_Manager := Transaction_Manager;
       This.Sender_Task         := new Send_Packet_Task;
       This.Packet_Queue        := new Raw_DNS_Packet_Queue;
@@ -133,9 +132,10 @@ package body DNS_Sender_Interface_IPv4_UDP is
       This.Sender_Task.Stop;
    end Shutdown;
 
-   function Get_Packet_Queue_Ptr(This: in out IPv4_UDP_Sender_Interface) return Raw_DNS_Packet_Queue_Ptr is
+   function Get_Packet_Queue_Ptr
+     (This : in out IPv4_UDP_Sender_Interface) return Raw_DNS_Packet_Queue_Ptr is
    begin
       return This.Packet_Queue;
-   end;
+   end Get_Packet_Queue_Ptr;
 
 end DNS_Sender_Interface_IPv4_UDP;

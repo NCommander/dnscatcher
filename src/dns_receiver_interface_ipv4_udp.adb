@@ -21,18 +21,19 @@ with Raw_DNS_Packets;
 package body DNS_Receiver_Interface_IPv4_UDP is
 
    task body Receive_Packet_Task is
-      DNS_Config   : Configuration_Ptr;
-      DNS_Socket : Socket_Type;
+      DNS_Config              : Configuration_Ptr;
+      DNS_Socket              : Socket_Type;
       DNS_Transaction_Manager : DNS_Transaction_Manager_Task_Ptr;
-      Buffer           : Utils.Stream_Element_Array_Ptr;
-      Offset           : Stream_Element_Offset;
-      Incoming_Address : Sock_Addr_Type;
-      DNS_Packet       : Raw_DNS_Packets.Raw_DNS_Packet;
-      Process_Packets  : Boolean := False;
+      Buffer                  : Utils.Stream_Element_Array_Ptr;
+      Offset                  : Stream_Element_Offset;
+      Incoming_Address        : Sock_Addr_Type;
+      DNS_Packet              : Raw_DNS_Packets.Raw_DNS_Packet;
+      Process_Packets         : Boolean := False;
    begin
-      accept Initialize (Config : Configuration_Ptr; Socket : Socket_Type; Transaction_Manager : DNS_Transaction_Manager_Task_Ptr) do
-         DNS_Config := Config;
-         DNS_Socket := Socket;
+      accept Initialize (Config : Configuration_Ptr; Socket : Socket_Type;
+         Transaction_Manager    : DNS_Transaction_Manager_Task_Ptr) do
+         DNS_Config              := Config;
+         DNS_Socket              := Socket;
          DNS_Transaction_Manager := Transaction_Manager;
       end Initialize;
 
@@ -89,13 +90,10 @@ package body DNS_Receiver_Interface_IPv4_UDP is
                   DNS_Packet.Raw_Data_Length := Offset;
 
                   -- Was this a server response, or client response?
-                  if DNS_Config.Upstream_DNS_Server /=
-                    (Image (Incoming_Address.Addr)) then
-                     DNS_Transaction_Manager.From_Client_Resolver_Packet
-                       (Packet => DNS_Packet);
+                  if DNS_Config.Upstream_DNS_Server /= (Image (Incoming_Address.Addr)) then
+                     DNS_Transaction_Manager.From_Client_Resolver_Packet (Packet => DNS_Packet);
                   else
-                     DNS_Transaction_Manager.From_Upstream_Resolver_Packet
-                       (Packet => DNS_Packet);
+                     DNS_Transaction_Manager.From_Upstream_Resolver_Packet (Packet => DNS_Packet);
                   end if;
 
                exception
@@ -127,23 +125,22 @@ package body DNS_Receiver_Interface_IPv4_UDP is
    end Receive_Packet_Task;
 
    procedure Initialize (This : in out IPv4_UDP_Receiver_Interface; Config : Configuration_Ptr;
-                         Transaction_Manager     :        DNS_Transaction_Manager_Task_Ptr;
-                         Socket: Socket_Type) is
+      Transaction_Manager     :        DNS_Transaction_Manager_Task_Ptr; Socket : Socket_Type) is
    begin
       GNAT.Sockets.Initialize;
 
       -- Save our config for good measure
-      This.Config := Config;
-      This.Receiver_Socket := Socket;
+      This.Config              := Config;
+      This.Receiver_Socket     := Socket;
       This.Transaction_Manager := Transaction_Manager;
-      This.Receiver_Task := new Receive_Packet_Task;
-      This.Receiver_Task.Initialize(Config, This.Receiver_Socket, This.Transaction_Manager);
+      This.Receiver_Task       := new Receive_Packet_Task;
+      This.Receiver_Task.Initialize (Config, This.Receiver_Socket, This.Transaction_Manager);
    end Initialize;
 
-   procedure Start(This : in out IPv4_UDP_Receiver_Interface) is
+   procedure Start (This : in out IPv4_UDP_Receiver_Interface) is
    begin
-     This.Receiver_Task.Start;
-   end;
+      This.Receiver_Task.Start;
+   end Start;
 
    procedure Shutdown (This : in out IPv4_UDP_Receiver_Interface) is
    begin

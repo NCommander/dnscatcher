@@ -1,9 +1,9 @@
 with System;
-with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
-with Ada.Streams; use Ada.Streams;
-with GNAT.Sockets; use GNAT.Sockets;
+with Ada.Strings.Unbounded;   use Ada.Strings.Unbounded;
+with Ada.Streams;             use Ada.Streams;
+with GNAT.Sockets;            use GNAT.Sockets;
 with Interfaces.C.Extensions; use Interfaces.C.Extensions;
-with Ada.Containers.Vectors; use Ada.Containers;
+with Ada.Containers.Vectors;  use Ada.Containers;
 
 with Utils;
 
@@ -23,7 +23,7 @@ package Raw_DNS_Packets is
    task type Raw_DNS_Packet_Queue is
       entry Put (Packet : in Raw_DNS_Packet);
       entry Get (Packet : out Raw_DNS_Packet);
-      entry Count(Count : out Integer);
+      entry Count (Count : out Integer);
       entry Empty;
    end Raw_DNS_Packet_Queue;
    type Raw_DNS_Packet_Queue_Ptr is access Raw_DNS_Packet_Queue;

@@ -1,5 +1,5 @@
 with Ada.Unchecked_Conversion;
-with Ada.Text_IO; use Ada.Text_IO;
+with Ada.Text_IO;         use Ada.Text_IO;
 with Ada.Integer_Text_IO; use Ada.Integer_Text_IO;
 with Ada.Strings.Hash;
 
@@ -11,12 +11,12 @@ package body DNS_Transaction_Manager is
    -- Handle the map for tracking transactions to/from source
    task body DNS_Transaction_Manager_Task is
       Outbound_Packet_Queue : Raw_DNS_Packets.Raw_DNS_Packet_Queue_Ptr;
-      Transaction         : DNS_Transaction;
-      Packet_Header       : Raw_DNS_Packets.DNS_Packet_Header;
-      Hashmap_Key         : IP_Transaction_Key;
-      Hashmap_Cursor      : DNS_Transaction_Maps.Cursor;
-      Outbound_Packet     : Raw_DNS_Packet;
-      Transaction_Hashmap : DNS_Transaction_Maps.Map;
+      Transaction           : DNS_Transaction;
+      Packet_Header         : Raw_DNS_Packets.DNS_Packet_Header;
+      Hashmap_Key           : IP_Transaction_Key;
+      Hashmap_Cursor        : DNS_Transaction_Maps.Cursor;
+      Outbound_Packet       : Raw_DNS_Packet;
+      Transaction_Hashmap   : DNS_Transaction_Maps.Map;
    begin
       loop
          select
@@ -57,12 +57,12 @@ package body DNS_Transaction_Manager is
 
                Put_Line
                  ("Inbound has" &
-                    Transaction_Hashmap.Reference (Hashmap_Key).From_Client_Resolver_Packets.Length'
-                      Image);
+                  Transaction_Hashmap.Reference (Hashmap_Key).From_Client_Resolver_Packets.Length'
+                    Image);
                Put_Line
                  ("Server Resolver" &
-                    Transaction_Hashmap.Reference (Hashmap_Key).From_Upstream_Resolver_Packets
-                  .Length'
+                  Transaction_Hashmap.Reference (Hashmap_Key).From_Upstream_Resolver_Packets
+                    .Length'
                     Image);
 
                -- Rewrite the DNS Packet and send it on it's way
@@ -105,12 +105,12 @@ package body DNS_Transaction_Manager is
 
                Put_Line
                  ("To Upstream has" &
-                    Transaction_Hashmap.Reference (Hashmap_Key).From_Client_Resolver_Packets.Length'
-                      Image);
+                  Transaction_Hashmap.Reference (Hashmap_Key).From_Client_Resolver_Packets.Length'
+                    Image);
                Put_Line
                  ("Server Resolver" &
-                    Transaction_Hashmap.Reference (Hashmap_Key).From_Client_Resolver_Packets.Length'
-                      Image);
+                  Transaction_Hashmap.Reference (Hashmap_Key).From_Client_Resolver_Packets.Length'
+                    Image);
 
                -- Flip the packet around so it goes to the right place
                Outbound_Packet              := Packet;
