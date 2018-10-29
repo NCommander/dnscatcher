@@ -17,7 +17,7 @@ project DNS_Catcher is
    end Linker;
 
    package Pretty_Printer is
-      for Default_Switches ("ada") use ("-A1", "-A2", "-A3", "-A4", "-A5", "-c4", "--no-separate-loop-then", "--no-separate-is", "-l3");
+      for Default_Switches ("ada") use ("-A1", "-A2", "-A3", "-A4", "-A5", "-c4", "--no-separate-loop-then", "--no-separate-is", "-l3", "-M99");
    end Pretty_Printer;
 
 end DNS_Catcher;
