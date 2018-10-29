@@ -7,10 +7,10 @@ with Ada.Containers.Hashed_Maps;
 with GNAT.Sockets;            use GNAT.Sockets;
 with Interfaces.C.Extensions; use Interfaces.C.Extensions;
 
-with Raw_DNS_Packets; use Raw_DNS_Packets;
+with DNS_Raw_Packet_Records; use DNS_Raw_Packet_Records;
 
 package DNS_Transaction_Manager is
-   package Stored_Packets_Vector is new Vectors (Natural, Raw_DNS_Packet);
+   package Stored_Packets_Vector is new Vectors (Natural, DNS_Raw_Packet_Record);
    use Stored_Packets_Vector;
 
    type DNS_Transaction is record
@@ -32,9 +32,9 @@ package DNS_Transaction_Manager is
    use DNS_Transaction_Maps;
 
    task type DNS_Transaction_Manager_Task is
-      entry Set_Packet_Queue (Queue : Raw_DNS_Packet_Queue_Ptr);
-      entry From_Client_Resolver_Packet (Packet : Raw_DNS_Packet);
-      entry From_Upstream_Resolver_Packet (Packet : Raw_DNS_Packet);
+      entry Set_Packet_Queue (Queue : DNS_Raw_Packet_Queue_Ptr);
+      entry From_Client_Resolver_Packet (Packet : DNS_Raw_Packet_Record);
+      entry From_Upstream_Resolver_Packet (Packet : DNS_Raw_Packet_Record);
       entry Shutdown_Task;
    end DNS_Transaction_Manager_Task;
 

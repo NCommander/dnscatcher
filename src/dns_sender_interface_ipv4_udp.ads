@@ -1,6 +1,6 @@
 with GNAT.Sockets;            use GNAT.Sockets;
 with DNSCatcher_Config;       use DNSCatcher_Config;
-with Raw_DNS_Packets;         use Raw_DNS_Packets;
+with DNS_Raw_Packet_Records;         use DNS_Raw_Packet_Records;
 with DNS_Network_Receiver_Interface;
 with DNS_Transaction_Manager; use DNS_Transaction_Manager;
 
@@ -9,7 +9,7 @@ package DNS_Sender_Interface_IPv4_UDP is
    task type Send_Packet_Task is
       entry Initialize (Config : Configuration_Ptr; Socket : Socket_Type;
          Transaction_Manager   : DNS_Transaction_Manager_Task_Ptr;
-         Packet_Queue          : Raw_DNS_Packets.Raw_DNS_Packet_Queue_Ptr);
+         Packet_Queue          : DNS_Raw_Packet_Queue_Ptr);
       entry Start;
       entry Stop;
    end Send_Packet_Task;
@@ -21,7 +21,7 @@ package DNS_Sender_Interface_IPv4_UDP is
       Sender_Socket       : Socket_Type;
       Transaction_Manager : DNS_Transaction_Manager_Task_Ptr;
       Sender_Task         : Send_Packet_Task_Ptr;
-      Packet_Queue        : Raw_DNS_Packet_Queue_Ptr;
+      Packet_Queue        : DNS_Raw_Packet_Queue_Ptr;
    end record;
    type IPv4_UDP_Receiver_Interface_Ptr is access IPv4_UDP_Sender_Interface;
 
@@ -37,7 +37,7 @@ package DNS_Sender_Interface_IPv4_UDP is
    -- Cleanly shuts down the interface
 
    function Get_Packet_Queue_Ptr
-     (This : in out IPv4_UDP_Sender_Interface) return Raw_DNS_Packet_Queue_Ptr;
+     (This : in out IPv4_UDP_Sender_Interface) return DNS_Raw_Packet_Queue_Ptr;
    -- Returns a pointer to the packet queue
 
 end DNS_Sender_Interface_IPv4_UDP;

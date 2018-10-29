@@ -1,33 +1,7 @@
 with System;
-with Ada.Strings.Unbounded;   use Ada.Strings.Unbounded;
-with Ada.Streams;             use Ada.Streams;
-with GNAT.Sockets;            use GNAT.Sockets;
 with Interfaces.C.Extensions; use Interfaces.C.Extensions;
-with Ada.Containers.Vectors;  use Ada.Containers;
-
-with Utils;
 
 package Raw_DNS_Packets is
-   type Raw_DNS_Packet is record
-      From_Address    : Unbounded_String;
-      From_Port       : Port_Type;
-      To_Address      : Unbounded_String;
-      To_Port         : Port_Type;
-      Raw_Data        : Utils.Stream_Element_Array_Ptr;
-      Raw_Data_Length : Stream_Element_Offset;
-   end record;
-
-   package Stored_Packets_Vector is new Vectors (Natural, Raw_DNS_Packet);
-   use Stored_Packets_Vector;
-
-   task type Raw_DNS_Packet_Queue is
-      entry Put (Packet : in Raw_DNS_Packet);
-      entry Get (Packet : out Raw_DNS_Packet);
-      entry Count (Count : out Integer);
-      entry Empty;
-   end Raw_DNS_Packet_Queue;
-   type Raw_DNS_Packet_Queue_Ptr is access Raw_DNS_Packet_Queue;
-
    type DNS_Packet_Header is record
       Identifier              : Unsigned_16;
       Query_Response_Flag     : Boolean;

@@ -16,7 +16,7 @@ with Utils;
 with DNSCatcher_Config; use DNSCatcher_Config;
 with DNS_Network_Receiver_Interface;
 with DNS_Transaction_Manager;
-with Raw_DNS_Packets;   use Raw_DNS_Packets;
+with DNS_Raw_Packet_Records;   use DNS_Raw_Packet_Records;
 
 package body DNS_Sender_Interface_IPv4_UDP is
 
@@ -24,8 +24,8 @@ package body DNS_Sender_Interface_IPv4_UDP is
       DNS_Config              : Configuration_Ptr;
       DNS_Socket              : Socket_Type;
       DNS_Transaction_Manager : DNS_Transaction_Manager_Task_Ptr;
-      DNS_Packet              : Raw_DNS_Packet;
-      Outbound_Packet_Queue   : Raw_DNS_Packet_Queue_Ptr;
+      DNS_Packet              : DNS_Raw_Packet_Record;
+      Outbound_Packet_Queue   : DNS_Raw_Packet_Queue_Ptr;
       Outgoing_Address        : Inet_Addr_Type;
       Outgoing_Port           : Port_Type;
       Length                  : Stream_Element_Offset;
@@ -34,7 +34,7 @@ package body DNS_Sender_Interface_IPv4_UDP is
    begin
       accept Initialize (Config : Configuration_Ptr; Socket : Socket_Type;
          Transaction_Manager    : DNS_Transaction_Manager_Task_Ptr;
-         Packet_Queue           : Raw_DNS_Packets.Raw_DNS_Packet_Queue_Ptr) do
+         Packet_Queue           : DNS_Raw_Packet_Queue_Ptr) do
          DNS_Config              := Config;
          DNS_Socket              := Socket;
          DNS_Transaction_Manager := Transaction_Manager;
@@ -115,7 +115,7 @@ package body DNS_Sender_Interface_IPv4_UDP is
       This.Sender_Socket       := Socket;
       This.Transaction_Manager := Transaction_Manager;
       This.Sender_Task         := new Send_Packet_Task;
-      This.Packet_Queue        := new Raw_DNS_Packet_Queue;
+      This.Packet_Queue        := new DNS_Raw_Packet_Record_Queue;
 
       This.Sender_Task.Initialize
         (Config, This.Sender_Socket, This.Transaction_Manager, This.Packet_Queue);
@@ -133,7 +133,7 @@ package body DNS_Sender_Interface_IPv4_UDP is
    end Shutdown;
 
    function Get_Packet_Queue_Ptr
-     (This : in out IPv4_UDP_Sender_Interface) return Raw_DNS_Packet_Queue_Ptr is
+     (This : in out IPv4_UDP_Sender_Interface) return DNS_Raw_Packet_Queue_Ptr is
    begin
       return This.Packet_Queue;
    end Get_Packet_Queue_Ptr;

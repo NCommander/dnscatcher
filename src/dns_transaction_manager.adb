@@ -2,29 +2,31 @@ with Ada.Unchecked_Conversion;
 with Ada.Text_IO;         use Ada.Text_IO;
 with Ada.Integer_Text_IO; use Ada.Integer_Text_IO;
 with Ada.Strings.Hash;
+with DNS_Raw_Packet_Records; use DNS_Raw_Packet_Records;
+with Raw_DNS_Packets; use Raw_DNS_Packets;
 
 package body DNS_Transaction_Manager is
    -- Conversion functions
    function SEA_To_DNS_Packet_Header is new Ada.Unchecked_Conversion
-     (Source => Stream_Element_Array, Target => Raw_Dns_Packets.Dns_Packet_Header);
+     (Source => Stream_Element_Array, Target => DNS_Packet_Header);
 
    -- Handle the map for tracking transactions to/from source
    task body DNS_Transaction_Manager_Task is
-      Outbound_Packet_Queue : Raw_DNS_Packets.Raw_DNS_Packet_Queue_Ptr;
+      Outbound_Packet_Queue : DNS_Raw_Packet_Queue_Ptr;
       Transaction           : DNS_Transaction;
-      Packet_Header         : Raw_DNS_Packets.DNS_Packet_Header;
+      Packet_Header         : DNS_Packet_Header;
       Hashmap_Key           : IP_Transaction_Key;
       Hashmap_Cursor        : DNS_Transaction_Maps.Cursor;
-      Outbound_Packet       : Raw_DNS_Packet;
+      Outbound_Packet       : DNS_Raw_Packet_Record;
       Transaction_Hashmap   : DNS_Transaction_Maps.Map;
    begin
       loop
          select
-            accept Set_Packet_Queue (Queue : in Raw_DNS_Packet_Queue_Ptr) do
+            accept Set_Packet_Queue (Queue : in DNS_Raw_Packet_Queue_Ptr) do
                Outbound_Packet_Queue := Queue;
             end Set_Packet_Queue;
          or
-            accept From_Client_Resolver_Packet (Packet : Raw_DNS_Packet) do
+            accept From_Client_Resolver_Packet (Packet : DNS_Raw_Packet_Record) do
                Put_Line ("HERE!!!");
                New_Line;
 
@@ -71,7 +73,7 @@ package body DNS_Transaction_Manager is
                Outbound_Packet_Queue.Put (Outbound_Packet);
             end From_Client_Resolver_Packet;
          or
-            accept From_Upstream_Resolver_Packet (Packet : Raw_DNS_Packet) do
+            accept From_Upstream_Resolver_Packet (Packet : DNS_Raw_Packet_Record) do
                Put_Line ("HERE2!!!");
                New_Line;
 

@@ -16,7 +16,7 @@ with Utils;
 with DNSCatcher_Config; use DNSCatcher_Config;
 with DNS_Network_Receiver_Interface;
 with DNS_Transaction_Manager;
-with Raw_DNS_Packets;
+with DNS_Raw_Packet_Records; use DNS_Raw_Packet_Records;
 
 package body DNS_Receiver_Interface_IPv4_UDP is
 
@@ -27,7 +27,7 @@ package body DNS_Receiver_Interface_IPv4_UDP is
       Buffer                  : Utils.Stream_Element_Array_Ptr;
       Offset                  : Stream_Element_Offset;
       Incoming_Address        : Sock_Addr_Type;
-      DNS_Packet              : Raw_DNS_Packets.Raw_DNS_Packet;
+      DNS_Packet              : DNS_Raw_Packet_Record;
       Process_Packets         : Boolean := False;
    begin
       accept Initialize (Config : Configuration_Ptr; Socket : Socket_Type;

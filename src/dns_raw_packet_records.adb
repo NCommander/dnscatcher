@@ -1,18 +1,18 @@
-package body Raw_DNS_Packets is
+package body DNS_Raw_Packet_Records is
    -- Handles DNS Packets in a FIFO queue; built around Vectors, this may need to be changed for
    -- performance reasons at some point
-   task body Raw_DNS_Packet_Queue is
+   task body DNS_Raw_Packet_Record_Queue is
       Stored_Packets : Vector;
       Packet_Count   : Integer := 0;
    begin
       loop
          select
-            accept Put (Packet : in Raw_DNS_Packet) do
+            accept Put (Packet : in DNS_Raw_Packet_Record) do
                Stored_Packets.Append (Packet);
             end Put;
             Packet_Count := Packet_Count + 1;
          or
-            accept Get (Packet : out Raw_DNS_Packet) do
+            accept Get (Packet : out DNS_Raw_Packet_Record) do
                Packet := Stored_Packets.First_Element;
                Stored_Packets.Delete_First;
             end Get;
@@ -38,5 +38,5 @@ package body Raw_DNS_Packets is
             terminate;
          end select;
       end loop;
-   end Raw_DNS_Packet_Queue;
-end Raw_DNS_Packets;
+   end DNS_Raw_Packet_Record_Queue;
+end DNS_Raw_Packet_Records;
