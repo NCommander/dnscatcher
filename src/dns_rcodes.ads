@@ -1,5 +1,5 @@
 package DNS_RCodes is
-   type DNS_RCodes is
+   type RCodes is
      (NoError,
       FormErr,
       ServFail,
