@@ -17,12 +17,14 @@ package Packet_Catcher is
    procedure Stop_Catcher;
 
    -- Protected Elements
+   type Stream_Element_Array_Ptr is access Stream_Element_Array;
+
    type Raw_DNS_Packet is record
       From_Address    : Unbounded_String;
       From_Port       : Port_Type;
       To_Address      : Unbounded_String;
       To_Port         : Port_Type;
-      Raw_Data        : access Stream_Element_Array;
+      Raw_Data        : Stream_Element_Array_Ptr;
       Raw_Data_Length : Stream_Element_Offset;
    end record;
 
@@ -32,6 +34,8 @@ package Packet_Catcher is
    task type Raw_DNS_Packet_Queue is
       entry Put (Packet : in Raw_DNS_Packet);
       entry Get (Packet : out Raw_DNS_Packet);
+      entry Count(Count : out Integer);
+      entry Shutdown_Task;
    end Raw_DNS_Packet_Queue;
 
    type DNS_Transaction is record
@@ -53,11 +57,11 @@ package Packet_Catcher is
      (Key_Type => IP_Transaction_Key, Element_Type => DNS_Transaction,
       Hash     => IP_Transaction_Key_HashID, Equivalent_Keys => "=");
    use DNS_Transaction_Maps;
-   protected type DNS_Transaction_Manager is
+
+   task type DNS_Transaction_Manager is
       entry From_Client_Resolver_Packet (Packet : Raw_DNS_Packet);
       entry From_Upstream_Resolver_Packet (Packet : Raw_DNS_Packet);
-   private
-      Transaction_Hashmap : DNS_Transaction_Maps.Map;
+      entry Shutdown_Task;
    end DNS_Transaction_Manager;
 
 end Packet_Catcher;
