@@ -38,6 +38,12 @@ package body Packet_Catcher is
       Transaction_Manager_Ptr : DNS_Transaction_Manager_Task_Ptr;
       Socket                  : Socket_Type;
 
+      procedure Free_Transaction_Manager is new Ada.Unchecked_Deallocation
+        (Object => DNS_Transaction_Manager_Task,
+         Name   => DNS_Transaction_Manager_Task_Ptr);
+      procedure Free_DNSCatacher_Config is new Ada.Unchecked_Deallocation
+        (Object => DNSCatcher_Config.Configuration,
+         Name => DNSCatcher_Config.Configuration_Ptr);
    begin
       Capture_Config                          := new DNSCatcher_Config.Configuration;
       Capture_Config.Local_Listen_Port        := 53;
@@ -62,6 +68,7 @@ package body Packet_Catcher is
 
       -- Connect the packet queue and start it all up
       Transaction_Manager_Ptr.Set_Packet_Queue (Sender_Interface.Get_Packet_Queue_Ptr);
+      Transaction_Manager_Ptr.Start;
       Receiver_Interface.Start;
       Sender_Interface.Start;
 
@@ -70,7 +77,9 @@ package body Packet_Catcher is
             Put_Line ("Starting shutdown");
             Receiver_Interface.Shutdown;
             Sender_Interface.Shutdown;
-            Transaction_Manager_Ptr.Shutdown_Task;
+            Transaction_Manager_Ptr.Stop;
+            Free_Transaction_Manager(Transaction_Manager_Ptr);
+            Free_DNSCatacher_Config(Capture_Config);
             return;
          else
             delay 1.0;

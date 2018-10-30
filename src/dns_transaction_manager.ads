@@ -19,8 +19,8 @@ package DNS_Transaction_Manager is
       Server_Resolver_Address        : Unbounded_String;
       Server_Resolver_Port           : Port_Type;
       DNS_Transaction_Id             : Unsigned_16;
-      From_Client_Resolver_Packets   : Vector;
-      From_Upstream_Resolver_Packets : Vector;
+      From_Client_Resolver_Packet    : DNS_Raw_Packet_Record_Ptr;
+      From_Upstream_Resolver_Packet  : DNS_Raw_Packet_Record_Ptr;
    end record;
    type DNS_Transaction_Ptr is access DNS_Transaction;
 
@@ -33,10 +33,11 @@ package DNS_Transaction_Manager is
    use DNS_Transaction_Maps;
 
    task type DNS_Transaction_Manager_Task is
+      entry Start;
       entry Set_Packet_Queue (Queue : DNS_Raw_Packet_Queue_Ptr);
       entry From_Client_Resolver_Packet (Packet : DNS_Raw_Packet_Record_Ptr);
       entry From_Upstream_Resolver_Packet (Packet : DNS_Raw_Packet_Record_Ptr);
-      entry Shutdown_Task;
+      entry Stop;
    end DNS_Transaction_Manager_Task;
 
    type DNS_Transaction_Manager_Task_Ptr is access DNS_Transaction_Manager_Task;
