@@ -10,7 +10,7 @@ with Interfaces.C.Extensions; use Interfaces.C.Extensions;
 with DNS_Raw_Packet_Records; use DNS_Raw_Packet_Records;
 
 package DNS_Transaction_Manager is
-   package Stored_Packets_Vector is new Vectors (Natural, DNS_Raw_Packet_Record);
+   package Stored_Packets_Vector is new Vectors (Natural, DNS_Raw_Packet_Record_Ptr);
    use Stored_Packets_Vector;
 
    type DNS_Transaction is record
@@ -34,8 +34,8 @@ package DNS_Transaction_Manager is
 
    task type DNS_Transaction_Manager_Task is
       entry Set_Packet_Queue (Queue : DNS_Raw_Packet_Queue_Ptr);
-      entry From_Client_Resolver_Packet (Packet : DNS_Raw_Packet_Record);
-      entry From_Upstream_Resolver_Packet (Packet : DNS_Raw_Packet_Record);
+      entry From_Client_Resolver_Packet (Packet : DNS_Raw_Packet_Record_Ptr);
+      entry From_Upstream_Resolver_Packet (Packet : DNS_Raw_Packet_Record_Ptr);
       entry Shutdown_Task;
    end DNS_Transaction_Manager_Task;
 

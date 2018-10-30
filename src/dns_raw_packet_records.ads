@@ -14,6 +14,7 @@ package DNS_Raw_Packet_Records is
       Raw_Data        : Raw_DNS_Packet;
       Raw_Data_Length : Stream_Element_Offset;
    end record;
+   type DNS_Raw_Packet_Record_Ptr is access DNS_Raw_Packet_Record;
 
    package Stored_Packets_Vector is new Vectors (Natural, DNS_Raw_Packet_Record);
    use Stored_Packets_Vector;

@@ -44,6 +44,8 @@ package Raw_DNS_Packets is
    for Raw_DNS_Packet'Scalar_Storage_Order use System.High_Order_First;
    pragma Pack (Raw_DNS_Packet);
 
+   procedure Free_Raw_DNS_Packet(Packet: in out Raw_DNS_Packet);
+
    -- DNS packet elements can't be represented in binary form
    -- due to the fact that they're variable legnth with a non-standard
    -- encoding, so we'll have to just save an array and turn it into

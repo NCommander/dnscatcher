@@ -27,7 +27,7 @@ package body DNS_Receiver_Interface_IPv4_UDP is
       Buffer                  : Stream_Element_Array (1 .. Stream_Element_Offset (1500));
       Offset                  : Stream_Element_Offset;
       Incoming_Address        : Sock_Addr_Type;
-      DNS_Packet              : DNS_Raw_Packet_Record;
+      DNS_Packet              : DNS_Raw_Packet_Record_Ptr;
       Process_Packets         : Boolean := False;
    begin
       accept Initialize (Config : Configuration_Ptr; Socket : Socket_Type;
@@ -78,6 +78,7 @@ package body DNS_Receiver_Interface_IPv4_UDP is
                   Put_Line ("Read " & Stream_Element_Offset'Image (Offset) & " bytes");
 
                   -- Copy the packet for further processing
+                  DNS_Packet              := new DNS_Raw_Packet_Record;
                   DNS_Packet.From_Address := To_Unbounded_String (Image (Incoming_Address.Addr));
                   DNS_Packet.From_Port    := Incoming_Address.Port;
                   DNS_Packet.To_Address   := DNS_Config.Upstream_DNS_Server;

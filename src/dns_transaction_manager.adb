@@ -1,9 +1,13 @@
 with Ada.Unchecked_Conversion;
+with Ada.Unchecked_Deallocation;
+
 with Ada.Text_IO;            use Ada.Text_IO;
 with Ada.Integer_Text_IO;    use Ada.Integer_Text_IO;
 with Ada.Strings.Hash;
 with DNS_Raw_Packet_Records; use DNS_Raw_Packet_Records;
 with Raw_DNS_Packets;        use Raw_DNS_Packets;
+
+with Utils;
 
 package body DNS_Transaction_Manager is
    -- Handle the map for tracking transactions to/from source
@@ -22,7 +26,7 @@ package body DNS_Transaction_Manager is
                Outbound_Packet_Queue := Queue;
             end Set_Packet_Queue;
          or
-            accept From_Client_Resolver_Packet (Packet : DNS_Raw_Packet_Record) do
+            accept From_Client_Resolver_Packet (Packet : DNS_Raw_Packet_Record_Ptr) do
                Transaction := new DNS_Transaction;
 
                Put ("  Downstream DNS Transaction ID: ");
@@ -49,7 +53,7 @@ package body DNS_Transaction_Manager is
                -- Now append to the vector
                -- FIXME: This likely needs to be a ordered hashmap ...
                Transaction := Transaction_Hashmap(Hashmap_Key);
-               Transaction.From_Client_Resolver_Packets.Append(Packet);
+               --Transaction.From_Client_Resolver_Packets.Append(Packet);
 
                Put_Line
                  ("Inbound has" &
@@ -59,10 +63,10 @@ package body DNS_Transaction_Manager is
                   Transaction.From_Upstream_Resolver_Packets.Length'Image);
 
                -- Rewrite the DNS Packet and send it on it's way
-               Outbound_Packet_Queue.Put (Packet);
+               Outbound_Packet_Queue.Put (Packet.all);
             end From_Client_Resolver_Packet;
          or
-            accept From_Upstream_Resolver_Packet (Packet : DNS_Raw_Packet_Record) do
+            accept From_Upstream_Resolver_Packet (Packet : DNS_Raw_Packet_Record_Ptr) do
                Transaction := new DNS_Transaction;
 
                Put ("  Upstream DNS Transaction ID: ");
@@ -95,7 +99,7 @@ package body DNS_Transaction_Manager is
                -- Now append to the vector
                -- FIXME: This likely needs to be a ordered hashmap ...
                Transaction := Transaction_Hashmap(Hashmap_Key);
-               Transaction.From_Upstream_Resolver_Packets.Append(Packet);
+               --Transaction.From_Upstream_Resolver_Packets.Append(Packet);
 
                Put_Line
                  ("To Upstream has" &
@@ -105,14 +109,27 @@ package body DNS_Transaction_Manager is
                   Transaction.From_Client_Resolver_Packets.Length'Image);
 
                -- Flip the packet around so it goes to the right place
-               Outbound_Packet            := Packet;
+               Outbound_Packet            := Packet.all;
                Outbound_Packet.To_Address := Transaction.Client_Resolver_Address;
                Outbound_Packet.To_Port    := Transaction.Client_Resolver_Port;
                Outbound_Packet_Queue.Put (Outbound_Packet);
             end From_Upstream_Resolver_Packet;
          or
             accept Shutdown_Task do
-               null;
+               declare
+
+                  -- Clean up the pool and get rid of everything we don't need
+                  procedure Empty_Hash_Map(c: DNS_Transaction_Maps.Cursor) is
+                     procedure Free_Transaction is new Ada.Unchecked_Deallocation
+                       (Object => DNS_Transaction, Name => DNS_Transaction_Ptr);
+                     P : DNS_Transaction_Ptr;
+                  begin
+                     P := Element(c);
+                     Free_Transaction(P);
+                  end;
+               begin
+                  Transaction_Hashmap.Iterate(Empty_Hash_Map'Access);
+               end;
             end Shutdown_Task;
          or
             terminate;
