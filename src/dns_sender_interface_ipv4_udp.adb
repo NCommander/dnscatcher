@@ -17,6 +17,7 @@ with DNSCatcher_Config; use DNSCatcher_Config;
 with DNS_Network_Receiver_Interface;
 with DNS_Transaction_Manager;
 with DNS_Raw_Packet_Records;   use DNS_Raw_Packet_Records;
+with Raw_DNS_Packets; use Raw_DNS_Packets;
 
 package body DNS_Sender_Interface_IPv4_UDP is
 
@@ -82,15 +83,23 @@ package body DNS_Sender_Interface_IPv4_UDP is
                   Put_Line (Image (Outgoing_Address));
                   Put_Line (Port_Type'Image (Outgoing_Port));
 
-                  Send_Socket
-                    (Socket => DNS_Socket,
-                     Item   => DNS_Packet.Raw_Data.all (1 .. DNS_Packet.Raw_Data_Length),
-                     Last   => Length,
-                     To     =>
-                       (Family => Family_Inet, Addr => Outgoing_Address, Port => Outgoing_Port));
+                  -- Create the outbound message
+                  declare
+                     Buffer : Stream_Element_Array(1..DNS_Packet.Raw_Data_Length);
+                     Header : SEA_DNS_Packet_Header;
+                  begin
+                     Header := DNS_Packet_Header_To_SEA(DNS_Packet.Raw_Data.Header);
+                     Buffer := Header & DNS_Packet.Raw_Data.Data.all;
+                       Send_Socket
+                       (Socket => DNS_Socket,
+                        Item   => Buffer,
+                        Last   => Length,
+                        To     =>
+                          (Family => Family_Inet, Addr => Outgoing_Address, Port => Outgoing_Port));
 
-                  Put ("Sent packet to ");
-                  Put_Line (Image (Outgoing_Address));
+                     Put ("Sent packet to ");
+                     Put_Line (Image (Outgoing_Address));
+                  end;
                end if;
             end select;
          end loop;

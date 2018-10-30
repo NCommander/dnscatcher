@@ -2,6 +2,7 @@ with Ada.Strings.Unbounded;   use Ada.Strings.Unbounded;
 with Ada.Streams;             use Ada.Streams;
 with GNAT.Sockets;            use GNAT.Sockets;
 with Ada.Containers.Vectors;  use Ada.Containers;
+with Raw_DNS_Packets;         use Raw_DNS_Packets;
 with Utils;
 
 package DNS_Raw_Packet_Records is
@@ -10,7 +11,7 @@ package DNS_Raw_Packet_Records is
       From_Port       : Port_Type;
       To_Address      : Unbounded_String;
       To_Port         : Port_Type;
-      Raw_Data        : Utils.Stream_Element_Array_Ptr;
+      Raw_Data        : Raw_DNS_Packet;
       Raw_Data_Length : Stream_Element_Offset;
    end record;
 

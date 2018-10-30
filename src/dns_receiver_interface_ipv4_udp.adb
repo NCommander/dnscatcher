@@ -2,13 +2,13 @@ with Ada.Text_IO;         use Ada.Text_IO;
 with Ada.Integer_Text_IO; use Ada.Integer_Text_IO;
 
 with Ada.Exceptions; use Ada.Exceptions;
-
-with GNAT.Sockets; use GNAT.Sockets;
-
 with Ada.Task_Identification; use Ada.Task_Identification;
-
 with Ada.Streams;           use Ada.Streams;
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
+with Ada.Unchecked_Conversion;
+with Ada.Unchecked_Deallocation;
+
+with GNAT.Sockets; use GNAT.Sockets;
 
 with Packet_Catcher;
 with Utils;
@@ -17,9 +17,9 @@ with DNSCatcher_Config; use DNSCatcher_Config;
 with DNS_Network_Receiver_Interface;
 with DNS_Transaction_Manager;
 with DNS_Raw_Packet_Records; use DNS_Raw_Packet_Records;
+with Raw_DNS_Packets; use Raw_DNS_Packets;
 
 package body DNS_Receiver_Interface_IPv4_UDP is
-
    task body Receive_Packet_Task is
       DNS_Config              : Configuration_Ptr;
       DNS_Socket              : Socket_Type;
@@ -85,8 +85,10 @@ package body DNS_Receiver_Interface_IPv4_UDP is
                   DNS_Packet.To_Port      := DNS_Config.Upstream_DNS_Server_Port;
 
                   -- Create a new buffer of the right length and copy the data in
-                  DNS_Packet.Raw_Data        := new Stream_Element_Array (1 .. Offset);
-                  DNS_Packet.Raw_Data.all    := Buffer (1 .. Offset);
+                  -- See comment on the Header Length BS in raw_dns_packets.ads ...
+                  DNS_Packet.Raw_Data.Header := SEA_To_DNS_Packet_Header(Buffer(Buffer'First..DNS_PACKET_HEADER_SIZE));
+                  DNS_Packet.Raw_Data.Data   := new Stream_Element_Array(1..Offset-DNS_PACKET_HEADER_SIZE);
+                  DNS_Packet.Raw_Data.Data.all := Buffer(DNS_PACKET_HEADER_SIZE+1..Offset);
                   DNS_Packet.Raw_Data_Length := Offset;
 
                   -- Was this a server response, or client response?

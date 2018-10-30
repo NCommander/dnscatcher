@@ -1,20 +1,15 @@
 with Ada.Unchecked_Conversion;
-with Ada.Text_IO;         use Ada.Text_IO;
-with Ada.Integer_Text_IO; use Ada.Integer_Text_IO;
+with Ada.Text_IO;            use Ada.Text_IO;
+with Ada.Integer_Text_IO;    use Ada.Integer_Text_IO;
 with Ada.Strings.Hash;
 with DNS_Raw_Packet_Records; use DNS_Raw_Packet_Records;
-with Raw_DNS_Packets; use Raw_DNS_Packets;
+with Raw_DNS_Packets;        use Raw_DNS_Packets;
 
 package body DNS_Transaction_Manager is
-   -- Conversion functions
-   function SEA_To_DNS_Packet_Header is new Ada.Unchecked_Conversion
-     (Source => Stream_Element_Array, Target => DNS_Packet_Header);
-
    -- Handle the map for tracking transactions to/from source
    task body DNS_Transaction_Manager_Task is
       Outbound_Packet_Queue : DNS_Raw_Packet_Queue_Ptr;
       Transaction           : DNS_Transaction;
-      Packet_Header         : DNS_Packet_Header;
       Hashmap_Key           : IP_Transaction_Key;
       Hashmap_Cursor        : DNS_Transaction_Maps.Cursor;
       Outbound_Packet       : DNS_Raw_Packet_Record;
@@ -27,17 +22,14 @@ package body DNS_Transaction_Manager is
             end Set_Packet_Queue;
          or
             accept From_Client_Resolver_Packet (Packet : DNS_Raw_Packet_Record) do
-               Put_Line ("HERE!!!");
-               New_Line;
-
-               Packet_Header := SEA_To_Dns_Packet_Header (Packet.Raw_Data.all);
                Put ("  DNS Transaction ID: ");
-               Put (Standard_Output, Integer (Packet_Header.Identifier), Base => 16);
+               Put (Standard_Output, Integer (Packet.Raw_Data.Header.Identifier), Base => 16);
                New_Line;
 
                Hashmap_Key :=
                  IP_Transaction_Key
-                   (Packet.To_Address & Packet.To_Port'Image & Packet_Header.Identifier'Image);
+                   (Packet.To_Address & Packet.To_Port'Image &
+                    Packet.Raw_Data.Header.Identifier'Image);
 
                Put_Line (To_String (Hashmap_Key));
                -- Create the key if necessary
@@ -48,7 +40,7 @@ package body DNS_Transaction_Manager is
                   Transaction.Client_Resolver_Port    := Packet.From_Port;
                   Transaction.Server_Resolver_Address := Packet.To_Address;
                   Transaction.Server_Resolver_Port    := Packet.To_Port;
-                  Transaction.DNS_Transaction_Id      := Packet_Header.Identifier;
+                  Transaction.DNS_Transaction_Id      := Packet.Raw_Data.Header.Identifier;
                   Transaction_Hashmap.Insert (Hashmap_Key, Transaction);
                end if;
 
@@ -68,23 +60,19 @@ package body DNS_Transaction_Manager is
                     Image);
 
                -- Rewrite the DNS Packet and send it on it's way
-               Outbound_Packet              := Packet;
-               Outbound_Packet.Raw_Data.all := Packet.Raw_Data.all;
+               Outbound_Packet := Packet;
                Outbound_Packet_Queue.Put (Outbound_Packet);
             end From_Client_Resolver_Packet;
          or
             accept From_Upstream_Resolver_Packet (Packet : DNS_Raw_Packet_Record) do
-               Put_Line ("HERE2!!!");
-               New_Line;
-
-               Packet_Header := SEA_To_Dns_Packet_Header (Packet.Raw_Data.all);
                Put ("  DNS Transaction ID: ");
-               Put (Standard_Output, Integer (Packet_Header.Identifier), Base => 16);
+               Put (Standard_Output, Integer (Packet.Raw_Data.Header.Identifier), Base => 16);
                New_Line;
 
                Hashmap_Key :=
                  IP_Transaction_Key
-                   (Packet.From_Address & Packet.From_Port'Image & Packet_Header.Identifier'Image);
+                   (Packet.From_Address & Packet.From_Port'Image &
+                    Packet.Raw_Data.Header.Identifier'Image);
 
                Put_Line (To_String (Hashmap_Key));
                -- Create the key if necessary
@@ -95,7 +83,7 @@ package body DNS_Transaction_Manager is
                   Transaction.Client_Resolver_Port    := Packet.To_Port;
                   Transaction.Server_Resolver_Address := Packet.From_Address;
                   Transaction.Server_Resolver_Port    := Packet.From_Port;
-                  Transaction.DNS_Transaction_Id      := Packet_Header.Identifier;
+                  Transaction.DNS_Transaction_Id      := Packet.Raw_Data.Header.Identifier;
                   Transaction_Hashmap.Insert (Hashmap_Key, Transaction);
                end if;
 
@@ -115,10 +103,9 @@ package body DNS_Transaction_Manager is
                     Image);
 
                -- Flip the packet around so it goes to the right place
-               Outbound_Packet              := Packet;
-               Outbound_Packet.To_Address   := Transaction.Client_Resolver_Address;
-               Outbound_Packet.To_Port      := Transaction.Client_Resolver_Port;
-               Outbound_Packet.Raw_Data.all := Packet.Raw_Data.all;
+               Outbound_Packet            := Packet;
+               Outbound_Packet.To_Address := Transaction.Client_Resolver_Address;
+               Outbound_Packet.To_Port    := Transaction.Client_Resolver_Port;
                Outbound_Packet_Queue.Put (Outbound_Packet);
             end From_Upstream_Resolver_Packet;
          or
