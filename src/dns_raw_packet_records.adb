@@ -1,3 +1,5 @@
+with Utils; use Utils;
+
 package body DNS_Raw_Packet_Records is
    -- Handles DNS Packets in a FIFO queue; built around Vectors, this may need to be changed for
    -- performance reasons at some point
@@ -27,8 +29,7 @@ package body DNS_Raw_Packet_Records is
                declare
                   procedure Dump_Vector_Data (c : Stored_Packets_Vector.Cursor) is
                   begin
-                     null;
-                     --Free_Packet_Raw_Data (Stored_Packets (c).Raw_Data);
+                     Free_Stream_Element_Array_Ptr (Stored_Packets (c).Raw_Data.Data);
                   end Dump_Vector_Data;
                begin
                   Stored_Packets.Iterate (Dump_Vector_Data'access);

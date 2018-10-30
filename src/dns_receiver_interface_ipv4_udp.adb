@@ -24,7 +24,7 @@ package body DNS_Receiver_Interface_IPv4_UDP is
       DNS_Config              : Configuration_Ptr;
       DNS_Socket              : Socket_Type;
       DNS_Transaction_Manager : DNS_Transaction_Manager_Task_Ptr;
-      Buffer                  : Utils.Stream_Element_Array_Ptr;
+      Buffer                  : Stream_Element_Array (1 .. Stream_Element_Offset (1500));
       Offset                  : Stream_Element_Offset;
       Incoming_Address        : Sock_Addr_Type;
       DNS_Packet              : DNS_Raw_Packet_Record;
@@ -37,7 +37,6 @@ package body DNS_Receiver_Interface_IPv4_UDP is
          DNS_Transaction_Manager := Transaction_Manager;
       end Initialize;
 
-      Buffer := new Stream_Element_Array (1 .. Stream_Element_Offset (1500));
       loop
          -- Either just started or stopping, we're terminatable in this state
          Put_Line ("Received State STOPPED");
@@ -69,7 +68,7 @@ package body DNS_Receiver_Interface_IPv4_UDP is
             else
                begin
                   Receive_Socket
-                    (Socket => DNS_Socket, Item => Buffer.all, Last => Offset,
+                    (Socket => DNS_Socket, Item => Buffer, Last => Offset,
                      From   => Incoming_Address);
 
                   Put_Line
@@ -121,9 +120,6 @@ package body DNS_Receiver_Interface_IPv4_UDP is
             Put_Line (Standard_Error, Exception_Information (Error));
             Packet_Catcher.Stop_Catcher;
          end;
-
-         -- Clean up after ourselves
-         Utils.Free_Stream_Element_Array_Ptr (Buffer);
    end Receive_Packet_Task;
 
    procedure Initialize (This : in out IPv4_UDP_Receiver_Interface; Config : Configuration_Ptr;

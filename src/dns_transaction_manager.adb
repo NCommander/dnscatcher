@@ -9,20 +9,23 @@ package body DNS_Transaction_Manager is
    -- Handle the map for tracking transactions to/from source
    task body DNS_Transaction_Manager_Task is
       Outbound_Packet_Queue : DNS_Raw_Packet_Queue_Ptr;
-      Transaction           : DNS_Transaction;
       Hashmap_Key           : IP_Transaction_Key;
       Hashmap_Cursor        : DNS_Transaction_Maps.Cursor;
       Outbound_Packet       : DNS_Raw_Packet_Record;
       Transaction_Hashmap   : DNS_Transaction_Maps.Map;
+      Transaction           : DNS_Transaction_Ptr;
    begin
       loop
+         Transaction := null;
          select
             accept Set_Packet_Queue (Queue : in DNS_Raw_Packet_Queue_Ptr) do
                Outbound_Packet_Queue := Queue;
             end Set_Packet_Queue;
          or
             accept From_Client_Resolver_Packet (Packet : DNS_Raw_Packet_Record) do
-               Put ("  DNS Transaction ID: ");
+               Transaction := new DNS_Transaction;
+
+               Put ("  Downstream DNS Transaction ID: ");
                Put (Standard_Output, Integer (Packet.Raw_Data.Header.Identifier), Base => 16);
                New_Line;
 
@@ -31,7 +34,6 @@ package body DNS_Transaction_Manager is
                    (Packet.To_Address & Packet.To_Port'Image &
                     Packet.Raw_Data.Header.Identifier'Image);
 
-               Put_Line (To_String (Hashmap_Key));
                -- Create the key if necessary
                Hashmap_Cursor := Transaction_Hashmap.Find (Hashmap_Key);
 
@@ -46,26 +48,24 @@ package body DNS_Transaction_Manager is
 
                -- Now append to the vector
                -- FIXME: This likely needs to be a ordered hashmap ...
-               Transaction_Hashmap.Reference (Hashmap_Key).From_Client_Resolver_Packets.Append
-                 (Packet);
+               Transaction := Transaction_Hashmap(Hashmap_Key);
+               Transaction.From_Client_Resolver_Packets.Append(Packet);
 
                Put_Line
                  ("Inbound has" &
-                  Transaction_Hashmap.Reference (Hashmap_Key).From_Client_Resolver_Packets.Length'
-                    Image);
+                  Transaction.From_Client_Resolver_Packets.Length'Image);
                Put_Line
                  ("Server Resolver" &
-                  Transaction_Hashmap.Reference (Hashmap_Key).From_Upstream_Resolver_Packets
-                    .Length'
-                    Image);
+                  Transaction.From_Upstream_Resolver_Packets.Length'Image);
 
                -- Rewrite the DNS Packet and send it on it's way
-               Outbound_Packet := Packet;
-               Outbound_Packet_Queue.Put (Outbound_Packet);
+               Outbound_Packet_Queue.Put (Packet);
             end From_Client_Resolver_Packet;
          or
             accept From_Upstream_Resolver_Packet (Packet : DNS_Raw_Packet_Record) do
-               Put ("  DNS Transaction ID: ");
+               Transaction := new DNS_Transaction;
+
+               Put ("  Upstream DNS Transaction ID: ");
                Put (Standard_Output, Integer (Packet.Raw_Data.Header.Identifier), Base => 16);
                New_Line;
 
@@ -74,11 +74,16 @@ package body DNS_Transaction_Manager is
                    (Packet.From_Address & Packet.From_Port'Image &
                     Packet.Raw_Data.Header.Identifier'Image);
 
-               Put_Line (To_String (Hashmap_Key));
                -- Create the key if necessary
                Hashmap_Cursor := Transaction_Hashmap.Find (Hashmap_Key);
 
                if Hashmap_Cursor = DNS_Transaction_Maps.No_Element then
+                  New_Line;
+                  New_Line;
+                  Put_Line("HERE2");
+                  New_Line;
+                  New_Line;
+
                   Transaction.Client_Resolver_Address := Packet.To_Address;
                   Transaction.Client_Resolver_Port    := Packet.To_Port;
                   Transaction.Server_Resolver_Address := Packet.From_Address;
@@ -89,18 +94,15 @@ package body DNS_Transaction_Manager is
 
                -- Now append to the vector
                -- FIXME: This likely needs to be a ordered hashmap ...
-               Transaction := Transaction_Hashmap.Reference (Hashmap_Key);
-               Transaction_Hashmap.Reference (Hashmap_Key).From_Upstream_Resolver_Packets.Append
-                 (Packet);
+               Transaction := Transaction_Hashmap(Hashmap_Key);
+               Transaction.From_Upstream_Resolver_Packets.Append(Packet);
 
                Put_Line
                  ("To Upstream has" &
-                  Transaction_Hashmap.Reference (Hashmap_Key).From_Client_Resolver_Packets.Length'
-                    Image);
+                  Transaction.From_Client_Resolver_Packets.Length'Image);
                Put_Line
                  ("Server Resolver" &
-                  Transaction_Hashmap.Reference (Hashmap_Key).From_Client_Resolver_Packets.Length'
-                    Image);
+                  Transaction.From_Client_Resolver_Packets.Length'Image);
 
                -- Flip the packet around so it goes to the right place
                Outbound_Packet            := Packet;
