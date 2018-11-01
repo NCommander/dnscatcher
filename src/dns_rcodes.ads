@@ -5,14 +5,14 @@ package DNS_RCodes is
       ServFail,
       NXDomain,
       NotImp,
+      Refused,
       YXDomain,
       YXRRSet,
       NXRRSet,
       NotAuth,
       NotZone,
-      BADVERS,
       BADSIG,
-      BADVERS,
+      -- 16 can also be BADVERS but that's not trivial to represent
       BADKEY,
       BADTIME,
       BADMODE,
@@ -20,7 +20,7 @@ package DNS_RCodes is
       BADALG,
       BADTRUNC,
       BADCOOKIE);
-   for DNS_RCodes use
+   for RCodes use
      (NoError   => 0,
       FormErr   => 1,
       ServFail  => 2,
@@ -32,8 +32,7 @@ package DNS_RCodes is
       NXRRSet   => 8,
       NotAuth   => 9,
       NotZone   => 10,
-      BADVERS   => 16,
-      BADSIG    => 16,
+      BADSIG   => 16,
       BADKEY    => 17,
       BADTIME   => 18,
       BADMODE   => 19,

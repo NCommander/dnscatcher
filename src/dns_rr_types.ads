@@ -1,4 +1,4 @@
-package RR_Types is
+package DNS_RR_Types is
 -- IANA Registered RRTypes
    type RR_Types is
      (A,
@@ -172,4 +172,7 @@ package RR_Types is
       DOA        => 259,
       TA         => 32768,
       DLV        => 32769);
-end RR_Types;
+
+   function To_String(RR_Type : RR_Types) return String;
+
+end DNS_RR_Types;

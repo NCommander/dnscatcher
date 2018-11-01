@@ -6,6 +6,7 @@ with Ada.Integer_Text_IO;    use Ada.Integer_Text_IO;
 with Ada.Strings.Hash;
 with DNS_Raw_Packet_Records; use DNS_Raw_Packet_Records;
 with Raw_DNS_Packets;        use Raw_DNS_Packets;
+with Packet_Parser;          use Packet_Parser;
 
 with Utils;
 
@@ -69,6 +70,9 @@ package body DNS_Transaction_Manager is
                   Transaction                             := Transaction_Hashmap (Hashmap_Key);
                   Transaction.From_Client_Resolver_Packet := Packet;
 
+                  -- Try to parse the packet
+                  Packet_Parser.Packet_Parser(Packet);
+
                   -- Rewrite the DNS Packet and send it on it's way
                   Outbound_Packet_Queue.Put (Packet.all);
                end From_Client_Resolver_Packet;
@@ -104,6 +108,9 @@ package body DNS_Transaction_Manager is
                   if (Packet.Raw_Data.Header.Truncated) then
                      Put_Line("WARNING: Trunciated packet response!");
                   end if;
+
+                  -- Try to parse the packet
+                  Packet_Parser.Packet_Parser(Packet);
 
                   -- Flip the packet around so it goes to the right place
                   Outbound_Packet            := Packet.all;
