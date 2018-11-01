@@ -17,8 +17,8 @@ project DNS_Catcher is
    end Linker;
 
    package Pretty_Printer is
-      for Default_Switches ("ada") use ("-A1", "-A2", "-A3", "-A4", "-A5", "--no-separate-loop-then", "--no-separate-is", "-M99", "--separate-stmt-name", "-c2", "--vertical-enum-types", "--vertical-array-types", 
-         "--vertical-named-aggregates", "--vertical-case-alternatives");
+      for Default_Switches ("ada") use ("-A1", "-A2", "-A3", "-A4", "-A5", "-M99", "--separate-stmt-name", "-c2", "--vertical-enum-types", "--vertical-array-types", "--vertical-named-aggregates", "--vertical-case-alternatives", 
+         "--separate-loop-then");
    end Pretty_Printer;
 
 end DNS_Catcher;

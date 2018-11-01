@@ -1,6 +1,7 @@
 with Ada.Unchecked_Conversion;
 with Ada.Unchecked_Deallocation;
 
+with Ada.Exceptions; use Ada.Exceptions;
 with Ada.Text_IO;            use Ada.Text_IO;
 with Ada.Integer_Text_IO;    use Ada.Integer_Text_IO;
 with Ada.Strings.Hash;
@@ -160,6 +161,12 @@ package body DNS_Transaction_Manager is
             end select;
          end loop;
       end loop;
+   exception
+      when Error : others =>
+         begin
+            Put (Standard_Error, "Transaction error: ");
+            Put_Line (Standard_Error, Exception_Information (Error));
+         end;
    end DNS_Transaction_Manager_Task;
 
    function IP_Transaction_Key_HashID (id : IP_Transaction_Key) return Hash_Type is
