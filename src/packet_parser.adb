@@ -117,7 +117,7 @@ package body Packet_Parser is
       end if;
         
       loop
-         -- Records can be compressed, denoted by Section Length of 0xff
+         -- Records can be compressed, denoted by Section Length of leading binary bytes 11
          -- so we need to handle both cases properly
          --
          -- This is flipping bullshit, and I dunno if I should be pissed at the Ada guys
