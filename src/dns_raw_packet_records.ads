@@ -19,11 +19,15 @@ package DNS_Raw_Packet_Records is
    package Stored_Packets_Vector is new Vectors (Natural, DNS_Raw_Packet_Record);
    use Stored_Packets_Vector;
 
-   task type DNS_Raw_Packet_Record_Queue is
+   protected type DNS_Raw_Packet_Record_Queue is
       entry Put (Packet : in DNS_Raw_Packet_Record);
       entry Get (Packet : out DNS_Raw_Packet_Record);
       entry Count (Count : out Integer);
       entry Empty;
+   private
+      Stored_Packets : Vector;
+      Packet_Count   : Integer := 0;
    end DNS_Raw_Packet_Record_Queue;
    type DNS_Raw_Packet_Queue_Ptr is access DNS_Raw_Packet_Record_Queue;
+
 end DNS_Raw_Packet_Records;

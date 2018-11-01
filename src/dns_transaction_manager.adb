@@ -76,6 +76,12 @@ package body DNS_Transaction_Manager is
 
                   -- Rewrite the DNS Packet and send it on it's way
                   Outbound_Packet_Queue.Put (Packet.all);
+               exception
+                  when Error : others =>
+                     begin
+                        Put (Standard_Error, "Transaction error: ");
+                        Put_Line (Standard_Error, Exception_Information (Error));
+                     end;
                end From_Client_Resolver_Packet;
             or
                accept From_Upstream_Resolver_Packet (Packet : DNS_Raw_Packet_Record_Ptr) do
@@ -118,6 +124,13 @@ package body DNS_Transaction_Manager is
                   Outbound_Packet.To_Address := Transaction.Client_Resolver_Address;
                   Outbound_Packet.To_Port    := Transaction.Client_Resolver_Port;
                   Outbound_Packet_Queue.Put (Outbound_Packet);
+
+               exception
+                  when Error : others =>
+                     begin
+                        Put (Standard_Error, "Transaction error: ");
+                        Put_Line (Standard_Error, Exception_Information (Error));
+                     end;
                end From_Upstream_Resolver_Packet;
             or
                accept Stop do
@@ -161,12 +174,6 @@ package body DNS_Transaction_Manager is
             end select;
          end loop;
       end loop;
-   exception
-      when Error : others =>
-         begin
-            Put (Standard_Error, "Transaction error: ");
-            Put_Line (Standard_Error, Exception_Information (Error));
-         end;
    end DNS_Transaction_Manager_Task;
 
    function IP_Transaction_Key_HashID (id : IP_Transaction_Key) return Hash_Type is

@@ -1,3 +1,5 @@
+with System;
+
 with Ada.Text_IO;         use Ada.Text_IO;
 with Ada.Integer_Text_IO; use Ada.Integer_Text_IO;
 with Ada.Streams;         use Ada.Streams;
@@ -61,6 +63,7 @@ package body Packet_Parser is
 
       for i in 1 .. Parsed_Packet.Header.Question_Count
       loop
+         Put_Line("Parsing Question");
          Parsed_Packet.Questions.Append
            (Parse_Question_Record (Packet.Raw_Data.Data, Current_Offset));
       end loop;
@@ -74,60 +77,124 @@ package body Packet_Parser is
 
       for i in 1 .. Parsed_Packet.Header.Authority_Record_Count
       loop
-         Put_Line ("Would process Authority_Record");
+         Put_Line ("Parsing Authority_Record");
+         Parsed_Packet.Authority.Append
+           (Parse_Resource_Record_Response (Packet.Raw_Data.Data, Current_Offset));
       end loop;
 
       for i in 1 .. Parsed_Packet.Header.Additional_Record_Count
       loop
-         Put_Line ("Would process Additional_Record");
+         Put_Line ("Parsing Additional_Record");
+         Parsed_Packet.Additional.Append
+           (Parse_Resource_Record_Response (Packet.Raw_Data.Data, Current_Offset));
       end loop;
 
    end Packet_Parser;
 
+   -- I apologize in advance, this function is a real mindfuck.
    function Parse_DNS_Packet_Name_Records (Raw_Data :        Raw_DNS_Packet_Data;
       Offset : in out Stream_Element_Offset) return Unbounded_String
    is
       Domain_Name    : Unbounded_String;
       Section_Length : Unsigned_8;
+      type Packer_Pointer is record
+         Packet_Offset : Unsigned_16;
+      end record;
+      for Packer_Pointer'Bit_Order use System.High_Order_First;
+      for Packer_Pointer'Scalar_Storage_Order use System.High_Order_First;
+      pragma Pack (Packer_Pointer);
+      Packet_Ptr : Packer_Pointer;
    begin
       -- This is fucked up. DNS basically defines the first octlet of the length
       -- of a level of a domain section, so we need to parse that, then build a
       -- proper domain string out of it. Also, shit can be compressed. Kill me now.
       Section_Length := Unsigned_8 (Raw_Data.all (Offset));
-      Offset         := Offset + 1;
-
+      if Section_Length = 0 then
+         -- It is possible for the section length to be zero for some
+         -- record requests or dealing with the root. Thus just return
+         -- blank
+         return To_Unbounded_String("");
+      end if;
+        
       loop
          -- Records can be compressed, denoted by Section Length of 0xff
          -- so we need to handle both cases properly
+         --
+         -- This is flipping bullshit, and I dunno if I should be pissed at the Ada guys
+         -- or the DNS ones. Basically, the top two bits of the offset represent if its
+         -- compressed or not, with the rest being used as an offset. Normally, you can
+         -- handle that via byte order and shit, but Ada gets confused when doing this
+         -- because you basically have you most significant bytes at the other end.
+         --
+         -- Given we're already in the correct memory format, we'll just use bitwise ops
+         -- because I've already raged hard enough here
 
-         if Section_Length /= 16#ff#
+         if (Section_Length and 2#11#) /= 0 -- Not compressed
          then
+         Offset := Offset + 1; -- Move past the length
+            
             declare
-               subtype Domain_Section is String (1 .. Integer (Section_Length));
+            subtype Domain_Section is String (1 .. Integer (Section_Length));
                function To_Domain_Section is new Ada.Unchecked_Conversion
                  (Source => Stream_Element_Array, Target => Domain_Section);
             begin
                Domain_Name :=
                  Domain_Name &
                  To_Domain_Section
-                   (Raw_Data.all (Offset .. Stream_Element_Offset (Section_Length)));
+                 (Raw_Data.all (Offset .. Stream_Element_Offset (Section_Length)));
+               
+               Offset := Offset + Stream_Element_Offset(Section_Length);
+            end;
+            
+         elsif (Section_Length and 2#11#) = 0 then
+            -- Standard compression is nuts. We have a pointer within the packet that basically
+            -- contains a link to the string segment we need next. Let's see if we can grab it and
+            -- decode it
+            
+            declare
+               Old_Section_Length : Unsigned_8;
+               Decompressed_Domain_String      : Unbounded_String;
+               function Get_Byte_Fixed_Header is new Ada.Unchecked_Conversion
+                 (Source => Stream_Element_Array, Target => Packer_Pointer);
+                 
+               subtype Domain_Section is String (1 .. Integer (Section_Length));
+               function To_Domain_Section is new Ada.Unchecked_Conversion
+                 (Source => Stream_Element_Array, Target => Domain_Section);
+            begin
+               -- Oh, and for more fuckery, the pointer is 16-bit ...
+               Packet_Ptr := Get_Byte_Fixed_Header(Raw_Data.all(Offset-1..Offset)); -- Make the top bytes vanish
+               
+               -- We subtract 12-1 for the packet header
+               Packet_Ptr.Packet_Offset := (Packet_Ptr.Packet_Offset and 16#3fff#)-11;
+               Old_Section_Length := Unsigned_8 (Raw_Data.all(Stream_Element_Offset(Packet_Ptr.Packet_Offset)));
+            
+               -- Sanity check ourselves
+               if (Section_Length and 2#11#) /= 0 then
+                  -- Should never happen but you never know ...
+                  raise Unknown_Compression_Method;
+               end if;
+            
+               -- Now we need to decode the whole old string ... ugh
+               Decompressed_Domain_String := Parse_DNS_Packet_Name_Records(Raw_Data,
+                                                                           Stream_Element_Offset(Packet_Ptr.Packet_Offset));
+               return Decompressed_Domain_String;
             end;
          else
-            Put_Line ("Not handling compressed DNS record");
+            -- Welp, unknown compression, bail out
+            raise Unknown_Compression_Method;
          end if;
-
-         -- Read in the next offset
-         Offset := Offset + Stream_Element_Offset (Section_Length);
-
+         
+         
          Section_Length := Unsigned_8 (Raw_Data.all (Offset));
-         Offset         := Offset + 1;
-
-         -- Tack on the . if this isn't the last iteration
+         --Put_Line(To_String(Domain_Name));
          exit when Section_Length = 0;
+         
+         -- Tack on the . if this isn't the last iteration
          Domain_Name := Domain_Name & ".";
+         
       end loop;
 
-      Offset := Offset + 1;
+      Offset := Offset + 2;
       return Domain_Name;
    end Parse_DNS_Packet_Name_Records;
 
@@ -212,10 +279,9 @@ package body Packet_Parser is
    is
       Parsed_Response : Parsed_DNS_Resource_Record;
    begin
-      Put_Line("  Starting Resource Record Parse");
-      raise Unknown_Class;
+      Put_Line ("  Starting Resource Record Parse");
       Parsed_Response.RName := Parse_DNS_Packet_Name_Records (Raw_Data, Offset);
-      Put_Line("    RName is " & To_String(Parsed_Response.RName));
+      Put_Line ("    RName is " & To_String (Parsed_Response.RName));
       return Parsed_Response;
    end Parse_Resource_Record_Response;
 

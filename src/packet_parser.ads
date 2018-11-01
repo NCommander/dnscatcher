@@ -59,4 +59,5 @@ package Packet_Parser is
    Unknown_RCode   : exception;
    Unknown_RR_Type : exception;
    Unknown_Class   : exception;
+   Unknown_Compression_Method : exception;
 end Packet_Parser;

@@ -46,7 +46,7 @@ package body Packet_Catcher is
          Name => DNSCatcher_Config.Configuration_Ptr);
    begin
       Capture_Config                          := new DNSCatcher_Config.Configuration;
-      Capture_Config.Local_Listen_Port        := 53;
+      Capture_Config.Local_Listen_Port        := 5553;
       Capture_Config.Upstream_DNS_Server      := To_Unbounded_String ("4.2.2.2");
       Capture_Config.Upstream_DNS_Server_Port := 53;
 
@@ -75,8 +75,8 @@ package body Packet_Catcher is
       loop
          if Shutting_Down = True then
             Put_Line ("Starting shutdown");
-            Receiver_Interface.Shutdown;
             Sender_Interface.Shutdown;
+            Receiver_Interface.Shutdown;
             Transaction_Manager_Ptr.Stop;
             Free_Transaction_Manager(Transaction_Manager_Ptr);
             Free_DNSCatacher_Config(Capture_Config);

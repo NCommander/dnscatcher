@@ -76,6 +76,7 @@ package Raw_DNS_Packets is
    type Raw_DNS_Packet_Additional is new Raw_DNS_Resource_Record;
 
    subtype SEA_DNS_Packet_Header is Stream_Element_Array(1..DNS_PACKET_HEADER_SIZE); -- 12 is the packed sized
+
    function SEA_To_DNS_Packet_Header is new Ada.Unchecked_Conversion
      (Source => Stream_Element_Array, Target => DNS_Packet_Header);
    function DNS_Packet_Header_To_SEA is new Ada.Unchecked_Conversion
