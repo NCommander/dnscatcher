@@ -93,7 +93,7 @@ package body Packet_Parser is
 
    -- I apologize in advance, this function is a real mindfuck.
    function Parse_DNS_Packet_Name_Records (Raw_Data :        Raw_DNS_Packet_Data;
-      Offset : in out Stream_Element_Offset) return Unbounded_String
+                                           Offset : in out Stream_Element_Offset) return Unbounded_String
    is
       Domain_Name    : Unbounded_String;
       Section_Length : Unsigned_8;
@@ -113,6 +113,7 @@ package body Packet_Parser is
          -- It is possible for the section length to be zero for some
          -- record requests or dealing with the root. Thus just return
          -- blank
+         Offset := Offset + 1;
          return To_Unbounded_String("");
       end if;
         
@@ -177,6 +178,7 @@ package body Packet_Parser is
                -- Now we need to decode the whole old string ... ugh
                Decompressed_Domain_String := Parse_DNS_Packet_Name_Records(Raw_Data,
                                                                            Stream_Element_Offset(Packet_Ptr.Packet_Offset));
+               Offset := Offset + 2;
                return Decompressed_Domain_String;
             end;
          else
@@ -278,10 +280,39 @@ package body Packet_Parser is
       Offset : in out Stream_Element_Offset) return Parsed_DNS_Resource_Record
    is
       Parsed_Response : Parsed_DNS_Resource_Record;
+      RData_Length : Unsigned_16;
    begin
       Put_Line ("  Starting Resource Record Parse");
       Parsed_Response.RName := Parse_DNS_Packet_Name_Records (Raw_Data, Offset);
+      Parsed_Response.RType := Parse_DNS_RR_Type(Raw_Data, Offset);
+      Parsed_Response.RClass := Unsigned_16(Raw_Data(Offset));
+      Offset := Offset + 2;
+      
+      Parsed_Response.TTL := Unsigned_32(Raw_Data(Offset));
+      Offset := Offset + 4;
+
+      -- What follows is the length as a 16 bit integer, then the RData which needs an
+      -- unchecked conversion
+      RData_Length := Unsigned_16(Raw_Data(Offset));
+      Offset := Offset + 2;
+
       Put_Line ("    RName is " & To_String (Parsed_Response.RName));
+      Put_Line ("    RType is " & To_String (Parsed_Response.RType));
+      Put_Line ("    RClass is" & Parsed_Response.RClass'Image);
+      Put_Line ("    TTL is" & Parsed_Response.TTL'Image);
+      Put_Line ("    RDLength is" & RData_Length'Image);
+      
+      declare
+         subtype RData is String (1 .. Integer (RData_Length));
+         function To_RData is new Ada.Unchecked_Conversion
+           (Source => Stream_Element_Array, Target => RData);
+      begin
+         Parsed_Response.RData := To_Unbounded_String(To_RData
+                                      (Raw_Data(Offset..Stream_Element_Offset(RData_Length))));
+         Offset := Offset + Stream_Element_Offset(RData_Length);
+      end;
+        
+      Put_Line ("    RData is " & To_String(Parsed_Response.RData));
       return Parsed_Response;
    end Parse_Resource_Record_Response;
 

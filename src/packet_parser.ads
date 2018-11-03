@@ -21,9 +21,8 @@ package Packet_Parser is
    type Parsed_DNS_Resource_Record is record
       RName     : Unbounded_String;
       RType     : RR_Types;
-      RClass    : DNS_Classes.Classes;
-      TTL       : Unsigned_16;
-      RD_Length : Unsigned_16;
+      RClass    : Unsigned_16;
+      TTL       : Unsigned_32;
       RData     : Unbounded_String;
    end record;
 
@@ -42,7 +41,7 @@ package Packet_Parser is
    procedure Packet_Parser (Packet : DNS_Raw_Packet_Record_Ptr);
 
    function Parse_DNS_Packet_Name_Records (Raw_Data :        Raw_DNS_Packet_Data;
-      Offset : in out Stream_Element_Offset) return Unbounded_String;
+                                           Offset : in out Stream_Element_Offset) return Unbounded_String;
 
    function Parse_DNS_RR_Type (Raw_Data :        Raw_DNS_Packet_Data;
       Offset                            : in out Stream_Element_Offset) return RR_Types;
