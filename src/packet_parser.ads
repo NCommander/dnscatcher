@@ -3,10 +3,8 @@ with Ada.Strings.Unbounded;   use Ada.Strings.Unbounded;
 with Ada.Streams;             use Ada.Streams;
 with Interfaces.C.Extensions; use Interfaces.C.Extensions;
 
-with Raw_DNS_Packets;        use Raw_DNS_Packets;
 with DNS_Raw_Packet_Records; use DNS_Raw_Packet_Records;
-with DNS_RR_Types;           use DNS_RR_Types;
-with DNS_Classes;            use DNS_Classes;
+with DNS_Core_Constructs; use DNS_Core_Constructs;
 
 package Packet_Parser is
 
@@ -15,7 +13,7 @@ package Packet_Parser is
    type Parsed_DNS_Question is record
       QName  : Unbounded_String;
       QType  : RR_Types;
-      QClass : DNS_Classes.Classes;
+      QClass : Classes;
    end record;
 
    type Parsed_DNS_Resource_Record is record
@@ -47,7 +45,7 @@ package Packet_Parser is
       Offset                            : in out Stream_Element_Offset) return RR_Types;
 
    function Parse_DNS_Class (Raw_Data :        Raw_DNS_Packet_Data;
-      Offset                          : in out Stream_Element_Offset) return DNS_Classes.Classes;
+      Offset                          : in out Stream_Element_Offset) return Classes;
 
    function Parse_Question_Record (Raw_Data :        Raw_DNS_Packet_Data;
       Offset : in out Stream_Element_Offset) return Parsed_DNS_Question;

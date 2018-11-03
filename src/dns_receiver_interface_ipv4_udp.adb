@@ -17,7 +17,7 @@ with DNSCatcher_Config; use DNSCatcher_Config;
 with DNS_Network_Receiver_Interface;
 with DNS_Transaction_Manager;
 with DNS_Raw_Packet_Records; use DNS_Raw_Packet_Records;
-with Raw_DNS_Packets; use Raw_DNS_Packets;
+with DNS_Core_Constructs; use DNS_Core_Constructs;
 
 package body DNS_Receiver_Interface_IPv4_UDP is
    task body Receive_Packet_Task is

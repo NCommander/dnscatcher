@@ -7,9 +7,7 @@ with Ada.Strings;
 with Ada.Unchecked_Conversion;
 
 with DNS_Raw_Packet_Records; use DNS_Raw_Packet_Records;
-with DNS_RR_Types;           use DNS_RR_Types;
-with DNS_Classes;            use DNS_Classes;
-with DNS_RCodes;             use DNS_RCodes;
+with DNS_Core_Constructs; use DNS_Core_Constructs;
 
 package body Packet_Parser is
 

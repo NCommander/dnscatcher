@@ -2,7 +2,7 @@ with Ada.Strings.Unbounded;   use Ada.Strings.Unbounded;
 with Ada.Streams;             use Ada.Streams;
 with GNAT.Sockets;            use GNAT.Sockets;
 with Ada.Containers.Vectors;  use Ada.Containers;
-with Raw_DNS_Packets;         use Raw_DNS_Packets;
+with DNS_Core_Constructs;     use DNS_Core_Constructs;
 with Utils;
 
 package DNS_Raw_Packet_Records is

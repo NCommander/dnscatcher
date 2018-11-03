@@ -6,7 +6,9 @@ with Ada.Text_IO;            use Ada.Text_IO;
 with Ada.Integer_Text_IO;    use Ada.Integer_Text_IO;
 with Ada.Strings.Hash;
 with DNS_Raw_Packet_Records; use DNS_Raw_Packet_Records;
-with Raw_DNS_Packets;        use Raw_DNS_Packets;
+with DNS_Core_Constructs; use DNS_Core_Constructs;
+with DNS_Core_Constructs.Utils; use DNS_Core_Constructs.Utils;
+
 with Packet_Parser;          use Packet_Parser;
 
 with Utils;

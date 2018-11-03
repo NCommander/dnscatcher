@@ -1,11 +1,4 @@
-with "gnat/dns_core_constructs";
-
-project DNS_Catcher is
-
-   for Source_Dirs use ("src");
-   for Object_Dir use "obj";
-   for Main use ("main.adb");
-
+abstract project DNS_Common is
    package Builder is
       for Switches ("ada") use ("-g");
    end Builder;
@@ -23,5 +16,5 @@ project DNS_Catcher is
          "--separate-loop-then");
    end Pretty_Printer;
 
-end DNS_Catcher;
+end DNS_Common;
 

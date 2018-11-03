@@ -1,4 +1,4 @@
-with Utils; use Utils;
+with DNS_Core_Constructs.Utils; use DNS_Core_Constructs.Utils;
 
 package body DNS_Raw_Packet_Records is
    -- Handles DNS Packets in a FIFO queue; built around Vectors, this may need to be changed for
