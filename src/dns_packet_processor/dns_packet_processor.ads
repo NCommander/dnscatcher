@@ -35,7 +35,7 @@ package DNS_Packet_Processor is
    end record;
    type Parsed_DNS_Packet_Ptr is access Parsed_DNS_Packet;
 
-   procedure Packet_Parser (Packet : DNS_Raw_Packet_Record_Ptr);
+   procedure Packet_Parser (Packet : Raw_Packet_Record_Ptr);
 
    function Parse_DNS_Packet_Name_Records (Raw_Data :        Raw_DNS_Packet_Data;
                                            Offset : in out Stream_Element_Offset) return Unbounded_String;

@@ -19,7 +19,7 @@ package body DNS_Transaction_Manager is
       Outbound_Packet_Queue : DNS_Raw_Packet_Queue_Ptr;
       Hashmap_Key           : IP_Transaction_Key;
       Hashmap_Cursor        : DNS_Transaction_Maps.Cursor;
-      Outbound_Packet       : DNS_Raw_Packet_Record;
+      Outbound_Packet       : Raw_Packet_Record;
       Transaction_Hashmap   : DNS_Transaction_Maps.Map;
       Transaction           : DNS_Transaction_Ptr;
       Running               : Boolean := False;
@@ -45,7 +45,7 @@ package body DNS_Transaction_Manager is
          Put_Line("Transaction Manager STARTED");
          while Running loop
             select
-               accept From_Client_Resolver_Packet (Packet : DNS_Raw_Packet_Record_Ptr) do
+               accept From_Client_Resolver_Packet (Packet : Raw_Packet_Record_Ptr) do
 
                   Put ("  Downstream DNS Transaction ID: ");
                   Put (Standard_Output, Integer (Packet.Raw_Data.Header.Identifier), Base => 16);
@@ -86,7 +86,7 @@ package body DNS_Transaction_Manager is
                      end;
                end From_Client_Resolver_Packet;
             or
-               accept From_Upstream_Resolver_Packet (Packet : DNS_Raw_Packet_Record_Ptr) do
+               accept From_Upstream_Resolver_Packet (Packet : Raw_Packet_Record_Ptr) do
                   Put ("  Upstream DNS Transaction ID: ");
                   Put (Standard_Output, Integer (Packet.Raw_Data.Header.Identifier), Base => 16);
                   New_Line;
@@ -143,7 +143,7 @@ package body DNS_Transaction_Manager is
                         procedure Free_Transaction is new Ada.Unchecked_Deallocation
                           (Object => DNS_Transaction, Name => DNS_Transaction_Ptr);
                         procedure Free_Packet is new Ada.Unchecked_Deallocation
-                          (Object => DNS_Raw_Packet_Record, Name => DNS_Raw_Packet_Record_Ptr);
+                          (Object => Raw_Packet_Record, Name => Raw_Packet_Record_Ptr);
                         P : DNS_Transaction_Ptr;
                      begin
                         P := Element (c);

@@ -3,13 +3,13 @@ with DNS_Core_Constructs.Utils; use DNS_Core_Constructs.Utils;
 package body DNS_Core_Constructs.Raw_Packet_Records is
    -- Handles DNS Packets in a FIFO queue; built around Vectors, this may need to be changed for
    -- performance reasons at some point
-   protected body DNS_Raw_Packet_Record_Queue is
-      entry Put (Packet : in DNS_Raw_Packet_Record) when True is
+   protected body Raw_Packet_Record_Queue is
+      entry Put (Packet : in Raw_Packet_Record) when True is
       begin
          Stored_Packets.Append (Packet);
          Packet_Count := Packet_Count + 1;
       end Put;
-      entry Get (Packet : out DNS_Raw_Packet_Record) when Packet_Count > 0 is
+      entry Get (Packet : out Raw_Packet_Record) when Packet_Count > 0 is
       begin
          Packet := Stored_Packets.First_Element;
          Stored_Packets.Delete_First;
@@ -31,5 +31,5 @@ package body DNS_Core_Constructs.Raw_Packet_Records is
             Stored_Packets.Iterate (Dump_Vector_Data'access);
          end;
       end Empty;
-   end DNS_Raw_Packet_Record_Queue;
+   end Raw_Packet_Record_Queue;
 end DNS_Core_Constructs.Raw_Packet_Records;

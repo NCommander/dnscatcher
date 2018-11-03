@@ -25,7 +25,7 @@ package body DNS_Sender_Interface_IPv4_UDP is
       DNS_Config              : Configuration_Ptr;
       DNS_Socket              : Socket_Type;
       DNS_Transaction_Manager : DNS_Transaction_Manager_Task_Ptr;
-      DNS_Packet              : DNS_Raw_Packet_Record;
+      DNS_Packet              : Raw_Packet_Record;
       Outbound_Packet_Queue   : DNS_Raw_Packet_Queue_Ptr;
       Outgoing_Address        : Inet_Addr_Type;
       Outgoing_Port           : Port_Type;
@@ -124,7 +124,7 @@ package body DNS_Sender_Interface_IPv4_UDP is
       This.Sender_Socket       := Socket;
       This.Transaction_Manager := Transaction_Manager;
       This.Sender_Task         := new Send_Packet_Task;
-      This.Packet_Queue        := new DNS_Raw_Packet_Record_Queue;
+      This.Packet_Queue        := new Raw_Packet_Record_Queue;
 
       This.Sender_Task.Initialize
         (Config, This.Sender_Socket, This.Transaction_Manager, This.Packet_Queue);

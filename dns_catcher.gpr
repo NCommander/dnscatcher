@@ -4,6 +4,7 @@ with "gnat/dns_packet_processor";
 with "gnat/dns_rdata_processor";
 
 project DNS_Catcher is
+
    for Create_Missing_Dirs use "True";
    for Source_Dirs use ("src");
    for Object_Dir use "obj";
@@ -22,9 +23,11 @@ project DNS_Catcher is
    end Linker;
 
    package Pretty_Printer is
-      for Default_Switches ("ada") use ("-A1", "-A2", "-A3", "-A4", "-A5", "-M99", "--separate-stmt-name", "-c2", "--vertical-enum-types", "--vertical-array-types", "--vertical-named-aggregates", "--vertical-case-alternatives",
+      for Default_Switches ("ada") use ("-A1", "-A2", "-A3", "-A4", "-A5", "-M99", "--separate-stmt-name", "-c2", "--vertical-enum-types", "--vertical-array-types", "--vertical-named-aggregates", "--vertical-case-alternatives", 
          "--separate-loop-then");
    end Pretty_Printer;
+
+   for Exec_Dir use "bin";
 
 end DNS_Catcher;
 

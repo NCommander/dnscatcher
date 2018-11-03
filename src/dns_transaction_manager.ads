@@ -10,7 +10,7 @@ with Interfaces.C.Extensions; use Interfaces.C.Extensions;
 with DNS_Core_Constructs.Raw_Packet_Records; use DNS_Core_Constructs.Raw_Packet_Records;
 
 package DNS_Transaction_Manager is
-   package Stored_Packets_Vector is new Vectors (Natural, DNS_Raw_Packet_Record_Ptr);
+   package Stored_Packets_Vector is new Vectors (Natural, Raw_Packet_Record_Ptr);
    use Stored_Packets_Vector;
 
    type DNS_Transaction is record
@@ -19,8 +19,8 @@ package DNS_Transaction_Manager is
       Server_Resolver_Address        : Unbounded_String;
       Server_Resolver_Port           : Port_Type;
       DNS_Transaction_Id             : Unsigned_16;
-      From_Client_Resolver_Packet    : DNS_Raw_Packet_Record_Ptr;
-      From_Upstream_Resolver_Packet  : DNS_Raw_Packet_Record_Ptr;
+      From_Client_Resolver_Packet    : Raw_Packet_Record_Ptr;
+      From_Upstream_Resolver_Packet  : Raw_Packet_Record_Ptr;
    end record;
    type DNS_Transaction_Ptr is access DNS_Transaction;
 
@@ -35,8 +35,8 @@ package DNS_Transaction_Manager is
    task type DNS_Transaction_Manager_Task is
       entry Start;
       entry Set_Packet_Queue (Queue : DNS_Raw_Packet_Queue_Ptr);
-      entry From_Client_Resolver_Packet (Packet : DNS_Raw_Packet_Record_Ptr);
-      entry From_Upstream_Resolver_Packet (Packet : DNS_Raw_Packet_Record_Ptr);
+      entry From_Client_Resolver_Packet (Packet : Raw_Packet_Record_Ptr);
+      entry From_Upstream_Resolver_Packet (Packet : Raw_Packet_Record_Ptr);
       entry Stop;
    end DNS_Transaction_Manager_Task;
 

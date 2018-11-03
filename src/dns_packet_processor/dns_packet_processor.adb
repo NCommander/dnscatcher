@@ -11,7 +11,7 @@ with DNS_Core_Constructs; use DNS_Core_Constructs;
 
 package body DNS_Packet_Processor is
 
-   procedure Packet_Parser (Packet : DNS_Raw_Packet_Record_Ptr) is
+   procedure Packet_Parser (Packet : Raw_Packet_Record_Ptr) is
       Parsed_Packet  : Parsed_DNS_Packet_Ptr;
       Current_Offset : Stream_Element_Offset := 1;
    begin
