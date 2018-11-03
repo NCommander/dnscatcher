@@ -16,8 +16,8 @@ with Utils;
 with DNSCatcher_Config; use DNSCatcher_Config;
 with DNS_Network_Receiver_Interface;
 with DNS_Transaction_Manager;
-with DNS_Raw_Packet_Records;   use DNS_Raw_Packet_Records;
 with DNS_Core_Constructs; use DNS_Core_Constructs;
+with DNS_Core_Constructs.Raw_Packet_Records; use DNS_Core_Constructs.Raw_Packet_Records;
 
 package body DNS_Sender_Interface_IPv4_UDP is
 

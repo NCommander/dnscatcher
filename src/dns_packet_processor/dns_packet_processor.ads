@@ -3,11 +3,10 @@ with Ada.Strings.Unbounded;   use Ada.Strings.Unbounded;
 with Ada.Streams;             use Ada.Streams;
 with Interfaces.C.Extensions; use Interfaces.C.Extensions;
 
-with DNS_Raw_Packet_Records; use DNS_Raw_Packet_Records;
+with DNS_Core_Constructs.Raw_Packet_Records; use DNS_Core_Constructs.Raw_Packet_Records;
 with DNS_Core_Constructs; use DNS_Core_Constructs;
 
-package Packet_Parser is
-
+package DNS_Packet_Processor is
    -- Create vector types for each type of section
    -- DNS question converted from wire format to human parsable format
    type Parsed_DNS_Question is record
@@ -57,4 +56,5 @@ package Packet_Parser is
    Unknown_RR_Type : exception;
    Unknown_Class   : exception;
    Unknown_Compression_Method : exception;
-end Packet_Parser;
+
+end DNS_Packet_Processor;

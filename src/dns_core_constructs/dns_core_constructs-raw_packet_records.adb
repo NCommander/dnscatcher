@@ -1,6 +1,6 @@
 with DNS_Core_Constructs.Utils; use DNS_Core_Constructs.Utils;
 
-package body DNS_Raw_Packet_Records is
+package body DNS_Core_Constructs.Raw_Packet_Records is
    -- Handles DNS Packets in a FIFO queue; built around Vectors, this may need to be changed for
    -- performance reasons at some point
    protected body DNS_Raw_Packet_Record_Queue is
@@ -32,4 +32,4 @@ package body DNS_Raw_Packet_Records is
          end;
       end Empty;
    end DNS_Raw_Packet_Record_Queue;
-end DNS_Raw_Packet_Records;
+end DNS_Core_Constructs.Raw_Packet_Records;

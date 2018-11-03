@@ -5,11 +5,11 @@ with Ada.Exceptions; use Ada.Exceptions;
 with Ada.Text_IO;            use Ada.Text_IO;
 with Ada.Integer_Text_IO;    use Ada.Integer_Text_IO;
 with Ada.Strings.Hash;
-with DNS_Raw_Packet_Records; use DNS_Raw_Packet_Records;
-with DNS_Core_Constructs; use DNS_Core_Constructs;
-with DNS_Core_Constructs.Utils; use DNS_Core_Constructs.Utils;
 
-with Packet_Parser;          use Packet_Parser;
+with DNS_Core_Constructs; use DNS_Core_Constructs;
+with DNS_Core_Constructs.Raw_Packet_Records; use DNS_Core_Constructs.Raw_Packet_Records;
+with DNS_Core_Constructs.Utils; use DNS_Core_Constructs.Utils;
+with DNS_Packet_Processor;          use DNS_Packet_Processor;
 
 with Utils;
 
@@ -74,7 +74,7 @@ package body DNS_Transaction_Manager is
                   Transaction.From_Client_Resolver_Packet := Packet;
 
                   -- Try to parse the packet
-                  Packet_Parser.Packet_Parser(Packet);
+                  DNS_Packet_Processor.Packet_Parser(Packet);
 
                   -- Rewrite the DNS Packet and send it on it's way
                   Outbound_Packet_Queue.Put (Packet.all);
@@ -119,7 +119,7 @@ package body DNS_Transaction_Manager is
                   end if;
 
                   -- Try to parse the packet
-                  Packet_Parser.Packet_Parser(Packet);
+                  DNS_Packet_Processor.Packet_Parser(Packet);
 
                   -- Flip the packet around so it goes to the right place
                   Outbound_Packet            := Packet.all;

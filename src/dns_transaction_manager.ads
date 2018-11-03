@@ -7,7 +7,7 @@ with Ada.Containers.Hashed_Maps;
 with GNAT.Sockets;            use GNAT.Sockets;
 with Interfaces.C.Extensions; use Interfaces.C.Extensions;
 
-with DNS_Raw_Packet_Records; use DNS_Raw_Packet_Records;
+with DNS_Core_Constructs.Raw_Packet_Records; use DNS_Core_Constructs.Raw_Packet_Records;
 
 package DNS_Transaction_Manager is
    package Stored_Packets_Vector is new Vectors (Natural, DNS_Raw_Packet_Record_Ptr);

@@ -3,9 +3,8 @@ with Ada.Streams;             use Ada.Streams;
 with GNAT.Sockets;            use GNAT.Sockets;
 with Ada.Containers.Vectors;  use Ada.Containers;
 with DNS_Core_Constructs;     use DNS_Core_Constructs;
-with Utils;
 
-package DNS_Raw_Packet_Records is
+package DNS_Core_Constructs.Raw_Packet_Records is
    type DNS_Raw_Packet_Record is record
       From_Address    : Unbounded_String;
       From_Port       : Port_Type;
@@ -30,4 +29,4 @@ package DNS_Raw_Packet_Records is
    end DNS_Raw_Packet_Record_Queue;
    type DNS_Raw_Packet_Queue_Ptr is access DNS_Raw_Packet_Record_Queue;
 
-end DNS_Raw_Packet_Records;
+end DNS_Core_Constructs.Raw_Packet_Records;
