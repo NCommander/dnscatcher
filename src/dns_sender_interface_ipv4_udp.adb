@@ -13,10 +13,10 @@ with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 with Packet_Catcher;
 with Utils;
 
-with DNSCatcher_Config; use DNSCatcher_Config;
+with DNSCatcher_Config;                      use DNSCatcher_Config;
 with DNS_Network_Receiver_Interface;
 with DNS_Transaction_Manager;
-with DNS_Core_Constructs; use DNS_Core_Constructs;
+with DNS_Core_Constructs;                    use DNS_Core_Constructs;
 with DNS_Core_Constructs.Raw_Packet_Records; use DNS_Core_Constructs.Raw_Packet_Records;
 
 package body DNS_Sender_Interface_IPv4_UDP is
@@ -46,7 +46,8 @@ package body DNS_Sender_Interface_IPv4_UDP is
       loop
          -- Either just started or stopping, we're terminatable in this state
          Put_Line ("Send State STOPPED");
-         while Process_Packets = False loop
+         while Process_Packets = False
+         loop
             select
                accept Start do
                   Process_Packets := True;
@@ -62,7 +63,8 @@ package body DNS_Sender_Interface_IPv4_UDP is
 
          Put_Line ("Send State STARTED");
          -- We're actively processing packets
-         while Process_Packets loop
+         while Process_Packets
+         loop
             select
                accept Start do
                   null;
@@ -73,7 +75,8 @@ package body DNS_Sender_Interface_IPv4_UDP is
                end Stop;
             else
                Outbound_Packet_Queue.Count (Packet_Count);
-               if Packet_Count > 0 then
+               if Packet_Count > 0
+               then
                   Outbound_Packet_Queue.Get (DNS_Packet);
                   Outgoing_Address := Inet_Addr (To_String (DNS_Packet.To_Address));
                   Outgoing_Port    := Port_Type (DNS_Packet.To_Port);
@@ -85,17 +88,16 @@ package body DNS_Sender_Interface_IPv4_UDP is
 
                   -- Create the outbound message
                   declare
-                     Buffer : Stream_Element_Array(1..DNS_Packet.Raw_Data_Length);
+                     Buffer : Stream_Element_Array (1 .. DNS_Packet.Raw_Data_Length);
                      Header : SEA_DNS_Packet_Header;
                   begin
-                     Header := DNS_Packet_Header_To_SEA(DNS_Packet.Raw_Data.Header);
+                     Header := DNS_Packet_Header_To_SEA (DNS_Packet.Raw_Data.Header);
                      Buffer := Header & DNS_Packet.Raw_Data.Data.all;
-                       Send_Socket
-                       (Socket => DNS_Socket,
-                        Item   => Buffer,
-                        Last   => Length,
+                     Send_Socket
+                       (Socket => DNS_Socket, Item => Buffer, Last => Length,
                         To     =>
-                          (Family => Family_Inet, Addr => Outgoing_Address, Port => Outgoing_Port));
+                          (Family => Family_Inet, Addr => Outgoing_Address,
+                           Port   => Outgoing_Port));
 
                      Put ("Sent packet to ");
                      Put_Line (Image (Outgoing_Address));
@@ -114,7 +116,8 @@ package body DNS_Sender_Interface_IPv4_UDP is
    end Send_Packet_Task;
 
    procedure Initialize (This : in out IPv4_UDP_Sender_Interface; Config : Configuration_Ptr;
-      Transaction_Manager     :        DNS_Transaction_Manager_Task_Ptr; Socket : Socket_Type) is
+      Transaction_Manager     :        DNS_Transaction_Manager_Task_Ptr; Socket : Socket_Type)
+   is
    begin
       GNAT.Sockets.Initialize;
 
@@ -142,7 +145,8 @@ package body DNS_Sender_Interface_IPv4_UDP is
    end Shutdown;
 
    function Get_Packet_Queue_Ptr
-     (This : in out IPv4_UDP_Sender_Interface) return DNS_Raw_Packet_Queue_Ptr is
+     (This : in out IPv4_UDP_Sender_Interface) return DNS_Raw_Packet_Queue_Ptr
+   is
    begin
       return This.Packet_Queue;
    end Get_Packet_Queue_Ptr;

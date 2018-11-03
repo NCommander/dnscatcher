@@ -180,7 +180,7 @@ package DNS_Core_Constructs is
       TA         => 32768,
       DLV        => 32769);
 
-   function To_String(RR_Type : RR_Types) return String;
+   function To_String (RR_Type : RR_Types) return String;
 
    type Classes is
      (INternet, -- IN (IN is an Ada keyword, we'll have to handle this specially)
@@ -195,7 +195,7 @@ package DNS_Core_Constructs is
       QCLASS_NONE => 254,
       QCLASS_ANY  => 255);
 
-   function To_String(DNS_Class : Classes) return String;
+   function To_String (DNS_Class : Classes) return String;
 
    type RCodes is
      (NoError,
@@ -230,7 +230,7 @@ package DNS_Core_Constructs is
       NXRRSet   => 8,
       NotAuth   => 9,
       NotZone   => 10,
-      BADSIG   => 16,
+      BADSIG    => 16,
       BADKEY    => 17,
       BADTIME   => 18,
       BADMODE   => 19,
@@ -279,7 +279,7 @@ package DNS_Core_Constructs is
    pragma Pack (Raw_DNS_Packet);
    type Raw_DNS_Packet_Ptr is access Raw_DNS_Packet;
 
-   procedure Free_Raw_DNS_Packet(Packet: in out Raw_DNS_Packet);
+   procedure Free_Raw_DNS_Packet (Packet : in out Raw_DNS_Packet);
 
    -- DNS packet elements can't be represented in binary form
    -- due to the fact that they're variable legnth with a non-standard
@@ -287,8 +287,8 @@ package DNS_Core_Constructs is
    -- something parsable later
 
    type Raw_DNS_Packet_Question is record
-      QName : Stream_Element_Array_Ptr;
-      QType : Unsigned_16;
+      QName  : Stream_Element_Array_Ptr;
+      QType  : Unsigned_16;
       QClass : Unsigned_16;
    end record;
    for Raw_DNS_Packet_Question'Bit_Order use System.High_Order_First;
@@ -297,22 +297,23 @@ package DNS_Core_Constructs is
 
    -- For the remaining sections, they share a common data format
    type Raw_DNS_Resource_Record is record
-      Name: Stream_Element_Array_Ptr; -- Variable Length
-      RR_Type: Unsigned_16;
-      DNS_Class: Unsigned_16;
-      TTL: Unsigned_32;
-      RData_Length: Unsigned_16;
-      RData: Stream_Element_Array_Ptr;
+      Name         : Stream_Element_Array_Ptr; -- Variable Length
+      RR_Type      : Unsigned_16;
+      DNS_Class    : Unsigned_16;
+      TTL          : Unsigned_32;
+      RData_Length : Unsigned_16;
+      RData        : Stream_Element_Array_Ptr;
    end record;
 
    type Raw_DNS_Packet_Answer is new Raw_DNS_Resource_Record;
    type Raw_DNS_Packet_Authority is new Raw_DNS_Resource_Record;
    type Raw_DNS_Packet_Additional is new Raw_DNS_Resource_Record;
 
-   subtype SEA_DNS_Packet_Header is Stream_Element_Array(1..DNS_PACKET_HEADER_SIZE); -- 12 is the packed sized
+   subtype SEA_DNS_Packet_Header is
+     Stream_Element_Array (1 .. DNS_PACKET_HEADER_SIZE); -- 12 is the packed sized
 
    function SEA_To_DNS_Packet_Header is new Ada.Unchecked_Conversion
      (Source => Stream_Element_Array, Target => DNS_Packet_Header);
-   function DNS_Packet_Header_To_SEA is new Ada.Unchecked_Conversion
-     (Source => DNS_Packet_Header, Target => SEA_DNS_Packet_Header);
+   function DNS_Packet_Header_To_SEA is new Ada.Unchecked_Conversion (Source => DNS_Packet_Header,
+      Target => SEA_DNS_Packet_Header);
 end DNS_Core_Constructs;

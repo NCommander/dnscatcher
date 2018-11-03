@@ -7,7 +7,7 @@ with Ada.Strings;
 with Ada.Unchecked_Conversion;
 
 with DNS_Core_Constructs.Raw_Packet_Records; use DNS_Core_Constructs.Raw_Packet_Records;
-with DNS_Core_Constructs; use DNS_Core_Constructs;
+with DNS_Core_Constructs;                    use DNS_Core_Constructs;
 
 package body DNS_Packet_Processor is
 
@@ -61,7 +61,7 @@ package body DNS_Packet_Processor is
 
       for i in 1 .. Parsed_Packet.Header.Question_Count
       loop
-         Put_Line("Parsing Question");
+         Put_Line ("Parsing Question");
          Parsed_Packet.Questions.Append
            (Parse_Question_Record (Packet.Raw_Data.Data, Current_Offset));
       end loop;
@@ -91,7 +91,7 @@ package body DNS_Packet_Processor is
 
    -- I apologize in advance, this function is a real mindfuck.
    function Parse_DNS_Packet_Name_Records (Raw_Data :        Raw_DNS_Packet_Data;
-                                           Offset : in out Stream_Element_Offset) return Unbounded_String
+      Offset : in out Stream_Element_Offset) return Unbounded_String
    is
       Domain_Name    : Unbounded_String;
       Section_Length : Unsigned_8;
@@ -107,12 +107,13 @@ package body DNS_Packet_Processor is
       -- of a level of a domain section, so we need to parse that, then build a
       -- proper domain string out of it. Also, shit can be compressed. Kill me now.
       Section_Length := Unsigned_8 (Raw_Data.all (Offset));
-      if Section_Length = 0 then
+      if Section_Length = 0
+      then
          -- It is possible for the section length to be zero for some
          -- record requests or dealing with the root. Thus just return
          -- blank
          Offset := Offset + 1;
-         return To_Unbounded_String("");
+         return To_Unbounded_String ("");
       end if;
 
       loop
@@ -130,29 +131,30 @@ package body DNS_Packet_Processor is
 
          if (Section_Length and 2#11#) /= 0 -- Not compressed
          then
-         Offset := Offset + 1; -- Move past the length
+            Offset := Offset + 1; -- Move past the length
 
             declare
-            subtype Domain_Section is String (1 .. Integer (Section_Length));
+               subtype Domain_Section is String (1 .. Integer (Section_Length));
                function To_Domain_Section is new Ada.Unchecked_Conversion
                  (Source => Stream_Element_Array, Target => Domain_Section);
             begin
                Domain_Name :=
                  Domain_Name &
                  To_Domain_Section
-                 (Raw_Data.all (Offset .. Stream_Element_Offset (Section_Length)));
+                   (Raw_Data.all (Offset .. Stream_Element_Offset (Section_Length)));
 
-               Offset := Offset + Stream_Element_Offset(Section_Length);
+               Offset := Offset + Stream_Element_Offset (Section_Length);
             end;
 
-         elsif (Section_Length and 2#11#) = 0 then
+         elsif (Section_Length and 2#11#) = 0
+         then
             -- Standard compression is nuts. We have a pointer within the packet that basically
             -- contains a link to the string segment we need next. Let's see if we can grab it and
             -- decode it
 
             declare
-               Old_Section_Length : Unsigned_8;
-               Decompressed_Domain_String      : Unbounded_String;
+               Old_Section_Length         : Unsigned_8;
+               Decompressed_Domain_String : Unbounded_String;
                function Get_Byte_Fixed_Header is new Ada.Unchecked_Conversion
                  (Source => Stream_Element_Array, Target => Packer_Pointer);
 
@@ -161,21 +163,26 @@ package body DNS_Packet_Processor is
                  (Source => Stream_Element_Array, Target => Domain_Section);
             begin
                -- Oh, and for more fuckery, the pointer is 16-bit ...
-               Packet_Ptr := Get_Byte_Fixed_Header(Raw_Data.all(Offset-1..Offset)); -- Make the top bytes vanish
+               Packet_Ptr :=
+                 Get_Byte_Fixed_Header
+                   (Raw_Data.all (Offset - 1 .. Offset)); -- Make the top bytes vanish
 
                -- We subtract 12-1 for the packet header
-               Packet_Ptr.Packet_Offset := (Packet_Ptr.Packet_Offset and 16#3fff#)-11;
-               Old_Section_Length := Unsigned_8 (Raw_Data.all(Stream_Element_Offset(Packet_Ptr.Packet_Offset)));
+               Packet_Ptr.Packet_Offset := (Packet_Ptr.Packet_Offset and 16#3fff#) - 11;
+               Old_Section_Length       :=
+                 Unsigned_8 (Raw_Data.all (Stream_Element_Offset (Packet_Ptr.Packet_Offset)));
 
                -- Sanity check ourselves
-               if (Section_Length and 2#11#) /= 0 then
+               if (Section_Length and 2#11#) /= 0
+               then
                   -- Should never happen but you never know ...
                   raise Unknown_Compression_Method;
                end if;
 
                -- Now we need to decode the whole old string ... ugh
-               Decompressed_Domain_String := Parse_DNS_Packet_Name_Records(Raw_Data,
-                                                                           Stream_Element_Offset(Packet_Ptr.Packet_Offset));
+               Decompressed_Domain_String :=
+                 Parse_DNS_Packet_Name_Records
+                   (Raw_Data, Stream_Element_Offset (Packet_Ptr.Packet_Offset));
                Offset := Offset + 2;
                return Decompressed_Domain_String;
             end;
@@ -183,7 +190,6 @@ package body DNS_Packet_Processor is
             -- Welp, unknown compression, bail out
             raise Unknown_Compression_Method;
          end if;
-
 
          Section_Length := Unsigned_8 (Raw_Data.all (Offset));
          --Put_Line(To_String(Domain_Name));
@@ -278,21 +284,21 @@ package body DNS_Packet_Processor is
       Offset : in out Stream_Element_Offset) return Parsed_DNS_Resource_Record
    is
       Parsed_Response : Parsed_DNS_Resource_Record;
-      RData_Length : Unsigned_16;
+      RData_Length    : Unsigned_16;
    begin
       Put_Line ("  Starting Resource Record Parse");
-      Parsed_Response.RName := Parse_DNS_Packet_Name_Records (Raw_Data, Offset);
-      Parsed_Response.RType := Parse_DNS_RR_Type(Raw_Data, Offset);
-      Parsed_Response.RClass := Unsigned_16(Raw_Data(Offset));
-      Offset := Offset + 2;
+      Parsed_Response.RName  := Parse_DNS_Packet_Name_Records (Raw_Data, Offset);
+      Parsed_Response.RType  := Parse_DNS_RR_Type (Raw_Data, Offset);
+      Parsed_Response.RClass := Unsigned_16 (Raw_Data (Offset));
+      Offset                 := Offset + 2;
 
-      Parsed_Response.TTL := Unsigned_32(Raw_Data(Offset));
-      Offset := Offset + 4;
+      Parsed_Response.TTL := Unsigned_32 (Raw_Data (Offset));
+      Offset              := Offset + 4;
 
       -- What follows is the length as a 16 bit integer, then the RData which needs an
       -- unchecked conversion
-      RData_Length := Unsigned_16(Raw_Data(Offset));
-      Offset := Offset + 2;
+      RData_Length := Unsigned_16 (Raw_Data (Offset));
+      Offset       := Offset + 2;
 
       Put_Line ("    RName is " & To_String (Parsed_Response.RName));
       Put_Line ("    RType is " & To_String (Parsed_Response.RType));
@@ -302,15 +308,16 @@ package body DNS_Packet_Processor is
 
       declare
          subtype RData is String (1 .. Integer (RData_Length));
-         function To_RData is new Ada.Unchecked_Conversion
-           (Source => Stream_Element_Array, Target => RData);
+         function To_RData is new Ada.Unchecked_Conversion (Source => Stream_Element_Array,
+            Target                                                 => RData);
       begin
-         Parsed_Response.RData := To_Unbounded_String(To_RData
-                                      (Raw_Data(Offset..Stream_Element_Offset(RData_Length))));
-         Offset := Offset + Stream_Element_Offset(RData_Length);
+         Parsed_Response.RData :=
+           To_Unbounded_String
+             (To_RData (Raw_Data (Offset .. Stream_Element_Offset (RData_Length))));
+         Offset := Offset + Stream_Element_Offset (RData_Length);
       end;
 
-      Put_Line ("    RData is " & To_String(Parsed_Response.RData));
+      Put_Line ("    RData is " & To_String (Parsed_Response.RData));
       return Parsed_Response;
    end Parse_Resource_Record_Response;
 

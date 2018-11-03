@@ -1,7 +1,7 @@
-with GNAT.Sockets;            use GNAT.Sockets;
-with DNSCatcher_Config;       use DNSCatcher_Config;
+with GNAT.Sockets;                           use GNAT.Sockets;
+with DNSCatcher_Config;                      use DNSCatcher_Config;
 with DNS_Network_Receiver_Interface;
-with DNS_Transaction_Manager; use DNS_Transaction_Manager;
+with DNS_Transaction_Manager;                use DNS_Transaction_Manager;
 with DNS_Core_Constructs.Raw_Packet_Records; use DNS_Core_Constructs.Raw_Packet_Records;
 
 package DNS_Sender_Interface_IPv4_UDP is

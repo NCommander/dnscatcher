@@ -1,15 +1,15 @@
 with Ada.Unchecked_Conversion;
 with Ada.Unchecked_Deallocation;
 
-with Ada.Exceptions; use Ada.Exceptions;
-with Ada.Text_IO;            use Ada.Text_IO;
-with Ada.Integer_Text_IO;    use Ada.Integer_Text_IO;
+with Ada.Exceptions;      use Ada.Exceptions;
+with Ada.Text_IO;         use Ada.Text_IO;
+with Ada.Integer_Text_IO; use Ada.Integer_Text_IO;
 with Ada.Strings.Hash;
 
-with DNS_Core_Constructs; use DNS_Core_Constructs;
+with DNS_Core_Constructs;                    use DNS_Core_Constructs;
 with DNS_Core_Constructs.Raw_Packet_Records; use DNS_Core_Constructs.Raw_Packet_Records;
-with DNS_Core_Constructs.Utils; use DNS_Core_Constructs.Utils;
-with DNS_Packet_Processor;          use DNS_Packet_Processor;
+with DNS_Core_Constructs.Utils;              use DNS_Core_Constructs.Utils;
+with DNS_Packet_Processor;                   use DNS_Packet_Processor;
 
 with Utils;
 
@@ -25,15 +25,17 @@ package body DNS_Transaction_Manager is
       Running               : Boolean := False;
    begin
       loop
-         Put_Line("Transaction Manager STOPPED");
-         while Running = False loop
+         Put_Line ("Transaction Manager STOPPED");
+         while Running = False
+         loop
             Transaction := null;
             select
                accept Set_Packet_Queue (Queue : in DNS_Raw_Packet_Queue_Ptr) do
                   Outbound_Packet_Queue := Queue;
                end Set_Packet_Queue;
                accept Start do
-                  if Outbound_Packet_Queue /= null then
+                  if Outbound_Packet_Queue /= null
+                  then
                      Running := True;
                   end if;
                end Start;
@@ -42,8 +44,9 @@ package body DNS_Transaction_Manager is
             end select;
          end loop;
 
-         Put_Line("Transaction Manager STARTED");
-         while Running loop
+         Put_Line ("Transaction Manager STARTED");
+         while Running
+         loop
             select
                accept From_Client_Resolver_Packet (Packet : Raw_Packet_Record_Ptr) do
 
@@ -54,13 +57,14 @@ package body DNS_Transaction_Manager is
                   Hashmap_Key :=
                     IP_Transaction_Key
                       (Packet.To_Address & Packet.To_Port'Image &
-                         Packet.Raw_Data.Header.Identifier'Image);
+                       Packet.Raw_Data.Header.Identifier'Image);
 
                   -- Create the key if necessary
                   Hashmap_Cursor := Transaction_Hashmap.Find (Hashmap_Key);
 
-                  if Hashmap_Cursor = DNS_Transaction_Maps.No_Element then
-                     Transaction := new DNS_Transaction;
+                  if Hashmap_Cursor = DNS_Transaction_Maps.No_Element
+                  then
+                     Transaction                         := new DNS_Transaction;
                      Transaction.Client_Resolver_Address := Packet.From_Address;
                      Transaction.Client_Resolver_Port    := Packet.From_Port;
                      Transaction.Server_Resolver_Address := Packet.To_Address;
@@ -74,7 +78,7 @@ package body DNS_Transaction_Manager is
                   Transaction.From_Client_Resolver_Packet := Packet;
 
                   -- Try to parse the packet
-                  DNS_Packet_Processor.Packet_Parser(Packet);
+                  DNS_Packet_Processor.Packet_Parser (Packet);
 
                   -- Rewrite the DNS Packet and send it on it's way
                   Outbound_Packet_Queue.Put (Packet.all);
@@ -94,13 +98,14 @@ package body DNS_Transaction_Manager is
                   Hashmap_Key :=
                     IP_Transaction_Key
                       (Packet.From_Address & Packet.From_Port'Image &
-                         Packet.Raw_Data.Header.Identifier'Image);
+                       Packet.Raw_Data.Header.Identifier'Image);
 
                   -- Create the key if necessary
                   Hashmap_Cursor := Transaction_Hashmap.Find (Hashmap_Key);
 
-                  if Hashmap_Cursor = DNS_Transaction_Maps.No_Element then
-                     Transaction := new DNS_Transaction;
+                  if Hashmap_Cursor = DNS_Transaction_Maps.No_Element
+                  then
+                     Transaction                         := new DNS_Transaction;
                      Transaction.Client_Resolver_Address := Packet.To_Address;
                      Transaction.Client_Resolver_Port    := Packet.To_Port;
                      Transaction.Server_Resolver_Address := Packet.From_Address;
@@ -114,12 +119,13 @@ package body DNS_Transaction_Manager is
                   Transaction.From_Upstream_Resolver_Packet := Packet;
 
                   -- Only server packets should be trunciated if at all
-                  if (Packet.Raw_Data.Header.Truncated) then
-                     Put_Line("WARNING: Trunciated packet response!");
+                  if (Packet.Raw_Data.Header.Truncated)
+                  then
+                     Put_Line ("WARNING: Trunciated packet response!");
                   end if;
 
                   -- Try to parse the packet
-                  DNS_Packet_Processor.Packet_Parser(Packet);
+                  DNS_Packet_Processor.Packet_Parser (Packet);
 
                   -- Flip the packet around so it goes to the right place
                   Outbound_Packet            := Packet.all;
@@ -148,19 +154,24 @@ package body DNS_Transaction_Manager is
                      begin
                         P := Element (c);
 
-                        if P.From_Client_Resolver_Packet /= null then
-                           if P.From_Client_Resolver_Packet.Raw_Data.Data /= null then
-                              Free_Stream_Element_Array_Ptr(P.From_Client_Resolver_Packet.Raw_Data.Data);
+                        if P.From_Client_Resolver_Packet /= null
+                        then
+                           if P.From_Client_Resolver_Packet.Raw_Data.Data /= null
+                           then
+                              Free_Stream_Element_Array_Ptr
+                                (P.From_Client_Resolver_Packet.Raw_Data.Data);
                            end if;
-                           Free_Packet(P.From_Client_Resolver_Packet);
+                           Free_Packet (P.From_Client_Resolver_Packet);
                         end if;
 
-
-                        if P.From_Upstream_Resolver_Packet /= null then
-                           if P.From_Upstream_Resolver_Packet.Raw_Data.Data /= null then
-                              Free_Stream_Element_Array_Ptr(P.From_Upstream_Resolver_Packet.Raw_Data.Data);
+                        if P.From_Upstream_Resolver_Packet /= null
+                        then
+                           if P.From_Upstream_Resolver_Packet.Raw_Data.Data /= null
+                           then
+                              Free_Stream_Element_Array_Ptr
+                                (P.From_Upstream_Resolver_Packet.Raw_Data.Data);
                            end if;
-                           Free_Packet(P.From_Upstream_Resolver_Packet);
+                           Free_Packet (P.From_Upstream_Resolver_Packet);
                         end if;
 
                         Free_Transaction (P);

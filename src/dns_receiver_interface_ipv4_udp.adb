@@ -1,10 +1,10 @@
 with Ada.Text_IO;         use Ada.Text_IO;
 with Ada.Integer_Text_IO; use Ada.Integer_Text_IO;
 
-with Ada.Exceptions; use Ada.Exceptions;
+with Ada.Exceptions;          use Ada.Exceptions;
 with Ada.Task_Identification; use Ada.Task_Identification;
-with Ada.Streams;           use Ada.Streams;
-with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
+with Ada.Streams;             use Ada.Streams;
+with Ada.Strings.Unbounded;   use Ada.Strings.Unbounded;
 with Ada.Unchecked_Conversion;
 with Ada.Unchecked_Deallocation;
 
@@ -13,11 +13,11 @@ with GNAT.Sockets; use GNAT.Sockets;
 with Packet_Catcher;
 with Utils;
 
-with DNSCatcher_Config; use DNSCatcher_Config;
+with DNSCatcher_Config;                      use DNSCatcher_Config;
 with DNS_Network_Receiver_Interface;
 with DNS_Transaction_Manager;
 with DNS_Core_Constructs.Raw_Packet_Records; use DNS_Core_Constructs.Raw_Packet_Records;
-with DNS_Core_Constructs; use DNS_Core_Constructs;
+with DNS_Core_Constructs;                    use DNS_Core_Constructs;
 
 package body DNS_Receiver_Interface_IPv4_UDP is
    task body Receive_Packet_Task is
@@ -40,7 +40,8 @@ package body DNS_Receiver_Interface_IPv4_UDP is
       loop
          -- Either just started or stopping, we're terminatable in this state
          Put_Line ("Received State STOPPED");
-         while Process_Packets = False loop
+         while Process_Packets = False
+         loop
             select
                accept Start do
                   Process_Packets := True;
@@ -56,7 +57,8 @@ package body DNS_Receiver_Interface_IPv4_UDP is
 
          Put_Line ("Received State STARTED");
 
-         while Process_Packets loop -- Main receiving loop
+         while Process_Packets
+         loop -- Main receiving loop
             select
                accept Start do
                   null;
@@ -86,13 +88,16 @@ package body DNS_Receiver_Interface_IPv4_UDP is
 
                   -- Create a new buffer of the right length and copy the data in
                   -- See comment on the Header Length BS in raw_dns_packets.ads ...
-                  DNS_Packet.Raw_Data.Header := SEA_To_DNS_Packet_Header(Buffer(Buffer'First..DNS_PACKET_HEADER_SIZE));
-                  DNS_Packet.Raw_Data.Data   := new Stream_Element_Array(1..Offset-DNS_PACKET_HEADER_SIZE);
-                  DNS_Packet.Raw_Data.Data.all := Buffer(DNS_PACKET_HEADER_SIZE+1..Offset);
-                  DNS_Packet.Raw_Data_Length := Offset;
+                  DNS_Packet.Raw_Data.Header :=
+                    SEA_To_DNS_Packet_Header (Buffer (Buffer'First .. DNS_PACKET_HEADER_SIZE));
+                  DNS_Packet.Raw_Data.Data :=
+                    new Stream_Element_Array (1 .. Offset - DNS_PACKET_HEADER_SIZE);
+                  DNS_Packet.Raw_Data.Data.all := Buffer (DNS_PACKET_HEADER_SIZE + 1 .. Offset);
+                  DNS_Packet.Raw_Data_Length   := Offset;
 
                   -- Was this a server response, or client response?
-                  if DNS_Config.Upstream_DNS_Server /= (Image (Incoming_Address.Addr)) then
+                  if DNS_Config.Upstream_DNS_Server /= (Image (Incoming_Address.Addr))
+                  then
                      DNS_Transaction_Manager.From_Client_Resolver_Packet (Packet => DNS_Packet);
                   else
                      DNS_Transaction_Manager.From_Upstream_Resolver_Packet (Packet => DNS_Packet);
@@ -124,7 +129,8 @@ package body DNS_Receiver_Interface_IPv4_UDP is
    end Receive_Packet_Task;
 
    procedure Initialize (This : in out IPv4_UDP_Receiver_Interface; Config : Configuration_Ptr;
-      Transaction_Manager     :        DNS_Transaction_Manager_Task_Ptr; Socket : Socket_Type) is
+      Transaction_Manager     :        DNS_Transaction_Manager_Task_Ptr; Socket : Socket_Type)
+   is
    begin
       GNAT.Sockets.Initialize;
 
