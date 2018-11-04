@@ -1,5 +1,6 @@
 with "dns_common.gpr";
 with "dns_core_constructs";
+limited with "dns_packet_processor";
 
 library project DNS_RData_Processor is
    for Library_Name use "dns_rdata_processor";

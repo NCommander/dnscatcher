@@ -8,6 +8,8 @@ with Ada.Unchecked_Conversion;
 
 with DNS_Core_Constructs.Raw_Packet_Records; use DNS_Core_Constructs.Raw_Packet_Records;
 with DNS_Core_Constructs;                    use DNS_Core_Constructs;
+with DNS_RData_Processor;                    use DNS_RData_Processor;
+with DNS_Packet_Processor.Utils;             use DNS_Packet_Processor.Utils;
 
 package body DNS_Packet_Processor is
 
@@ -165,7 +167,7 @@ package body DNS_Packet_Processor is
                -- Oh, and for more fuckery, the pointer is 16-bit ...
                Packet_Ptr :=
                  Get_Byte_Fixed_Header
-                   (Raw_Data.all (Offset - 1 .. Offset)); -- Make the top bytes vanish
+                   (Raw_Data.all (Offset..Offset+1)); -- Make the top bytes vanish
 
                -- We subtract 12-1 for the packet header
                Packet_Ptr.Packet_Offset := (Packet_Ptr.Packet_Offset and 16#3fff#) - 11;
@@ -200,7 +202,7 @@ package body DNS_Packet_Processor is
 
       end loop;
 
-      Offset := Offset + 2;
+      Offset := Offset + 1;
       return Domain_Name;
    end Parse_DNS_Packet_Name_Records;
 
@@ -208,13 +210,15 @@ package body DNS_Packet_Processor is
       Offset                            : in out Stream_Element_Offset) return RR_Types
    is
       Found_RRType : RR_Types;
+      RR_Type_Raw  : Unsigned_16;
    begin
       declare
          Found : Boolean := False;
       begin
+         RR_Type_Raw := Read_Unsigned_16 (Raw_Data, Offset);
          for RR_Type in RR_Types
          loop
-            if Unsigned_16 (Raw_Data (Offset)) = RR_Type'Enum_Rep
+            if RR_Type_Raw = RR_Type'Enum_Rep
             then
                Found_RRType := RR_Type;
                Found        := True;
@@ -227,7 +231,6 @@ package body DNS_Packet_Processor is
          end if;
       end;
 
-      Offset := Offset + 2;
       return Found_RRType;
    end Parse_DNS_RR_Type;
 
@@ -235,14 +238,17 @@ package body DNS_Packet_Processor is
       Offset                          : in out Stream_Element_Offset) return Classes
    is
       Found_Class : Classes;
+      Raw_Class   : Unsigned_16;
    begin
       -- The last 32-bits is the type and class
       declare
          Found : Boolean := False;
       begin
+         Raw_Class := Read_Unsigned_16 (Raw_Data, Offset);
+
          for Class in Classes
          loop
-            if Unsigned_16 (Raw_Data (Offset)) = Class'Enum_Rep
+            if Raw_Class = Class'Enum_Rep
             then
                Found_Class := Class;
                Found       := True;
@@ -254,8 +260,6 @@ package body DNS_Packet_Processor is
             raise Unknown_Class;
          end if;
       end;
-
-      Offset := Offset + 2;
       return Found_Class;
    end Parse_DNS_Class;
 
@@ -281,24 +285,22 @@ package body DNS_Packet_Processor is
    end Parse_Question_Record;
 
    function Parse_Resource_Record_Response (Raw_Data :        Raw_DNS_Packet_Data;
-      Offset : in out Stream_Element_Offset) return Parsed_DNS_Resource_Record
+      Offset : in out Stream_Element_Offset) return Parsed_RData_Access
    is
       Parsed_Response : Parsed_DNS_Resource_Record;
-      RData_Length    : Unsigned_16;
+
+      RData_Length          : Unsigned_16;
+      Parsed_RData_Response : Parsed_RData_Access;
    begin
       Put_Line ("  Starting Resource Record Parse");
       Parsed_Response.RName  := Parse_DNS_Packet_Name_Records (Raw_Data, Offset);
       Parsed_Response.RType  := Parse_DNS_RR_Type (Raw_Data, Offset);
-      Parsed_Response.RClass := Unsigned_16 (Raw_Data (Offset));
-      Offset                 := Offset + 2;
-
-      Parsed_Response.TTL := Unsigned_32 (Raw_Data (Offset));
-      Offset              := Offset + 4;
+      Parsed_Response.RClass := Read_Unsigned_16 (Raw_Data, Offset);
+      Parsed_Response.TTL    := Read_Unsigned_32 (Raw_Data, Offset);
 
       -- What follows is the length as a 16 bit integer, then the RData which needs an
       -- unchecked conversion
-      RData_Length := Unsigned_16 (Raw_Data (Offset));
-      Offset       := Offset + 2;
+      RData_Length := Read_Unsigned_16 (Raw_Data, Offset);
 
       Put_Line ("    RName is " & To_String (Parsed_Response.RName));
       Put_Line ("    RType is " & To_String (Parsed_Response.RType));
@@ -316,9 +318,12 @@ package body DNS_Packet_Processor is
              (To_RData (Raw_Data (Offset .. Stream_Element_Offset (RData_Length))));
          Offset := Offset + Stream_Element_Offset (RData_Length);
       end;
+      Offset := Offset + 1;
 
-      Put_Line ("    RData is " & To_String (Parsed_Response.RData));
-      return Parsed_Response;
+      Parsed_RData_Response := To_Parsed_RData (Parsed_Response);
+      Put_Line ("    RData is " & Parsed_RData_Response.RData_To_String);
+
+      return Parsed_RData_Response;
    end Parse_Resource_Record_Response;
 
 end DNS_Packet_Processor;

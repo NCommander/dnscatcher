@@ -5,6 +5,9 @@ with Interfaces.C.Extensions; use Interfaces.C.Extensions;
 
 with DNS_Core_Constructs.Raw_Packet_Records; use DNS_Core_Constructs.Raw_Packet_Records;
 with DNS_Core_Constructs;                    use DNS_Core_Constructs;
+with DNS_RData_Processor;                    use DNS_RData_Processor;
+
+with System;
 
 package DNS_Packet_Processor is
    -- Create vector types for each type of section
@@ -24,7 +27,7 @@ package DNS_Packet_Processor is
    end record;
 
    package Question_Vector is new Vectors (Natural, Parsed_DNS_Question);
-   package Resource_Record_Vector is new Vectors (Natural, Parsed_DNS_Resource_Record);
+   package Resource_Record_Vector is new Vectors (Natural, Parsed_RData_Access);
 
    type Parsed_DNS_Packet is record
       Header     : DNS_Packet_Header;
@@ -50,7 +53,7 @@ package DNS_Packet_Processor is
       Offset : in out Stream_Element_Offset) return Parsed_DNS_Question;
 
    function Parse_Resource_Record_Response (Raw_Data :        Raw_DNS_Packet_Data;
-      Offset : in out Stream_Element_Offset) return Parsed_DNS_Resource_Record;
+      Offset : in out Stream_Element_Offset) return Parsed_RData_Access;
 
    Unknown_RCode              : exception;
    Unknown_RR_Type            : exception;
