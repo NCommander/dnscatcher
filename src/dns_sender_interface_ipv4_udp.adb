@@ -1,45 +1,25 @@
-with Ada.Text_IO;         use Ada.Text_IO;
-with Ada.Integer_Text_IO; use Ada.Integer_Text_IO;
-
+with Ada.Text_IO;    use Ada.Text_IO;
 with Ada.Exceptions; use Ada.Exceptions;
-
-with GNAT.Sockets; use GNAT.Sockets;
-
-with Ada.Task_Identification; use Ada.Task_Identification;
 
 with Ada.Streams;           use Ada.Streams;
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
-
-with Packet_Catcher;
-with Utils;
-
-with DNSCatcher_Config;                      use DNSCatcher_Config;
-with DNS_Network_Receiver_Interface;
-with DNS_Transaction_Manager;
-with DNS_Core_Constructs;                    use DNS_Core_Constructs;
-with DNS_Core_Constructs.Raw_Packet_Records; use DNS_Core_Constructs.Raw_Packet_Records;
+with DNS_Core_Constructs;   use DNS_Core_Constructs;
 
 package body DNS_Sender_Interface_IPv4_UDP is
 
    task body Send_Packet_Task is
-      DNS_Config              : Configuration_Ptr;
-      DNS_Socket              : Socket_Type;
-      DNS_Transaction_Manager : DNS_Transaction_Manager_Task_Ptr;
-      DNS_Packet              : Raw_Packet_Record;
-      Outbound_Packet_Queue   : DNS_Raw_Packet_Queue_Ptr;
-      Outgoing_Address        : Inet_Addr_Type;
-      Outgoing_Port           : Port_Type;
-      Length                  : Stream_Element_Offset;
-      Process_Packets         : Boolean := False;
-      Packet_Count            : Integer := 0;
+      DNS_Socket            : Socket_Type;
+      DNS_Packet            : Raw_Packet_Record;
+      Outbound_Packet_Queue : DNS_Raw_Packet_Queue_Ptr;
+      Outgoing_Address      : Inet_Addr_Type;
+      Outgoing_Port         : Port_Type;
+      Length                : Stream_Element_Offset;
+      Process_Packets       : Boolean := False;
+      Packet_Count          : Integer := 0;
    begin
-      accept Initialize (Config : Configuration_Ptr; Socket : Socket_Type;
-         Transaction_Manager    : DNS_Transaction_Manager_Task_Ptr;
-         Packet_Queue           : DNS_Raw_Packet_Queue_Ptr) do
-         DNS_Config              := Config;
-         DNS_Socket              := Socket;
-         DNS_Transaction_Manager := Transaction_Manager;
-         Outbound_Packet_Queue   := Packet_Queue;
+      accept Initialize (Socket : Socket_Type; Packet_Queue : DNS_Raw_Packet_Queue_Ptr) do
+         DNS_Socket            := Socket;
+         Outbound_Packet_Queue := Packet_Queue;
       end Initialize;
 
       Put_Line ("Send packet task started");
@@ -79,7 +59,7 @@ package body DNS_Sender_Interface_IPv4_UDP is
                then
                   Outbound_Packet_Queue.Get (DNS_Packet);
                   Outgoing_Address := Inet_Addr (To_String (DNS_Packet.To_Address));
-                  Outgoing_Port    := Port_Type (DNS_Packet.To_Port);
+                  Outgoing_Port    := DNS_Packet.To_Port;
 
                   -- And send the damn thing
                   Put ("Sent packet to ");
@@ -116,21 +96,17 @@ package body DNS_Sender_Interface_IPv4_UDP is
    end Send_Packet_Task;
 
    procedure Initialize (This : in out IPv4_UDP_Sender_Interface; Config : Configuration_Ptr;
-      Transaction_Manager     :        DNS_Transaction_Manager_Task_Ptr; Socket : Socket_Type)
+      Socket                  :        Socket_Type)
    is
    begin
-      GNAT.Sockets.Initialize;
-
       -- Save our config for good measure
       This.Config := Config;
 
-      This.Sender_Socket       := Socket;
-      This.Transaction_Manager := Transaction_Manager;
-      This.Sender_Task         := new Send_Packet_Task;
-      This.Packet_Queue        := new Raw_Packet_Record_Queue;
+      This.Sender_Socket := Socket;
+      This.Sender_Task   := new Send_Packet_Task;
+      This.Packet_Queue  := new Raw_Packet_Record_Queue;
 
-      This.Sender_Task.Initialize
-        (Config, This.Sender_Socket, This.Transaction_Manager, This.Packet_Queue);
+      This.Sender_Task.Initialize (This.Sender_Socket, This.Packet_Queue);
    end Initialize;
 
    procedure Start (This : in out IPv4_UDP_Sender_Interface) is

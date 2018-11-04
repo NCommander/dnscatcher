@@ -7,8 +7,6 @@ with DNS_Core_Constructs.Raw_Packet_Records; use DNS_Core_Constructs.Raw_Packet_
 with DNS_Core_Constructs;                    use DNS_Core_Constructs;
 with DNS_RData_Processor;                    use DNS_RData_Processor;
 
-with System;
-
 package DNS_Packet_Processor is
    -- Create vector types for each type of section
    -- DNS question converted from wire format to human parsable format

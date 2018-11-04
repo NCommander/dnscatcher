@@ -1,15 +1,9 @@
-with System;
-
-with Ada.Text_IO;         use Ada.Text_IO;
-with Ada.Integer_Text_IO; use Ada.Integer_Text_IO;
-with Ada.Streams;         use Ada.Streams;
+with Ada.Text_IO;                use Ada.Text_IO;
 with Ada.Strings;
 with Ada.Unchecked_Conversion;
+with DNS_Packet_Processor.Utils; use DNS_Packet_Processor.Utils;
 
-with DNS_Core_Constructs.Raw_Packet_Records; use DNS_Core_Constructs.Raw_Packet_Records;
-with DNS_Core_Constructs;                    use DNS_Core_Constructs;
-with DNS_RData_Processor;                    use DNS_RData_Processor;
-with DNS_Packet_Processor.Utils;             use DNS_Packet_Processor.Utils;
+with System;
 
 package body DNS_Packet_Processor is
 
@@ -50,7 +44,7 @@ package body DNS_Packet_Processor is
             exit when Found;
          end loop;
 
-         if Found /= True
+         if not Found
          then
             raise Unknown_RCode;
          end if;
@@ -155,24 +149,17 @@ package body DNS_Packet_Processor is
             -- decode it
 
             declare
-               Old_Section_Length         : Unsigned_8;
                Decompressed_Domain_String : Unbounded_String;
                function Get_Byte_Fixed_Header is new Ada.Unchecked_Conversion
                  (Source => Stream_Element_Array, Target => Packer_Pointer);
-
-               subtype Domain_Section is String (1 .. Integer (Section_Length));
-               function To_Domain_Section is new Ada.Unchecked_Conversion
-                 (Source => Stream_Element_Array, Target => Domain_Section);
             begin
                -- Oh, and for more fuckery, the pointer is 16-bit ...
                Packet_Ptr :=
                  Get_Byte_Fixed_Header
-                   (Raw_Data.all (Offset..Offset+1)); -- Make the top bytes vanish
+                   (Raw_Data.all (Offset .. Offset + 1)); -- Make the top bytes vanish
 
                -- We subtract 12-1 for the packet header
                Packet_Ptr.Packet_Offset := (Packet_Ptr.Packet_Offset and 16#3fff#) - 11;
-               Old_Section_Length       :=
-                 Unsigned_8 (Raw_Data.all (Stream_Element_Offset (Packet_Ptr.Packet_Offset)));
 
                -- Sanity check ourselves
                if (Section_Length and 2#11#) /= 0
@@ -225,7 +212,7 @@ package body DNS_Packet_Processor is
             end if;
          end loop;
 
-         if Found /= True
+         if not Found
          then
             raise Unknown_RR_Type;
          end if;
@@ -255,7 +242,7 @@ package body DNS_Packet_Processor is
             end if;
          end loop;
 
-         if Found /= True
+         if not Found
          then
             raise Unknown_Class;
          end if;

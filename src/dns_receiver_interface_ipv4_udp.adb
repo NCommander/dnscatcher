@@ -1,21 +1,12 @@
-with Ada.Text_IO;         use Ada.Text_IO;
-with Ada.Integer_Text_IO; use Ada.Integer_Text_IO;
+with Ada.Text_IO; use Ada.Text_IO;
 
-with Ada.Exceptions;          use Ada.Exceptions;
-with Ada.Task_Identification; use Ada.Task_Identification;
-with Ada.Streams;             use Ada.Streams;
-with Ada.Strings.Unbounded;   use Ada.Strings.Unbounded;
+with Ada.Exceptions;        use Ada.Exceptions;
+with Ada.Streams;           use Ada.Streams;
+with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 with Ada.Unchecked_Conversion;
-with Ada.Unchecked_Deallocation;
-
-with GNAT.Sockets; use GNAT.Sockets;
 
 with Packet_Catcher;
-with Utils;
 
-with DNSCatcher_Config;                      use DNSCatcher_Config;
-with DNS_Network_Receiver_Interface;
-with DNS_Transaction_Manager;
 with DNS_Core_Constructs.Raw_Packet_Records; use DNS_Core_Constructs.Raw_Packet_Records;
 with DNS_Core_Constructs;                    use DNS_Core_Constructs;
 
@@ -107,7 +98,7 @@ package body DNS_Receiver_Interface_IPv4_UDP is
 
                   -- Socket Errors will happen due to time out all the time, we just need to
                   -- restart and recover
-                  when Error : GNAT.Sockets.Socket_Error =>
+                  when GNAT.Sockets.Socket_Error =>
                      begin
                         -- This isn't the RIGHT thing to do, but its the only way to handle Recv
                         -- Timeouts because it doesn't use a unique exception. We'll hope the right
@@ -132,8 +123,6 @@ package body DNS_Receiver_Interface_IPv4_UDP is
       Transaction_Manager     :        DNS_Transaction_Manager_Task_Ptr; Socket : Socket_Type)
    is
    begin
-      GNAT.Sockets.Initialize;
-
       -- Save our config for good measure
       This.Config              := Config;
       This.Receiver_Socket     := Socket;

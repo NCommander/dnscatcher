@@ -1,7 +1,4 @@
 with Ada.Unchecked_Conversion;
-with Ada.Integer_Text_IO;   use Ada.Integer_Text_IO;
-with Ada.Streams;           use Ada.Streams;
-with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 
 with System;
 
@@ -25,8 +22,10 @@ package body DNS_RData_Processor.Utils is
       function To_IPv4_Components is new Ada.Unchecked_Conversion (Source => String,
          Target                                                           => Raw_IPv4_Components);
    begin
-      IPv4_Components := To_IPv4_Components (To_String (Parsed_RR.RData) (1..4));
-      ASCII_IPv4 := ASCII_IPv4 & IPv4_Components.A'Image & IPv4_Components.B'Image & IPv4_Components.C'Image & IPv4_Components.D'Image;
+      IPv4_Components := To_IPv4_Components (To_String (Parsed_RR.RData) (1 .. 4));
+      ASCII_IPv4      :=
+        ASCII_IPv4 & IPv4_Components.A'Image & IPv4_Components.B'Image & IPv4_Components.C'Image &
+        IPv4_Components.D'Image;
 
       return ASCII_IPv4;
    end Decode_DNS_IPv4_Address;

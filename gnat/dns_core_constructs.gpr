@@ -5,5 +5,8 @@ library project DNS_Core_Constructs is
    for Source_Dirs use ("../src/dns_core_constructs");
    for Object_Dir use "../obj/dns_core_constructs";
    for Library_Dir use "../lib";
+
+   package Compiler renames DNS_Common.Compiler;
+
 end DNS_Core_Constructs;
 

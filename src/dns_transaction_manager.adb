@@ -6,12 +6,9 @@ with Ada.Text_IO;         use Ada.Text_IO;
 with Ada.Integer_Text_IO; use Ada.Integer_Text_IO;
 with Ada.Strings.Hash;
 
-with DNS_Core_Constructs;                    use DNS_Core_Constructs;
-with DNS_Core_Constructs.Raw_Packet_Records; use DNS_Core_Constructs.Raw_Packet_Records;
-with DNS_Core_Constructs.Utils;              use DNS_Core_Constructs.Utils;
-with DNS_Packet_Processor;                   use DNS_Packet_Processor;
-
-with Utils;
+with DNS_Core_Constructs;       use DNS_Core_Constructs;
+with DNS_Core_Constructs.Utils; use DNS_Core_Constructs.Utils;
+with DNS_Packet_Processor;
 
 package body DNS_Transaction_Manager is
    -- Handle the map for tracking transactions to/from source

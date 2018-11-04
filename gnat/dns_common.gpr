@@ -1,16 +1,37 @@
+-- Loosely based off Matreska's build comm file
 abstract project DNS_Common is
-   package Builder is
-      for Switches ("ada") use ("-g");
-   end Builder;
+   type Build_Type is ("RELEASE", "DEBUG");
+   Build : Build_Type := external ("BUILD", "RELEASE");
 
+   for Create_Missing_Dirs use "True";
+   
+   Common_Ada_Switches :=
+     ("-g",
+      "-gnatwa",
+      "-gnat12",
+      "-gnatW8");
+   
+   Release_Build_Switches :=
+     ("-O2",
+      "-gnatn");
+   
+   Build_Switches := Common_Ada_Switches;
+
+   case Build is
+      when "RELEASE" =>
+         Build_Switches := Build_Switches & Release_Build_Switches;
+      when others =>
+         null;
+   end case;
+   
    package Compiler is
-      for Switches ("ada") use ("-g");
+      for Default_Switches ("ada") use Build_Switches;
    end Compiler;
 
-   package Linker is
-      for Switches ("ada") use ("-g");
-   end Linker;
-
+   package Builder is
+      for Default_Switches ("ada") use Build_Switches;
+   end Builder;
+   
    package Pretty_Printer is
       for Default_Switches ("ada") use ("-A1", "-A2", "-A3", "-A4", "-A5", "-M99", "--separate-stmt-name", "-c2", "--vertical-enum-types", "--vertical-array-types", "--vertical-named-aggregates", "--vertical-case-alternatives", 
          "--separate-loop-then");

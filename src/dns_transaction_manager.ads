@@ -1,5 +1,4 @@
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
-with Ada.Streams;           use Ada.Streams;
 
 with Ada.Containers.Vectors; use Ada.Containers;
 with Ada.Containers.Hashed_Maps;
@@ -11,7 +10,6 @@ with DNS_Core_Constructs.Raw_Packet_Records; use DNS_Core_Constructs.Raw_Packet_
 
 package DNS_Transaction_Manager is
    package Stored_Packets_Vector is new Vectors (Natural, Raw_Packet_Record_Ptr);
-   use Stored_Packets_Vector;
 
    type DNS_Transaction is record
       Client_Resolver_Address       : Unbounded_String;
