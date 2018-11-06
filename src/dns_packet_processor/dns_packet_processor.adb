@@ -305,7 +305,6 @@ package body DNS_Packet_Processor is
              (To_RData (Raw_Data (Offset .. Stream_Element_Offset (RData_Length))));
          Offset := Offset + Stream_Element_Offset (RData_Length);
       end;
-      Offset := Offset + 1;
 
       Parsed_RData_Response := To_Parsed_RData (Parsed_Response);
       Put_Line ("    RData is " & Parsed_RData_Response.RData_To_String);
