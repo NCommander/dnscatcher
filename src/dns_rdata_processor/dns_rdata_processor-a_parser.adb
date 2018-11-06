@@ -1,5 +1,5 @@
-with DNS_RData_Processor.Utils; use DNS_RData_Processor.Utils;
-
+with DNS_Common; use DNS_Common;
+with DNS_Common.Utils; use DNS_Common.Utils;
 package body DNS_RData_Processor.A_Parser is
 
    -- A records are simply four octlets which we need to turn into integers then
@@ -7,8 +7,8 @@ package body DNS_RData_Processor.A_Parser is
    procedure From_Parsed_RR (This : in out Parsed_A_RData; Parsed_RR : Parsed_DNS_Resource_Record)
    is
    begin
-
-      This.A_Record := Decode_DNS_IPv4_Address (Parsed_RR);
+      --This.A_Record := Decode_DNS_IPv4_Address (Parsed_RR);
+      This.A_Record := Inet_Ntop(IPv4, Parsed_RR.RData);
    end From_Parsed_RR;
 
    pragma Warnings (Off, "formal parameter ""This"" is not referenced");
