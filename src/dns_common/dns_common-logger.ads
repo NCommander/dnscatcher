@@ -1,3 +1,5 @@
+with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
+
 package DNS_Common.Logger is
    -- Handles logging operations in a sane and consistent way within
    -- the Catcher
@@ -24,9 +26,26 @@ package DNS_Common.Logger is
       Log_Level: Log_Levels; -- Sets the message types to be shown
       Use_ANSI_Color: Boolean;
    end record;
-   
+
+   -- Contains a message to log
+   type Log_Message is record
+      Log_Level: Log_Levels;
+      Component: Unbounded_String;
+      Message: Unbounded_String;
+   end record;
+
    task type Logger is
       entry Start;
+      -- Starts the logger thread
+      entry Stop;
+      -- Stops the logger thread
+
+      entry Accept_Log_Packet;
+      -- Accepts a Log Packet for logging
+
+      -- Processes a logger packet if FIFO queue
+      entry Log_Immediately(Log_Level: Log_Levels; Component : in Unbounded_String; Message: Unbounded_String);
+      -- Logs a message immediately
    end Logger;
    
    
