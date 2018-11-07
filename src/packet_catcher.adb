@@ -6,7 +6,8 @@ with Ada.Unchecked_Deallocation;
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 with GNAT.Sockets;          use GNAT.Sockets;
 
-with DNSCatcher_Config;
+with DNS_Common.Config;
+with DNS_Common.Logger;       use DNS_Common.Logger;
 with DNS_Receiver_Interface_IPv4_UDP;
 with DNS_Sender_Interface_IPv4_UDP;
 with DNS_Transaction_Manager; use DNS_Transaction_Manager;
@@ -17,7 +18,7 @@ package body Packet_Catcher is
    procedure Run_Catcher is
       -- Input and Output Sockets
       DNS_Transactions        : DNS_Transaction_Manager.DNS_Transaction_Manager_Task;
-      Capture_Config          : DNSCatcher_Config.Configuration_Ptr;
+      Capture_Config          : DNS_Common.Config.Configuration_Ptr;
       Receiver_Interface      : DNS_Receiver_Interface_IPv4_UDP.IPv4_UDP_Receiver_Interface;
       Sender_Interface        : DNS_Sender_Interface_IPv4_UDP.IPv4_UDP_Sender_Interface;
       Transaction_Manager_Ptr : DNS_Transaction_Manager_Task_Ptr;
@@ -26,12 +27,16 @@ package body Packet_Catcher is
       procedure Free_Transaction_Manager is new Ada.Unchecked_Deallocation
         (Object => DNS_Transaction_Manager_Task, Name => DNS_Transaction_Manager_Task_Ptr);
       procedure Free_DNSCatacher_Config is new Ada.Unchecked_Deallocation
-        (Object => DNSCatcher_Config.Configuration, Name => DNSCatcher_Config.Configuration_Ptr);
+        (Object => DNS_Common.Config.Configuration, Name => DNS_Common.Config.Configuration_Ptr);
    begin
-      Capture_Config                          := new DNSCatcher_Config.Configuration;
+      Capture_Config                          := new DNS_Common.Config.Configuration;
       Capture_Config.Local_Listen_Port        := 5553;
       Capture_Config.Upstream_DNS_Server      := To_Unbounded_String ("4.2.2.2");
       Capture_Config.Upstream_DNS_Server_Port := 53;
+
+      -- Configure the logger
+      Capture_Config.Logger_Config.Log_Level      := DEBUG;
+      Capture_Config.Logger_Config.Use_ANSI_Color := True;
 
       Transaction_Manager_Ptr := new DNS_Transaction_Manager_Task;
 

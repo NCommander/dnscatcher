@@ -1,5 +1,5 @@
 with GNAT.Sockets;                           use GNAT.Sockets;
-with DNSCatcher_Config;                      use DNSCatcher_Config;
+with DNS_Common.Config;                      use DNS_Common.Config;
 with DNS_Network_Sender_Interface;
 with DNS_Core_Constructs.Raw_Packet_Records; use DNS_Core_Constructs.Raw_Packet_Records;
 

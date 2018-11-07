@@ -1,6 +1,6 @@
 with GNAT.Sockets; use GNAT.Sockets;
 
-with DNSCatcher_Config; use DNSCatcher_Config;
+with DNS_Common.Config; use DNS_Common.Config;
 
 package DNS_Network_Sender_Interface is
    type Sender_Interface is abstract tagged null record;

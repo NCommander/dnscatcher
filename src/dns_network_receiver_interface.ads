@@ -1,6 +1,6 @@
 with GNAT.Sockets; use GNAT.Sockets;
 
-with DNSCatcher_Config;       use DNSCatcher_Config;
+with DNS_Common.Config;       use DNS_Common.Config;
 with DNS_Transaction_Manager; use DNS_Transaction_Manager;
 
 package DNS_Network_Receiver_Interface is
