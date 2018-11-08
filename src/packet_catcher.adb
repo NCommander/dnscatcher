@@ -35,8 +35,8 @@ package body Packet_Catcher is
       Capture_Config.Upstream_DNS_Server_Port := 53;
 
       -- Configure the logger
-      Capture_Config.Logger_Config.Log_Level      := DEBUG;
-      Capture_Config.Logger_Config.Use_ANSI_Color := True;
+      Capture_Config.Logger_Config.Log_Level := DEBUG;
+      Capture_Config.Logger_Config.Use_Color := True;
 
       Transaction_Manager_Ptr := new DNS_Transaction_Manager_Task;
 
