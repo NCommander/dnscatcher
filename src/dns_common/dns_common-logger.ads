@@ -43,9 +43,9 @@ package DNS_Common.Logger is
    package Log_Message_Vector is new Vectors (Natural, Log_Message_Record);
    
    protected type Logger_Message_Packet is
-      entry Push_Component(Component: Unbounded_String);
+      entry Push_Component(Component: String);
       entry Pop_Component;
-      entry Log_Message (Level: Log_Levels; Msg : in Unbounded_String);
+      entry Log_Message (Level: Log_Levels; Msg : in String);
       entry Get (Msg : out Log_Message_Record);
       entry Count (Count : out Integer);
       entry Empty;
@@ -63,7 +63,6 @@ package DNS_Common.Logger is
       entry Empty;
    private
       Queued_Packets : Logger_Message_Packet_Vector.Vector;
-      Queue_Count : Integer := 0;
    end Logger_Queue_Type;
    
    -- Global for logging queues

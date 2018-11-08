@@ -41,7 +41,7 @@ package body DNS_Common.Logger is
          Queued_Packets.Append (Queue);
       end Add_Packet;
 
-      entry Get (Queue : out Logger_Message_Packet_Ptr) when Queue_Count > 0 is
+      entry Get (Queue : out Logger_Message_Packet_Ptr) when Queued_Packets.Length > 0 is
       begin
          Queue := Queued_Packets.First_Element;
          Queued_Packets.Delete_First;
@@ -66,9 +66,9 @@ package body DNS_Common.Logger is
    end Logger_Queue_Type;
 
    protected body Logger_Message_Packet is
-      entry Push_Component (Component : Unbounded_String) when True is
+      entry Push_Component (Component : String) when True is
       begin
-         Current_Component.Append (Component);
+         Current_Component.Append (To_Unbounded_String(Component));
       end Push_Component;
 
       entry Pop_Component when True is
@@ -76,12 +76,12 @@ package body DNS_Common.Logger is
          Current_Component.Delete_Last;
       end Pop_Component;
 
-      entry Log_Message (Level : Log_Levels; Msg : in Unbounded_String) when True is
+      entry Log_Message (Level : Log_Levels; Msg : in String) when True is
          Msg_Record : Log_Message_Record;
       begin
          Msg_Record.Log_Level := Level;
          Msg_Record.Component := Current_Component.Copy;
-         Msg_Record.Message   := Msg;
+         Msg_Record.Message   := To_Unbounded_String(Msg);
 
          Logged_Msgs.Append (Msg_Record);
       end Log_Message;
@@ -116,65 +116,71 @@ package body DNS_Common.Logger is
       Logger_Cfg.Log_Level := NOTICE;
       Logger_Cfg.Use_Color := False;
 
-      -- Processing loop
-      while Keep_Running
       loop
-         select
-            accept Start do
-               null;
-            end Start;
-         or
-            accept Stop do
-               Logger_Queue.Empty;
-               Keep_Running := False;
-            end Stop;
-         else
-            Logger_Queue.Count (Queue_Count);
-            if Queue_Count > 0
-            then
-               Logger_Queue.Get (Current_Queue);
+         -- Processing loop
+         while Keep_Running
+         loop
+            select
+               accept Start do
+                  null;
+               end Start;
+            or
+               accept Stop do
+                  Logger_Queue.Empty;
+                  Keep_Running := False;
+               end Stop;
+            else
+               Logger_Queue.Count (Queue_Count);
+               if Queue_Count > 0
+               then
+                  Logger_Queue.Get (Current_Queue);
 
-               -- Process the queue and deliver all msgs
-               declare
-                  Queue_Msg_Count : Integer;
-                  Current_Msg     : Log_Message_Record;
-               begin
-                  Current_Queue.Count (Queue_Msg_Count);
-
-                  while Queue_Msg_Count /= 0
-                  loop
-                     Current_Queue.Get (Current_Msg);
-
-                     -- This is so ugly :(
-                     if Log_Levels'Enum_Rep(Current_Msg.Log_Level) >= Log_Levels'Enum_Rep (Logger_Cfg.Log_Level)
-                     then
-                        Msg_String :=
-                          Format_Log_Level (Logger_Cfg.Use_Color, Current_Msg.Log_Level);
-                        Msg_String :=
-                          Msg_String & Create_String_From_Components (Current_Msg.Component);
-                        Msg_String := " " & Current_Msg.Message;
-                        Put_Line (To_String (Msg_String));
-                     end if;
+                  -- Process the queue and deliver all msgs
+                  declare
+                     Queue_Msg_Count : Integer;
+                     Current_Msg     : Log_Message_Record;
+                  begin
                      Current_Queue.Count (Queue_Msg_Count);
-                  end loop;
-               end;
 
-               Free_Logger_Msg_Ptr (Current_Queue);
-            end if;
-         end select;
-      end loop;
+                     while Queue_Msg_Count /= 0
+                     loop
+                        Current_Queue.Get (Current_Msg);
 
-      -- Idling loop ready for shutdown
-      while Keep_Running = False
-      loop
-         select
-            accept Initialize (Cfg : Logger_Configuration) do
-               Logger_Cfg := Cfg;
-            end Initialize;
-            accept Start do
-               Keep_Running := True;
-            end Start;
-         end select;
+                        -- This is so ugly :(
+                        if Log_Levels'Enum_Rep(Logger_Cfg.Log_Level) >= Log_Levels'Enum_Rep (Current_Msg.Log_Level)
+                        then
+                           Msg_String :=
+                             Format_Log_Level (Logger_Cfg.Use_Color, Current_Msg.Log_Level);
+                           Msg_String :=
+                             Msg_String & Create_String_From_Components (Current_Msg.Component);
+                           Msg_String := Msg_String & " " & Current_Msg.Message;
+                           Put_Line (To_String (Msg_String));
+                        end if;
+                        Current_Queue.Count (Queue_Msg_Count);
+                     end loop;
+                     delay 0.1;
+                  end;
+
+                  Free_Logger_Msg_Ptr (Current_Queue);
+               end if;
+            end select;
+         end loop;
+
+         -- Idling loop ready for shutdown
+         while Keep_Running = False
+         loop
+            select
+               accept Initialize (Cfg : Logger_Configuration) do
+                  Logger_Cfg := Cfg;
+               end Initialize;
+            or
+               accept Start do
+                  Keep_Running := True;
+               end Start;
+            or
+               terminate;
+            end select;
+         end loop;
       end loop;
    end Logger;
 end DNS_Common.Logger;

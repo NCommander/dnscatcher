@@ -21,8 +21,10 @@ package body Packet_Catcher is
       Capture_Config          : DNS_Common.Config.Configuration_Ptr;
       Receiver_Interface      : DNS_Receiver_Interface_IPv4_UDP.IPv4_UDP_Receiver_Interface;
       Sender_Interface        : DNS_Sender_Interface_IPv4_UDP.IPv4_UDP_Sender_Interface;
+      Logger_Task             : DNS_Common.Logger.Logger;
       Transaction_Manager_Ptr : DNS_Transaction_Manager_Task_Ptr;
       Socket                  : Socket_Type;
+      Logger_Packet     : DNS_Common.Logger.Logger_Message_Packet_Ptr;
 
       procedure Free_Transaction_Manager is new Ada.Unchecked_Deallocation
         (Object => DNS_Transaction_Manager_Task, Name => DNS_Transaction_Manager_Task_Ptr);
@@ -38,6 +40,7 @@ package body Packet_Catcher is
       Capture_Config.Logger_Config.Log_Level := DEBUG;
       Capture_Config.Logger_Config.Use_Color := True;
 
+      Logger_Task.Initialize(Capture_Config.Logger_Config);
       Transaction_Manager_Ptr := new DNS_Transaction_Manager_Task;
 
       -- Socket has to be shared between receiver and sender. This likely needs to move to
@@ -55,6 +58,11 @@ package body Packet_Catcher is
       Sender_Interface.Initialize (Capture_Config, Socket);
 
       -- Connect the packet queue and start it all up
+      Logger_Task.Start;
+      Logger_Packet := new DNS_Common.Logger.Logger_Message_Packet;
+      Logger_Packet.Log_Message(INFO, "DNSCatcher starting up ...");
+      DNS_Common.Logger.Logger_Queue.Add_Packet(Logger_Packet);
+
       Transaction_Manager_Ptr.Set_Packet_Queue (Sender_Interface.Get_Packet_Queue_Ptr);
       Transaction_Manager_Ptr.Start;
       Receiver_Interface.Start;
@@ -67,6 +75,7 @@ package body Packet_Catcher is
             Sender_Interface.Shutdown;
             Receiver_Interface.Shutdown;
             Transaction_Manager_Ptr.Stop;
+            Logger_Task.Stop;
             Free_Transaction_Manager (Transaction_Manager_Ptr);
             Free_DNSCatacher_Config (Capture_Config);
             return;
