@@ -4,6 +4,7 @@ with Ada.Exceptions; use Ada.Exceptions;
 with Ada.Streams;           use Ada.Streams;
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 with DNS_Core_Constructs;   use DNS_Core_Constructs;
+with DNS_Common.Logger;      use DNS_Common.Logger;
 
 package body DNS_Sender_Interface_IPv4_UDP is
 
@@ -16,21 +17,25 @@ package body DNS_Sender_Interface_IPv4_UDP is
       Length                : Stream_Element_Offset;
       Process_Packets       : Boolean := False;
       Packet_Count          : Integer := 0;
+      Logger_Packet           : Logger_Message_Packet_Ptr;
    begin
       accept Initialize (Socket : Socket_Type; Packet_Queue : DNS_Raw_Packet_Queue_Ptr) do
          DNS_Socket            := Socket;
          Outbound_Packet_Queue := Packet_Queue;
       end Initialize;
 
-      Put_Line ("Send packet task started");
       loop
          -- Either just started or stopping, we're terminatable in this state
-         Put_Line ("Send State STOPPED");
          while Process_Packets = False
          loop
             select
                accept Start do
+                  Logger_Packet := new Logger_Message_Packet;
+                  Logger_Packet.Push_Component("UDP Sender");
+
                   Process_Packets := True;
+                  Logger_Packet.Log_Message(INFO, "Sender startup");
+                  Logger_Queue.Add_Packet(Logger_Packet);
                end Start;
             or
                accept Stop do
@@ -41,10 +46,12 @@ package body DNS_Sender_Interface_IPv4_UDP is
             end select;
          end loop;
 
-         Put_Line ("Send State STARTED");
          -- We're actively processing packets
          while Process_Packets
          loop
+            Logger_Packet := new Logger_Message_Packet;
+            Logger_Packet.Push_Component("UDP Sender");
+
             select
                accept Start do
                   null;
@@ -64,7 +71,6 @@ package body DNS_Sender_Interface_IPv4_UDP is
                   -- And send the damn thing
                   Put ("Sent packet to ");
                   Put_Line (Image (Outgoing_Address));
-                  Put_Line (Port_Type'Image (Outgoing_Port));
 
                   -- Create the outbound message
                   declare
@@ -81,18 +87,19 @@ package body DNS_Sender_Interface_IPv4_UDP is
 
                      Put ("Sent packet to ");
                      Put_Line (Image (Outgoing_Address));
+                  exception
+                     when Exp_Error : others =>
+                        begin
+                           Logger_Packet.Log_Message(ERROR, "Unknown error: " & Exception_Information (Exp_Error));
+                        end;
                   end;
                end if;
             end select;
+
+            -- Send the logs on their way
+            Logger_Queue.Add_Packet(Logger_Packet);
          end loop;
       end loop;
-
-   exception
-      when Error : others =>
-         begin
-            Put (Standard_Error, "Unknown error: ");
-            Put_Line (Standard_Error, Exception_Information (Error));
-         end;
    end Send_Packet_Task;
 
    procedure Initialize (This : in out IPv4_UDP_Sender_Interface; Config : Configuration_Ptr;

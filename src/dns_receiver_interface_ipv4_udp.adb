@@ -1,4 +1,3 @@
-with Ada.Text_IO; use Ada.Text_IO;
 
 with Ada.Exceptions;        use Ada.Exceptions;
 with Ada.Streams;           use Ada.Streams;
@@ -9,6 +8,7 @@ with Packet_Catcher;
 
 with DNS_Core_Constructs.Raw_Packet_Records; use DNS_Core_Constructs.Raw_Packet_Records;
 with DNS_Core_Constructs;                    use DNS_Core_Constructs;
+with DNS_Common.Logger;                      use DNS_Common.Logger;
 
 package body DNS_Receiver_Interface_IPv4_UDP is
    task body Receive_Packet_Task is
@@ -20,6 +20,7 @@ package body DNS_Receiver_Interface_IPv4_UDP is
       Incoming_Address        : Sock_Addr_Type;
       DNS_Packet              : Raw_Packet_Record_Ptr;
       Process_Packets         : Boolean := False;
+      Logger_Packet           : Logger_Message_Packet_Ptr;
    begin
       accept Initialize (Config : Configuration_Ptr; Socket : Socket_Type;
          Transaction_Manager    : DNS_Transaction_Manager_Task_Ptr) do
@@ -29,13 +30,17 @@ package body DNS_Receiver_Interface_IPv4_UDP is
       end Initialize;
 
       loop
+         Logger_Packet := new Logger_Message_Packet;
+         Logger_Packet.Push_Component("UDP Receiver");
+
          -- Either just started or stopping, we're terminatable in this state
-         Put_Line ("Received State STOPPED");
          while Process_Packets = False
          loop
             select
                accept Start do
                   Process_Packets := True;
+                  Logger_Packet.Log_Message(NOTICE, "Receiver Startup");
+                  Logger_Queue.Add_Packet(Logger_Packet); -- We do this because state change
                end Start;
             or
                accept Stop do
@@ -46,10 +51,11 @@ package body DNS_Receiver_Interface_IPv4_UDP is
             end select;
          end loop;
 
-         Put_Line ("Received State STARTED");
-
          while Process_Packets
          loop -- Main receiving loop
+            Logger_Packet := new Logger_Message_Packet;
+            Logger_Packet.Push_Component("UDP Receiver");
+
             select
                accept Start do
                   null;
@@ -64,11 +70,13 @@ package body DNS_Receiver_Interface_IPv4_UDP is
                     (Socket => DNS_Socket, Item => Buffer, Last => Offset,
                      From   => Incoming_Address);
 
-                  Put_Line
-                    ("Received UDP Packet From " & Image (Incoming_Address.Addr) & ":" &
-                     Port_Type'Image (Incoming_Address.Port));
+                  Logger_Packet.Log_Message
+                    (INFO,
+                     ("Received UDP Packet From " & Image (Incoming_Address.Addr) & ":" &
+                     Port_Type'Image (Incoming_Address.Port)));
 
-                  Put_Line ("Read " & Stream_Element_Offset'Image (Offset) & " bytes");
+                  Logger_Packet.Log_Message
+                    (DEBUG, ("Read " & Stream_Element_Offset'Image (Offset) & " bytes"));
 
                   -- Copy the packet for further processing
                   DNS_Packet              := new Raw_Packet_Record;
@@ -95,7 +103,6 @@ package body DNS_Receiver_Interface_IPv4_UDP is
                   end if;
 
                exception
-
                   -- Socket Errors will happen due to time out all the time, we just need to
                   -- restart and recover
                   when GNAT.Sockets.Socket_Error =>
@@ -106,15 +113,15 @@ package body DNS_Receiver_Interface_IPv4_UDP is
                         null;
                      end;
                end;
-
             end select;
+
+            Logger_Queue.Add_Packet(Logger_Packet);
          end loop;
       end loop;
    exception
-      when Error : others =>
+      when Exp_Error : others =>
          begin
-            Put (Standard_Error, "Unknown error: ");
-            Put_Line (Standard_Error, Exception_Information (Error));
+            Logger_Packet.Log_Message(ERROR, "Unknown error: " & Exception_Information (Exp_Error));
             Packet_Catcher.Stop_Catcher;
          end;
    end Receive_Packet_Task;
