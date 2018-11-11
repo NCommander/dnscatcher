@@ -92,6 +92,11 @@ package body DNS_Common.Logger is
          Logged_Msgs.Delete_First;
       end Get;
 
+      entry Get_All (Queue: out Log_Message_Vector.Vector) when True is
+      begin
+         Queue := Logged_Msgs.Copy;
+      end Get_All;
+
       entry Count (Count : out Integer) when True is
       begin
          Count := Integer (Logged_Msgs.Length);
@@ -109,42 +114,45 @@ package body DNS_Common.Logger is
       Logger_Cfg    : Logger_Configuration;
       Keep_Running  : Boolean := False;
       Current_Queue : Logger_Message_Packet_Ptr;
-      Queue_Count   : Integer := 0;
+      Msg_Packets   : Log_Message_Vector.Vector;
       Msg_String    : Unbounded_String;
-
+      Queues_To_Process : Integer;
       procedure Process_Queue is
+
+         procedure Print_Messages(c: Log_Message_Vector.Cursor) is
+            Current_Msg : constant Log_Message_Record := Log_Message_Vector.Element(c);
+         begin
+            -- This is so ugly :(
+            if Log_Levels'Enum_Rep(Logger_Cfg.Log_Level) >= Log_Levels'Enum_Rep (Current_Msg.Log_Level)
+            then
+               Msg_String :=
+                 Format_Log_Level (Logger_Cfg.Use_Color, Current_Msg.Log_Level);
+               Msg_String :=
+                 Msg_String & Create_String_From_Components (Current_Msg.Component);
+               Msg_String := Msg_String & " " & Current_Msg.Message;
+               Put_Line (To_String (Msg_String));
+            end if;
+         end;
+
       begin
-         Logger_Queue.Count (Queue_Count);
-         if Queue_Count > 0
-         then
-            Logger_Queue.Get (Current_Queue);
+         Logger_Queue.Count(Queues_To_Process);
+         while Queues_To_Process > 0 loop
+            Logger_Queue.Get(Current_Queue);
 
-            -- Process the queue and deliver all msgs
-            declare
-               Queue_Msg_Count : Integer;
-               Current_Msg     : Log_Message_Record;
+            -- Get a local copy and then empty it; we don't care past that point
+            Current_Queue.Get_All(Msg_Packets);
+            Current_Queue.Empty;
+
+            Msg_Packets.Iterate(Print_Messages'Access);
+            Logger_Queue.Count(Queues_To_Process);
+         end loop;
+
+      exception
+         -- Not sure if there's a better way to do this, but avoids a race condition
+         when Constraint_Error =>
             begin
-               Current_Queue.Count (Queue_Msg_Count);
-
-               while Queue_Msg_Count /= 0
-               loop
-                  Current_Queue.Get (Current_Msg);
-
-                  -- This is so ugly :(
-                  if Log_Levels'Enum_Rep(Logger_Cfg.Log_Level) >= Log_Levels'Enum_Rep (Current_Msg.Log_Level)
-                  then
-                     Msg_String :=
-                       Format_Log_Level (Logger_Cfg.Use_Color, Current_Msg.Log_Level);
-                     Msg_String :=
-                       Msg_String & Create_String_From_Components (Current_Msg.Component);
-                     Msg_String := Msg_String & " " & Current_Msg.Message;
-                     Put_Line (To_String (Msg_String));
-                  end if;
-                  Current_Queue.Count (Queue_Msg_Count);
-               end loop;
+               null;
             end;
-            Free_Logger_Msg_Ptr(Current_Queue);
-         end if;
       end Process_Queue;
 
    begin
@@ -162,9 +170,9 @@ package body DNS_Common.Logger is
                end Start;
             or
                accept Stop do
-                  Keep_Running := False;
                   -- Flush the pending queue
                   Put_Line("HERE");
+                  Keep_Running := False;
                   Process_Queue;
                end Stop;
             else
@@ -184,6 +192,10 @@ package body DNS_Common.Logger is
                accept Start do
                   Keep_Running := True;
                end Start;
+            or
+               accept Stop do
+                  null;
+               end Stop;
             or
                terminate;
             end select;

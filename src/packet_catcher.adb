@@ -1,5 +1,3 @@
-with Ada.Text_IO; use Ada.Text_IO;
-
 with Ada.Unchecked_Conversion;
 
 with Ada.Unchecked_Deallocation;
@@ -71,8 +69,7 @@ package body Packet_Catcher is
                Logger_Packet.Log_Message
                  (ERROR, "Refusing to start!");
                Logger_Queue.Add_Packet (Logger_Packet);
-               Logger_Task.Stop;
-               return;
+               goto Shutdown_Procedure;
             end;
       end;
 
@@ -87,18 +84,19 @@ package body Packet_Catcher is
       loop
          if Shutting_Down
          then
-            Put_Line ("Starting shutdown");
-            Sender_Interface.Shutdown;
-            Receiver_Interface.Shutdown;
-            Transaction_Manager_Ptr.Stop;
-            Logger_Task.Stop;
-            Free_Transaction_Manager (Transaction_Manager_Ptr);
-            Free_DNSCatacher_Config (Capture_Config);
-            return;
+            goto Shutdown_Procedure;
          else
             delay 1.0;
          end if;
       end loop;
+
+      <<Shutdown_Procedure>>
+      Sender_Interface.Shutdown;
+      Receiver_Interface.Shutdown;
+      Transaction_Manager_Ptr.Stop;
+      Logger_Task.Stop;
+      Free_Transaction_Manager (Transaction_Manager_Ptr);
+      Free_DNSCatacher_Config (Capture_Config);
 
    end Run_Catcher;
 

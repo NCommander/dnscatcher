@@ -32,6 +32,7 @@ package body DNS_Transaction_Manager is
                accept Set_Packet_Queue (Queue : in DNS_Raw_Packet_Queue_Ptr) do
                   Outbound_Packet_Queue := Queue;
                end Set_Packet_Queue;
+            or
                accept Start do
                   if Outbound_Packet_Queue /= null
                   then
@@ -41,8 +42,13 @@ package body DNS_Transaction_Manager is
                   end if;
                end Start;
             or
+               accept Stop do
+                  null;
+               end Stop;
+            or
                terminate;
             end select;
+            Logger_Queue.Add_Packet(Logger_Packet);
          end loop;
 
          while Running

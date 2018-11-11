@@ -19,16 +19,16 @@ package body DNS_Sender_Interface_IPv4_UDP is
       Packet_Count          : Integer := 0;
       Logger_Packet           : Logger_Message_Packet_Ptr;
    begin
-      accept Initialize (Socket : Socket_Type; Packet_Queue : DNS_Raw_Packet_Queue_Ptr) do
-         DNS_Socket            := Socket;
-         Outbound_Packet_Queue := Packet_Queue;
-      end Initialize;
-
       loop
          -- Either just started or stopping, we're terminatable in this state
          while Process_Packets = False
          loop
             select
+               accept Initialize (Socket : Socket_Type; Packet_Queue : DNS_Raw_Packet_Queue_Ptr) do
+                  DNS_Socket            := Socket;
+                  Outbound_Packet_Queue := Packet_Queue;
+               end Initialize;
+            or
                accept Start do
                   Logger_Packet := new Logger_Message_Packet;
                   Logger_Packet.Push_Component("UDP Sender");
@@ -124,7 +124,9 @@ package body DNS_Sender_Interface_IPv4_UDP is
    procedure Shutdown (This : in out IPv4_UDP_Sender_Interface) is
    begin
       -- Cleanly shuts down the interface
-      This.Sender_Task.Stop;
+      if This.Sender_Task /= null then
+         This.Sender_Task.Stop;
+      end if;
    end Shutdown;
 
    function Get_Packet_Queue_Ptr

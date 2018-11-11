@@ -1,4 +1,4 @@
-
+with Ada.Text_IO;
 with Ada.Exceptions;        use Ada.Exceptions;
 with Ada.Streams;           use Ada.Streams;
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
@@ -22,13 +22,6 @@ package body DNS_Receiver_Interface_IPv4_UDP is
       Process_Packets         : Boolean := False;
       Logger_Packet           : Logger_Message_Packet_Ptr;
    begin
-      accept Initialize (Config : Configuration_Ptr; Socket : Socket_Type;
-         Transaction_Manager    : DNS_Transaction_Manager_Task_Ptr) do
-         DNS_Config              := Config;
-         DNS_Socket              := Socket;
-         DNS_Transaction_Manager := Transaction_Manager;
-      end Initialize;
-
       loop
          Logger_Packet := new Logger_Message_Packet;
          Logger_Packet.Push_Component("UDP Receiver");
@@ -36,7 +29,15 @@ package body DNS_Receiver_Interface_IPv4_UDP is
          -- Either just started or stopping, we're terminatable in this state
          while Process_Packets = False
          loop
+            Ada.Text_IO.Put_Line("Here");
             select
+               accept Initialize (Config : Configuration_Ptr; Socket : Socket_Type;
+                                  Transaction_Manager    : DNS_Transaction_Manager_Task_Ptr) do
+                  DNS_Config              := Config;
+                  DNS_Socket              := Socket;
+                  DNS_Transaction_Manager := Transaction_Manager;
+               end Initialize;
+            or
                accept Start do
                   Process_Packets := True;
                   Logger_Packet.Log_Message(NOTICE, "Receiver Startup");
@@ -44,6 +45,8 @@ package body DNS_Receiver_Interface_IPv4_UDP is
                end Start;
             or
                accept Stop do
+                  Logger_Packet.Log_Message(NOTICE, "Receiver Stop");
+                  Logger_Queue.Add_Packet(Logger_Packet); -- We do this because state change
                   null;
                end Stop;
             or
@@ -146,6 +149,8 @@ package body DNS_Receiver_Interface_IPv4_UDP is
    procedure Shutdown (This : in out IPv4_UDP_Receiver_Interface) is
    begin
       -- Cleanly shuts down the interface
-      This.Receiver_Task.Stop;
+      if This.Receiver_Task /= null then
+         This.Receiver_Task.Stop;
+      end if;
    end Shutdown;
 end DNS_Receiver_Interface_IPv4_UDP;
