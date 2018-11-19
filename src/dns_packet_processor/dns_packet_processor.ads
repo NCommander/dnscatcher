@@ -25,8 +25,8 @@ package DNS_Packet_Processor is
       RData  : Unbounded_String;
    end record;
 
-   package Question_Vector is new Vectors (Natural, Parsed_DNS_Question);
-   package Resource_Record_Vector is new Vectors (Natural, Parsed_RData_Access);
+   package Question_Vector is new Vectors (Positive, Parsed_DNS_Question);
+   package Resource_Record_Vector is new Vectors (Positive, Parsed_RData_Access);
 
    type Parsed_DNS_Packet is record
       Header     : DNS_Packet_Header;
