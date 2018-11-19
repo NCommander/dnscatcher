@@ -89,6 +89,8 @@ package body DNS_Sender_Interface_IPv4_UDP is
                            Logger_Packet.Log_Message(ERROR, "Unknown error: " & Exception_Information (Exp_Error));
                         end;
                   end;
+               else
+                  delay 0.1;
                end if;
             end select;
 

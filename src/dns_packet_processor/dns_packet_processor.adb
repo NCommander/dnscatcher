@@ -77,6 +77,7 @@ package body DNS_Packet_Processor is
       end loop;
 
       Logger.Pop_Component;
+
       return Parsed_Packet;
    end Packet_Parser;
 

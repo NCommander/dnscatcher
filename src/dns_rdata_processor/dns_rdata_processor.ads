@@ -23,4 +23,5 @@ package DNS_RData_Processor is
    function RClass_To_String (This : in Parsed_RData) return String is abstract;
    function RData_To_String (This : in Parsed_RData) return String is abstract;
    function Print_Packet (This : in Parsed_RData) return String is abstract;
+   procedure Delete (This : in out Parsed_RData) is abstract;
 end DNS_RData_Processor;

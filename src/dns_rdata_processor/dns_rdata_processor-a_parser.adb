@@ -1,5 +1,7 @@
 with DNS_Common; use DNS_Common;
 with DNS_Common.Utils; use DNS_Common.Utils;
+with Ada.Unchecked_Deallocation;
+
 package body DNS_RData_Processor.A_Parser is
 
    -- A records are simply four octlets which we need to turn into integers then
@@ -28,4 +30,12 @@ package body DNS_RData_Processor.A_Parser is
       return "A " & RData_To_String(This);
    end Print_Packet;
 
+   -- Obliberate ourselves
+   procedure Delete(This : in out Parsed_A_RData) is
+      procedure Free_Parsed_A_Record is new Ada.Unchecked_Deallocation(Object => Parsed_A_RData,
+                                                                       Name   => Parsed_A_RData_Access);
+      Ptr : aliased Parsed_A_RData_Access := This'Unchecked_Access;
+   begin
+      Free_Parsed_A_Record(Ptr);
+   end;
 end DNS_RData_Processor.A_Parser;

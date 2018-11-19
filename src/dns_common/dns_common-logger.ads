@@ -47,7 +47,7 @@ package DNS_Common.Logger is
       entry Pop_Component;
       entry Log_Message (Level: Log_Levels; Msg : in String);
       entry Get (Msg : out Log_Message_Record);
-      entry Get_All (Queue : out Log_Message_Vector.Vector);
+      entry Get_All_And_Empty (Queue : out Log_Message_Vector.Vector);
       entry Count (Count : out Integer);
       entry Empty;
    private

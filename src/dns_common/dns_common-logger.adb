@@ -116,10 +116,11 @@ package body DNS_Common.Logger is
          Logged_Msgs.Delete_First;
       end Get;
 
-      entry Get_All (Queue: out Log_Message_Vector.Vector) when True is
+      entry Get_All_And_Empty (Queue: out Log_Message_Vector.Vector) when True is
       begin
          Queue := Logged_Msgs.Copy;
-      end Get_All;
+         Logged_Msgs.Clear;
+      end Get_All_And_Empty;
 
       entry Count (Count : out Integer) when True is
       begin
@@ -164,10 +165,12 @@ package body DNS_Common.Logger is
             Logger_Queue.Get(Current_Queue);
 
             -- Get a local copy and then empty it; we don't care past that point
-            Current_Queue.Get_All(Msg_Packets);
-            Current_Queue.Empty;
+            if Current_Queue /= null then
+               Current_Queue.Get_All_And_Empty(Msg_Packets);
+               Msg_Packets.Iterate(Print_Messages'Access);
+               Free_Logger_Msg_Ptr(Current_Queue);
+            end if;
 
-            Msg_Packets.Iterate(Print_Messages'Access);
             Logger_Queue.Count(Queues_To_Process);
          end loop;
 

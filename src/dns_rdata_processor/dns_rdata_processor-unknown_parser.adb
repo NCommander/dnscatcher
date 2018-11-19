@@ -1,3 +1,5 @@
+with Ada.Unchecked_Deallocation;
+
 package body DNS_RData_Processor.Unknown_Parser is
 
    -- A records are simply four octlets which we need to turn into integers then
@@ -25,4 +27,12 @@ package body DNS_RData_Processor.Unknown_Parser is
    end Print_Packet;
    pragma Warnings (On, "formal parameter ""This"" is not referenced");
 
+   -- Obliberate ourselves
+   procedure Delete(This : in out Parsed_Unknown_RData) is
+      procedure Free_Parsed_Unknown_Record is new Ada.Unchecked_Deallocation(Object => Parsed_Unknown_RData,
+                                                                             Name   => Parsed_Unknown_RData_Access);
+      Ptr : aliased Parsed_Unknown_RData_Access := This'Unchecked_Access;
+   begin
+      Free_Parsed_Unknown_Record(Ptr);
+   end;
 end DNS_RData_Processor.Unknown_Parser;

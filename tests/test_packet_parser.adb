@@ -13,7 +13,7 @@ with DNS_Core_Constructs.Utils; use DNS_Core_Constructs.Utils;
 
 with DNS_Core_Constructs.Raw_Packet_Records; use DNS_Core_Constructs.Raw_Packet_Records;
 with DNS_Packet_Processor; use DNS_Packet_Processor;
-
+with DNS_Packet_Processor.Utils; use DNS_Packet_Processor.Utils;
 with DNS_RData_Processor; use DNS_RData_Processor;
 
 with Interfaces.C.Extensions; use Interfaces.C.Extensions;
@@ -146,6 +146,8 @@ package body Test_Packet_Parser is
       AUnit.Assertions.Assert((Answer.TTL = 3190), "Incorrect TTL!");
       AUnit.Assertions.Assert(Answer.RData_To_String, "17.142.160.59", "RData is incorrect");
 
+      Free_Raw_Packet_Record_Ptr(Inbound_Packet);
+      Free_Parsed_DNS_Packet(Parsed_Packet);
    end Test_Parse_A_Record;
 
    procedure Test_2 (T : in out Test_Cases.Test_Case'Class) is

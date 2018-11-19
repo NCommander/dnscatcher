@@ -1,4 +1,5 @@
 with Ada.Unchecked_Conversion;
+with Ada.Unchecked_Deallocation;
 
 package body DNS_Packet_Processor.Utils is
    function Ntohs (Network_Short : Unsigned_16) return Unsigned_16 is
@@ -42,5 +43,32 @@ package body DNS_Packet_Processor.Utils is
       Offset       := Offset + 4;
       return Network_Long;
    end Read_Unsigned_32;
+
+   procedure Free_Parsed_DNS_Packet(Packet: in out Parsed_DNS_Packet_Ptr)
+   is
+      procedure Free_Ptr is new Ada.Unchecked_Deallocation(Object => Parsed_DNS_Packet,
+                                                           Name   => Parsed_DNS_Packet_Ptr);
+   begin
+      Packet.Questions.Clear;
+
+      for I of Packet.Answer loop
+         I.Delete;
+      end loop;
+
+      for I of Packet.Authority loop
+         I.Delete;
+      end loop;
+
+      for I of Packet.Additional loop
+         I.Delete;
+      end loop;
+
+      Packet.Answer.Clear;
+      Packet.Authority.Clear;
+      Packet.Additional.Clear;
+
+
+      Free_Ptr(Packet);
+   end;
 
 end DNS_Packet_Processor.Utils;

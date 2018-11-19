@@ -5,10 +5,11 @@ with Ada.Exceptions;      use Ada.Exceptions;
 with Ada.Integer_Text_IO; use Ada.Integer_Text_IO;
 with Ada.Strings.Hash;
 
-with DNS_Core_Constructs;       use DNS_Core_Constructs;
-with DNS_Core_Constructs.Utils; use DNS_Core_Constructs.Utils;
-with DNS_Packet_Processor;      use DNS_Packet_Processor;
-with DNS_Common.Logger;         use DNS_Common.Logger;
+with DNS_Core_Constructs;        use DNS_Core_Constructs;
+with DNS_Core_Constructs.Utils;  use DNS_Core_Constructs.Utils;
+with DNS_Packet_Processor;       use DNS_Packet_Processor;
+with DNS_Packet_Processor.Utils; use DNS_Packet_Processor.Utils;
+with DNS_Common.Logger;          use DNS_Common.Logger;
 
 package body DNS_Transaction_Manager is
    -- Handle the map for tracking transactions to/from source
@@ -24,11 +25,10 @@ package body DNS_Transaction_Manager is
       Parsed_Packet         : Parsed_DNS_Packet_Ptr;
    begin
       loop
+         Logger_Packet := null;
          while Running = False
          loop
             Transaction   := null;
-            Logger_Packet := new Logger_Message_Packet;
-            Logger_Packet.Push_Component ("Transaction Manager");
             select
                accept Set_Packet_Queue (Queue : in DNS_Raw_Packet_Queue_Ptr) do
                   Outbound_Packet_Queue := Queue;
@@ -37,6 +37,9 @@ package body DNS_Transaction_Manager is
                accept Start do
                   if Outbound_Packet_Queue /= null
                   then
+                     Logger_Packet := new Logger_Message_Packet;
+                     Logger_Packet.Push_Component ("Transaction Manager");
+
                      Running := True;
                      Logger_Packet.Log_Message (INFO, "Transaction Manager Started!");
                      Logger_Queue.Add_Packet (Logger_Packet);
@@ -49,7 +52,6 @@ package body DNS_Transaction_Manager is
             or
                terminate;
             end select;
-            Logger_Queue.Add_Packet (Logger_Packet);
          end loop;
 
          while Running
@@ -96,6 +98,7 @@ package body DNS_Transaction_Manager is
 
                   -- Try to parse the packet
                   Parsed_Packet := DNS_Packet_Processor.Packet_Parser (Logger_Packet, Packet);
+                  Free_Parsed_DNS_Packet (Parsed_Packet);
 
                   -- Rewrite the DNS Packet and send it on it's way
                   Outbound_Packet_Queue.Put (Packet.all);
@@ -153,6 +156,7 @@ package body DNS_Transaction_Manager is
                   loop
                      Logger_Packet.Log_Message (INFO, "    " & I.Print_Packet);
                   end loop;
+                  Free_Parsed_DNS_Packet(Parsed_Packet);
 
                   -- Flip the packet around so it goes to the right place
                   Outbound_Packet            := Packet.all;
@@ -212,7 +216,9 @@ package body DNS_Transaction_Manager is
             or
                delay 0.1;
             end select;
-            Logger_Queue.Add_Packet (Logger_Packet);
+            if Logger_Packet /= null then
+              Logger_Queue.Add_Packet (Logger_Packet);
+            end if;
          end loop;
       end loop;
    end DNS_Transaction_Manager_Task;
