@@ -32,7 +32,7 @@ package body Packet_Catcher is
         (Object => DNS_Common.Config.Configuration, Name => DNS_Common.Config.Configuration_Ptr);
    begin
       Capture_Config                          := new DNS_Common.Config.Configuration;
-      Capture_Config.Local_Listen_Port        := 5553;
+      Capture_Config.Local_Listen_Port        := 53;
       Capture_Config.Upstream_DNS_Server      := To_Unbounded_String ("4.2.2.2");
       Capture_Config.Upstream_DNS_Server_Port := 53;
 

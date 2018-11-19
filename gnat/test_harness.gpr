@@ -1,19 +1,19 @@
 with "aunit";
+
 with "gnat/dns_common";
 with "gnat/dns_core_constructs";
 with "gnat/dns_packet_processor";
 with "gnat/dns_rdata_processor";
 
-project DNS_Catcher is
+project Test_Harness is
    for Create_Missing_Dirs use "True";
 
-   for Source_Dirs use ("src", "tests");
-   for Object_Dir use "obj";
-   for Main use ("main.adb", "test_runner.adb");
+   for Source_Dirs use ("../tests");
+   for Object_Dir use "../obj";
+   for Main use ("test_runner.adb");
 
-   for Exec_Dir use "bin";
+   for Exec_Dir use "../bin";
 
    package Compiler renames DNS_Common.Compiler;
    package Pretty_Printer renames DNS_Common.Pretty_Printer;
-end DNS_Catcher;
-
+end Test_Harness;
