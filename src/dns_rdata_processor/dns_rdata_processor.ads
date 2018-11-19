@@ -22,4 +22,5 @@ package DNS_RData_Processor is
       Parsed_RR                   : DNS_Packet_Processor.Parsed_DNS_Resource_Record) is abstract;
    function RClass_To_String (This : in Parsed_RData) return String is abstract;
    function RData_To_String (This : in Parsed_RData) return String is abstract;
+   function Print_Packet (This : in Parsed_RData) return String is abstract;
 end DNS_RData_Processor;

@@ -7,7 +7,7 @@ with Ada.Strings.Hash;
 
 with DNS_Core_Constructs;       use DNS_Core_Constructs;
 with DNS_Core_Constructs.Utils; use DNS_Core_Constructs.Utils;
-with DNS_Packet_Processor;
+with DNS_Packet_Processor;      use DNS_Packet_Processor;
 with DNS_Common.Logger;         use DNS_Common.Logger;
 
 package body DNS_Transaction_Manager is
@@ -21,13 +21,14 @@ package body DNS_Transaction_Manager is
       Transaction           : DNS_Transaction_Ptr;
       Running               : Boolean := False;
       Logger_Packet         : Logger_Message_Packet_Ptr;
+      Parsed_Packet         : Parsed_DNS_Packet_Ptr;
    begin
       loop
          while Running = False
          loop
-            Transaction := null;
+            Transaction   := null;
             Logger_Packet := new Logger_Message_Packet;
-            Logger_Packet.Push_Component("Transaction Manager");
+            Logger_Packet.Push_Component ("Transaction Manager");
             select
                accept Set_Packet_Queue (Queue : in DNS_Raw_Packet_Queue_Ptr) do
                   Outbound_Packet_Queue := Queue;
@@ -37,8 +38,8 @@ package body DNS_Transaction_Manager is
                   if Outbound_Packet_Queue /= null
                   then
                      Running := True;
-                     Logger_Packet.Log_Message(INFO, "Transaction Manager Started!");
-                     Logger_Queue.Add_Packet(Logger_Packet);
+                     Logger_Packet.Log_Message (INFO, "Transaction Manager Started!");
+                     Logger_Queue.Add_Packet (Logger_Packet);
                   end if;
                end Start;
             or
@@ -48,24 +49,26 @@ package body DNS_Transaction_Manager is
             or
                terminate;
             end select;
-            Logger_Queue.Add_Packet(Logger_Packet);
+            Logger_Queue.Add_Packet (Logger_Packet);
          end loop;
 
          while Running
          loop
             Logger_Packet := new Logger_Message_Packet;
-            Logger_Packet.Push_Component("Transaction Manager");
+            Logger_Packet.Push_Component ("Transaction Manager");
 
             select
                accept From_Client_Resolver_Packet (Packet : Raw_Packet_Record_Ptr) do
                   declare
-                     Log_String : Unbounded_String;
-                     Transaction_String : String(1..8);
+                     Log_String         : Unbounded_String;
+                     Transaction_String : String (1 .. 8);
                   begin
-                     Log_String := To_Unbounded_String("Downstream DNS Transaction ID: ");
-                     Put (Transaction_String, Integer (Packet.Raw_Data.Header.Identifier), Base => 16);
-                     Log_String := Log_String & To_Unbounded_String(Transaction_String);
-                     Logger_Packet.Log_Message(DEBUG, To_String(Log_String));
+                     Log_String := To_Unbounded_String ("Downstream DNS Transaction ID: ");
+                     Put
+                       (Transaction_String, Integer (Packet.Raw_Data.Header.Identifier),
+                        Base => 16);
+                     Log_String := Log_String & To_Unbounded_String (Transaction_String);
+                     Logger_Packet.Log_Message (DEBUG, To_String (Log_String));
                   end;
 
                   Hashmap_Key :=
@@ -92,26 +95,29 @@ package body DNS_Transaction_Manager is
                   Transaction.From_Client_Resolver_Packet := Packet;
 
                   -- Try to parse the packet
-                  DNS_Packet_Processor.Packet_Parser (Logger_Packet, Packet);
+                  Parsed_Packet := DNS_Packet_Processor.Packet_Parser (Logger_Packet, Packet);
 
                   -- Rewrite the DNS Packet and send it on it's way
                   Outbound_Packet_Queue.Put (Packet.all);
                exception
                   when Exp_Error : others =>
                      begin
-                        Logger_Packet.Log_Message(ERROR, "Transaction error: " & Exception_Information (Exp_Error));
+                        Logger_Packet.Log_Message
+                          (ERROR, "Transaction error: " & Exception_Information (Exp_Error));
                      end;
                end From_Client_Resolver_Packet;
             or
                accept From_Upstream_Resolver_Packet (Packet : Raw_Packet_Record_Ptr) do
                   declare
-                     Log_String : Unbounded_String;
-                     Transaction_String : String(1..8);
+                     Log_String         : Unbounded_String;
+                     Transaction_String : String (1 .. 8);
                   begin
-                     Log_String := To_Unbounded_String("Upstream DNS Transaction ID: ");
-                     Put (Transaction_String, Integer (Packet.Raw_Data.Header.Identifier), Base => 16);
-                     Log_String := Log_String & To_Unbounded_String(Transaction_String);
-                     Logger_Packet.Log_Message(DEBUG, To_String(Log_String));
+                     Log_String := To_Unbounded_String ("Upstream DNS Transaction ID: ");
+                     Put
+                       (Transaction_String, Integer (Packet.Raw_Data.Header.Identifier),
+                        Base => 16);
+                     Log_String := Log_String & To_Unbounded_String (Transaction_String);
+                     Logger_Packet.Log_Message (DEBUG, To_String (Log_String));
                   end;
 
                   Hashmap_Key :=
@@ -138,7 +144,15 @@ package body DNS_Transaction_Manager is
                   Transaction.From_Upstream_Resolver_Packet := Packet;
 
                   -- Try to parse the packet
-                  DNS_Packet_Processor.Packet_Parser (Logger_Packet, Packet);
+                  Parsed_Packet := DNS_Packet_Processor.Packet_Parser (Logger_Packet, Packet);
+                  Logger_Packet.Log_Message
+                    (INFO,
+                     To_String (Transaction.Server_Resolver_Address) & " -> " &
+                     To_String (Transaction.Client_Resolver_Address));
+                  for I of Parsed_Packet.Answer
+                  loop
+                     Logger_Packet.Log_Message (INFO, "    " & I.Print_Packet);
+                  end loop;
 
                   -- Flip the packet around so it goes to the right place
                   Outbound_Packet            := Packet.all;
@@ -149,7 +163,8 @@ package body DNS_Transaction_Manager is
                exception
                   when Exp_Error : others =>
                      begin
-                        Logger_Packet.Log_Message(ERROR, "Transaction error: " & Exception_Information (Exp_Error));
+                        Logger_Packet.Log_Message
+                          (ERROR, "Transaction error: " & Exception_Information (Exp_Error));
                      end;
                end From_Upstream_Resolver_Packet;
             or
@@ -197,7 +212,7 @@ package body DNS_Transaction_Manager is
             or
                delay 0.1;
             end select;
-            Logger_Queue.Add_Packet(Logger_Packet);
+            Logger_Queue.Add_Packet (Logger_Packet);
          end loop;
       end loop;
    end DNS_Transaction_Manager_Task;

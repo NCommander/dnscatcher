@@ -78,6 +78,24 @@ package DNS_Common.Logger is
 
    end Logger;
    
+   -- Define some color codes here
+   ANSI_Default : constant String := ASCII.ESC & "[39m";
+   ANSI_Black : constant String := ASCII.ESC & "[30m";
+   ANSI_Red : constant String := ASCII.ESC & "[31m";
+   ANSI_Green : constant String := ASCII.ESC & "[32m";
+   ANSI_Yellow : constant String := ASCII.ESC & "[33m";
+   ANSI_Blue : constant String := ASCII.ESC & "[34m";
+   ANSI_Magenta : constant String := ASCII.ESC & "[35m";
+   ANSI_Cyan : constant String := ASCII.ESC & "[36m";
+   ANSI_Light_Gray : constant String := ASCII.ESC & "[37m";
+   ANSI_Dark_Gray : constant String := ASCII.ESC & "[90m";
+   ANSI_Light_Red : constant String := ASCII.ESC & "[91m";
+   ANSI_Light_Green : constant String := ASCII.ESC & "[92m";
+   ANSI_Light_Yellow : constant String := ASCII.ESC & "[93m";
+   ANSI_Light_Blue : constant String := ASCII.ESC & "[94m";
+   ANSI_Light_Magenta : constant String := ASCII.ESC & "[95m";
+   ANSI_Light_Cyan : constant String := ASCII.ESC & "[96m";
    
+   ANSI_Reset : constant String := ASCII.ESC & "[0m";
 
 end DNS_Common.Logger;

@@ -18,6 +18,11 @@ package body DNS_RData_Processor.Unknown_Parser is
    begin
       return "UNKNOWN";
    end RData_To_String;
-   pragma Warnings (On, "formal parameter ""This"" is not referenced");
    
+   function Print_Packet (This : in Parsed_Unknown_RData) return String is
+   begin
+      return "UNKNOWN";
+   end Print_Packet;
+   pragma Warnings (On, "formal parameter ""This"" is not referenced");
+
 end DNS_RData_Processor.Unknown_Parser;

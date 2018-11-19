@@ -6,13 +6,13 @@ with System;
 
 package body DNS_Packet_Processor is
 
-   procedure Packet_Parser (Logger: Logger_Message_Packet_Ptr; Packet : Raw_Packet_Record_Ptr) is
+   function Packet_Parser (Logger: Logger_Message_Packet_Ptr; Packet : Raw_Packet_Record_Ptr) return Parsed_DNS_Packet_Ptr is
       Parsed_Packet  : Parsed_DNS_Packet_Ptr;
       Current_Offset : Stream_Element_Offset := 1;
    begin
       Parsed_Packet := new Parsed_DNS_Packet;
 
-      Logger.Push_Component("Packet_Parser");
+      Logger.Push_Component("Packet Parser");
       -- Copy the header as it's already parsed
       Parsed_Packet.Header := Packet.all.Raw_Data.Header;
 
@@ -76,6 +76,8 @@ package body DNS_Packet_Processor is
            (Parse_Resource_Record_Response (Logger, Packet.Raw_Data.Data, Current_Offset));
       end loop;
 
+      Logger.Pop_Component;
+      return Parsed_Packet;
    end Packet_Parser;
 
    -- I apologize in advance, this function is a real mindfuck.
@@ -291,7 +293,7 @@ package body DNS_Packet_Processor is
       Logger.Log_Message(DEBUG, "TTL is" & Parsed_Response.TTL'Image);
       Logger.Log_Message(DEBUG, "RDLength is" & RData_Length'Image);
 
-      Logger.Pop_Component;
+
       declare
          subtype RData is String (1 .. Integer (RData_Length));
          function To_RData is new Ada.Unchecked_Conversion (Source => Stream_Element_Array,

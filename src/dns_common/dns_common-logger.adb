@@ -1,5 +1,8 @@
 with Ada.Text_IO; use Ada.Text_IO;
 with Ada.Unchecked_Deallocation;
+with Ada.Calendar; use Ada.Calendar;
+with Ada.Calendar.Formatting; use Ada.Calendar.Formatting;
+
 
 package body DNS_Common.Logger is
 
@@ -8,9 +11,30 @@ package body DNS_Common.Logger is
 
    function Format_Log_Level (Use_Color : Boolean; Log_Level : Log_Levels) return Unbounded_String
    is
+      Color_Prefix : Unbounded_String;
+      Log_Level_Str : Unbounded_String;
+      Now : constant Time := Clock;
    begin
-      -- We'll do color later
-      return To_Unbounded_String ("[" & Log_Level'Image & "]");
+
+      -- Add ANSI color codes if we're using color on Linux
+      if Use_Color then
+         case Log_Level is
+            when EMERGERENCY => Color_Prefix := To_Unbounded_String(ANSI_Light_Red);
+            when ALERT => Color_Prefix := To_Unbounded_String(ANSI_Light_Red);
+            when CRITICAL  => Color_Prefix := To_Unbounded_String(ANSI_Light_Red);
+            when ERROR => Color_Prefix := To_Unbounded_String(ANSI_Red);
+            when WARNING => Color_Prefix := To_Unbounded_String(ANSI_Light_Yellow);
+            when NOTICE => Color_Prefix := To_Unbounded_String(ANSI_Yellow);
+            when INFO => Color_Prefix := To_Unbounded_String(ANSI_Green);
+            when DEBUG => Color_Prefix := To_Unbounded_String (ANSI_Light_Blue);
+         end case;
+
+         Log_Level_Str := Color_Prefix & To_Unbounded_String(Log_Level'Image) & ANSI_Reset;
+      else
+         Log_Level_Str := To_Unbounded_String(Log_Level'Image);
+      end if;
+
+      return To_Unbounded_String (Image(Date => Now) & " [" & To_String(Log_Level_Str) & "]");
    end Format_Log_Level;
 
    function Create_String_From_Components
@@ -171,7 +195,6 @@ package body DNS_Common.Logger is
             or
                accept Stop do
                   -- Flush the pending queue
-                  Put_Line("HERE");
                   Keep_Running := False;
                   Process_Queue;
                end Stop;

@@ -23,4 +23,9 @@ package body DNS_RData_Processor.A_Parser is
       return To_String (This.A_Record);
    end RData_To_String;
 
+   function Print_Packet(This : in Parsed_A_RData) return String is
+   begin
+      return "A " & RData_To_String(This);
+   end Print_Packet;
+
 end DNS_RData_Processor.A_Parser;
