@@ -3,6 +3,7 @@ with Ada.Strings.Unbounded;   use Ada.Strings.Unbounded;
 with Ada.Streams;             use Ada.Streams;
 with Interfaces.C.Extensions; use Interfaces.C.Extensions;
 
+with DNS_Common.Logger; use DNS_Common.Logger;
 with DNS_Core_Constructs.Raw_Packet_Records; use DNS_Core_Constructs.Raw_Packet_Records;
 with DNS_Core_Constructs;                    use DNS_Core_Constructs;
 with DNS_RData_Processor;                    use DNS_RData_Processor;
@@ -36,7 +37,7 @@ package DNS_Packet_Processor is
    end record;
    type Parsed_DNS_Packet_Ptr is access Parsed_DNS_Packet;
 
-   procedure Packet_Parser (Packet : Raw_Packet_Record_Ptr);
+   procedure Packet_Parser (Logger: Logger_Message_Packet_Ptr; Packet : Raw_Packet_Record_Ptr);
 
    function Parse_DNS_Packet_Name_Records (Raw_Data :        Raw_DNS_Packet_Data;
       Offset : in out Stream_Element_Offset) return Unbounded_String;
@@ -47,11 +48,13 @@ package DNS_Packet_Processor is
    function Parse_DNS_Class (Raw_Data :        Raw_DNS_Packet_Data;
       Offset                          : in out Stream_Element_Offset) return Classes;
 
-   function Parse_Question_Record (Raw_Data :        Raw_DNS_Packet_Data;
-      Offset : in out Stream_Element_Offset) return Parsed_DNS_Question;
+   function Parse_Question_Record (Logger: Logger_Message_Packet_Ptr;
+                                   Raw_Data :        Raw_DNS_Packet_Data;
+                                   Offset : in out Stream_Element_Offset) return Parsed_DNS_Question;
 
-   function Parse_Resource_Record_Response (Raw_Data :        Raw_DNS_Packet_Data;
-      Offset : in out Stream_Element_Offset) return Parsed_RData_Access;
+   function Parse_Resource_Record_Response (Logger: Logger_Message_Packet_Ptr;
+                                            Raw_Data :        Raw_DNS_Packet_Data;
+                                            Offset : in out Stream_Element_Offset) return Parsed_RData_Access;
 
    Unknown_RCode              : exception;
    Unknown_RR_Type            : exception;

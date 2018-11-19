@@ -1,4 +1,3 @@
-with Ada.Text_IO;                use Ada.Text_IO;
 with Ada.Strings;
 with Ada.Unchecked_Conversion;
 with DNS_Packet_Processor.Utils; use DNS_Packet_Processor.Utils;
@@ -7,29 +6,26 @@ with System;
 
 package body DNS_Packet_Processor is
 
-   procedure Packet_Parser (Packet : Raw_Packet_Record_Ptr) is
+   procedure Packet_Parser (Logger: Logger_Message_Packet_Ptr; Packet : Raw_Packet_Record_Ptr) is
       Parsed_Packet  : Parsed_DNS_Packet_Ptr;
       Current_Offset : Stream_Element_Offset := 1;
    begin
       Parsed_Packet := new Parsed_DNS_Packet;
 
+      Logger.Push_Component("Packet_Parser");
       -- Copy the header as it's already parsed
       Parsed_Packet.Header := Packet.all.Raw_Data.Header;
-      New_Line;
-      Put_Line ("DNS Packet Information:");
-      if Parsed_Packet.Header.Query_Response_Flag
-      then
-         Put_Line ("  Client Requested");
+
+      if Parsed_Packet.Header.Query_Response_Flag then
+        Logger.Log_Message(DEBUG, "Client Requested DNS Packet");
       else
-         Put_Line ("  Response from Resolver");
+         Logger.Log_Message(DEBUG, "Server Response DNS Packet");
       end if;
 
       if Parsed_Packet.Header.Truncated
       then
-         Put_Line ("  WARNING: Packet is truncated!");
+         Logger.Log_Message (DEBUG, "Packet is truncated!");
       end if;
-
-      Put ("  Response Code: ");
 
       declare
          Found : Boolean := False;
@@ -38,7 +34,7 @@ package body DNS_Packet_Processor is
          loop
             if Integer (Parsed_Packet.Header.Response_Code) = RCode'Enum_Rep
             then
-               Put_Line (RCodes'Image (RCode));
+               Logger.Log_Message(DEBUG, "Response code: " & RCodes'Image (RCode));
                Found := True;
             end if;
             exit when Found;
@@ -50,37 +46,34 @@ package body DNS_Packet_Processor is
          end if;
       end;
 
-      Put_Line ("  Question Count:" & Parsed_Packet.Header.Question_Count'Image);
-      Put_Line ("  Answer Count:" & Parsed_Packet.Header.Answer_Record_Count'Image);
-      Put_Line ("  Authority Count:" & Parsed_Packet.Header.Authority_Record_Count'Image);
-      Put_Line ("  Additional Count:" & Parsed_Packet.Header.Additional_Record_Count'Image);
+
+      Logger.Log_Message(DEBUG, "Question Count:" & Parsed_Packet.Header.Question_Count'Image);
+      Logger.Log_Message(DEBUG, "Answer Count:" & Parsed_Packet.Header.Answer_Record_Count'Image);
+      Logger.Log_Message(DEBUG, "Authority Count:" & Parsed_Packet.Header.Authority_Record_Count'Image);
+      Logger.Log_Message(DEBUG, "Additional Count:" & Parsed_Packet.Header.Additional_Record_Count'Image);
 
       for i in 1 .. Parsed_Packet.Header.Question_Count
       loop
-         Put_Line ("Parsing Question");
          Parsed_Packet.Questions.Append
-           (Parse_Question_Record (Packet.Raw_Data.Data, Current_Offset));
+           (Parse_Question_Record (Logger, Packet.Raw_Data.Data, Current_Offset));
       end loop;
 
       for i in 1 .. Parsed_Packet.Header.Answer_Record_Count
       loop
-         Put_Line ("Parsing Answer_Record");
          Parsed_Packet.Answer.Append
-           (Parse_Resource_Record_Response (Packet.Raw_Data.Data, Current_Offset));
+           (Parse_Resource_Record_Response (Logger, Packet.Raw_Data.Data, Current_Offset));
       end loop;
 
       for i in 1 .. Parsed_Packet.Header.Authority_Record_Count
       loop
-         Put_Line ("Parsing Authority_Record");
          Parsed_Packet.Authority.Append
-           (Parse_Resource_Record_Response (Packet.Raw_Data.Data, Current_Offset));
+           (Parse_Resource_Record_Response (Logger, Packet.Raw_Data.Data, Current_Offset));
       end loop;
 
       for i in 1 .. Parsed_Packet.Header.Additional_Record_Count
       loop
-         Put_Line ("Parsing Additional_Record");
          Parsed_Packet.Additional.Append
-           (Parse_Resource_Record_Response (Packet.Raw_Data.Data, Current_Offset));
+           (Parse_Resource_Record_Response (Logger, Packet.Raw_Data.Data, Current_Offset));
       end loop;
 
    end Packet_Parser;
@@ -181,7 +174,6 @@ package body DNS_Packet_Processor is
          end if;
 
          Section_Length := Unsigned_8 (Raw_Data.all (Offset));
-         --Put_Line(To_String(Domain_Name));
          exit when Section_Length = 0;
 
          -- Tack on the . if this isn't the last iteration
@@ -251,12 +243,13 @@ package body DNS_Packet_Processor is
    end Parse_DNS_Class;
 
    -- Parses the questions asked in a DNS record
-   function Parse_Question_Record (Raw_Data :        Raw_DNS_Packet_Data;
-      Offset : in out Stream_Element_Offset) return Parsed_DNS_Question
+   function Parse_Question_Record (Logger: Logger_Message_Packet_Ptr;
+                                   Raw_Data :        Raw_DNS_Packet_Data;
+                                   Offset : in out Stream_Element_Offset) return Parsed_DNS_Question
    is
       Parsed_Question : Parsed_DNS_Question;
    begin
-      Put_Line ("    Starting Answer Parse");
+      Logger.Push_Component("Question Parser");
 
       -- Get the QName
       Parsed_Question.QName  := Parse_DNS_Packet_Name_Records (Raw_Data, Offset);
@@ -264,22 +257,25 @@ package body DNS_Packet_Processor is
       Parsed_Question.QClass := Parse_DNS_Class (Raw_Data, Offset);
       --      Parsed_Question.QClass := DNS_Classes.DNS_Classes(Unsigned_16(Raw_Data(Offset+2..Offset+2)));
 
-      Put_Line ("      QName is " & To_String (Parsed_Question.QName));
-      Put_Line ("      QType is " & To_String (Parsed_Question.QType));
-      Put_Line ("      QClass is " & To_String (Parsed_Question.QClass));
+      Logger.Log_Message(DEBUG, "QName is " & To_String (Parsed_Question.QName));
+      Logger.Log_Message(DEBUG, "QType is " & To_String (Parsed_Question.QType));
+      Logger.Log_Message(DEBUG, "QClass is " & To_String (Parsed_Question.QClass));
+
+      Logger.Pop_Component;
 
       return Parsed_Question;
    end Parse_Question_Record;
 
-   function Parse_Resource_Record_Response (Raw_Data :        Raw_DNS_Packet_Data;
-      Offset : in out Stream_Element_Offset) return Parsed_RData_Access
+   function Parse_Resource_Record_Response (Logger: Logger_Message_Packet_Ptr;
+                                            Raw_Data :        Raw_DNS_Packet_Data;
+                                            Offset : in out Stream_Element_Offset) return Parsed_RData_Access
    is
       Parsed_Response : Parsed_DNS_Resource_Record;
 
       RData_Length          : Unsigned_16;
       Parsed_RData_Response : Parsed_RData_Access;
    begin
-      Put_Line ("  Starting Resource Record Parse");
+      Logger.Push_Component("RRecord Parser");
       Parsed_Response.RName  := Parse_DNS_Packet_Name_Records (Raw_Data, Offset);
       Parsed_Response.RType  := Parse_DNS_RR_Type (Raw_Data, Offset);
       Parsed_Response.RClass := Read_Unsigned_16 (Raw_Data, Offset);
@@ -289,12 +285,13 @@ package body DNS_Packet_Processor is
       -- unchecked conversion
       RData_Length := Read_Unsigned_16 (Raw_Data, Offset);
 
-      Put_Line ("    RName is " & To_String (Parsed_Response.RName));
-      Put_Line ("    RType is " & To_String (Parsed_Response.RType));
-      Put_Line ("    RClass is" & Parsed_Response.RClass'Image);
-      Put_Line ("    TTL is" & Parsed_Response.TTL'Image);
-      Put_Line ("    RDLength is" & RData_Length'Image);
+      Logger.Log_Message(DEBUG, "RName is " & To_String (Parsed_Response.RName));
+      Logger.Log_Message(DEBUG, "RType is " & To_String (Parsed_Response.RType));
+      Logger.Log_Message(DEBUG, "RClass is" & Parsed_Response.RClass'Image);
+      Logger.Log_Message(DEBUG, "TTL is" & Parsed_Response.TTL'Image);
+      Logger.Log_Message(DEBUG, "RDLength is" & RData_Length'Image);
 
+      Logger.Pop_Component;
       declare
          subtype RData is String (1 .. Integer (RData_Length));
          function To_RData is new Ada.Unchecked_Conversion (Source => Stream_Element_Array,
@@ -307,7 +304,8 @@ package body DNS_Packet_Processor is
       end;
 
       Parsed_RData_Response := To_Parsed_RData (Parsed_Response);
-      Put_Line ("    RData is " & Parsed_RData_Response.RData_To_String);
+      Logger.Log_Message(DEBUG, "RData is " & Parsed_RData_Response.RData_To_String);
+      Logger.Pop_Component;
 
       return Parsed_RData_Response;
    end Parse_Resource_Record_Response;

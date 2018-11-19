@@ -92,7 +92,7 @@ package body DNS_Transaction_Manager is
                   Transaction.From_Client_Resolver_Packet := Packet;
 
                   -- Try to parse the packet
-                  DNS_Packet_Processor.Packet_Parser (Packet);
+                  DNS_Packet_Processor.Packet_Parser (Logger_Packet, Packet);
 
                   -- Rewrite the DNS Packet and send it on it's way
                   Outbound_Packet_Queue.Put (Packet.all);
@@ -138,7 +138,7 @@ package body DNS_Transaction_Manager is
                   Transaction.From_Upstream_Resolver_Packet := Packet;
 
                   -- Try to parse the packet
-                  DNS_Packet_Processor.Packet_Parser (Packet);
+                  DNS_Packet_Processor.Packet_Parser (Logger_Packet, Packet);
 
                   -- Flip the packet around so it goes to the right place
                   Outbound_Packet            := Packet.all;

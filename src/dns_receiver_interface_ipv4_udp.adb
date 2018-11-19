@@ -1,4 +1,3 @@
-with Ada.Text_IO;
 with Ada.Exceptions;        use Ada.Exceptions;
 with Ada.Streams;           use Ada.Streams;
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
@@ -29,7 +28,6 @@ package body DNS_Receiver_Interface_IPv4_UDP is
          -- Either just started or stopping, we're terminatable in this state
          while Process_Packets = False
          loop
-            Ada.Text_IO.Put_Line("Here");
             select
                accept Initialize (Config : Configuration_Ptr; Socket : Socket_Type;
                                   Transaction_Manager    : DNS_Transaction_Manager_Task_Ptr) do

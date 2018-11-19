@@ -1,4 +1,3 @@
-with Ada.Text_IO;    use Ada.Text_IO;
 with Ada.Exceptions; use Ada.Exceptions;
 
 with Ada.Streams;           use Ada.Streams;
@@ -69,8 +68,7 @@ package body DNS_Sender_Interface_IPv4_UDP is
                   Outgoing_Port    := DNS_Packet.To_Port;
 
                   -- And send the damn thing
-                  Put ("Sent packet to ");
-                  Put_Line (Image (Outgoing_Address));
+                  Logger_Packet.Log_Message(DEBUG, "Sent packet to " & Image (Outgoing_Address));
 
                   -- Create the outbound message
                   declare
@@ -85,8 +83,6 @@ package body DNS_Sender_Interface_IPv4_UDP is
                           (Family => Family_Inet, Addr => Outgoing_Address,
                            Port   => Outgoing_Port));
 
-                     Put ("Sent packet to ");
-                     Put_Line (Image (Outgoing_Address));
                   exception
                      when Exp_Error : others =>
                         begin
