@@ -24,6 +24,6 @@ package Test_Packet_Parser is
 
    -- Test Routines:
    procedure Test_Parse_A_Record (T : in out Test_Cases.Test_Case'Class);
-   procedure Test_2 (T : in out Test_Cases.Test_Case'Class);
+   procedure Test_Parse_SOA_Record (T : in out Test_Cases.Test_Case'Class);
 
 end Test_Packet_Parser;

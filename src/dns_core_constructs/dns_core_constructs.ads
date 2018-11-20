@@ -267,7 +267,7 @@ package DNS_Core_Constructs is
    DNS_PACKET_HEADER_SIZE : constant Stream_Element_Offset := 12;
 
    -- Represents everything past the data
-   type Stream_Element_Array_Ptr is access Stream_Element_Array;
+   type Stream_Element_Array_Ptr is access all Stream_Element_Array;
    subtype Raw_DNS_Packet_Data is Stream_Element_Array_Ptr;
 
    type Raw_DNS_Packet is record

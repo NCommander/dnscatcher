@@ -1,5 +1,6 @@
 with DNS_Packet_Processor;               use DNS_Packet_Processor;
 with DNS_RData_Processor.A_Parser;       use DNS_RData_Processor.A_Parser;
+with DNS_RData_Processor.SOA_Parser;     use DNS_RData_Processor.SOA_Parser;
 with DNS_RData_Processor.Unknown_Parser; use DNS_RData_Processor.Unknown_Parser;
 package body DNS_RData_Processor is
 
@@ -9,6 +10,8 @@ package body DNS_RData_Processor is
       case Parsed_RR.RType is
          when A =>
             Working_Record := new Parsed_A_RData;
+         when SOA =>
+            Working_Record := new Parsed_SOA_RData;
          when others =>
             Working_Record := new Parsed_Unknown_RData;
       end case;

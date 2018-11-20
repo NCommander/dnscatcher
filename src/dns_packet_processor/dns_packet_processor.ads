@@ -23,6 +23,8 @@ package DNS_Packet_Processor is
       RClass : Unsigned_16;
       TTL    : Unsigned_32;
       RData  : Unbounded_String;
+      Raw_Packet : Stream_Element_Array_Ptr; -- Because sometimes we need the whole packet to decode
+      RData_Offset : Stream_Element_Offset;
    end record;
 
    package Question_Vector is new Vectors (Positive, Parsed_DNS_Question);

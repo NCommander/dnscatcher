@@ -169,7 +169,7 @@ package body DNS_Packet_Processor is
                  Parse_DNS_Packet_Name_Records
                    (Raw_Data, Stream_Element_Offset (Packet_Ptr.Packet_Offset));
                Offset := Offset + 2;
-               return Decompressed_Domain_String;
+               return Domain_Name & Decompressed_Domain_String;
             end;
          else
             -- Welp, unknown compression, bail out
@@ -294,6 +294,11 @@ package body DNS_Packet_Processor is
       Logger.Log_Message(DEBUG, "TTL is" & Parsed_Response.TTL'Image);
       Logger.Log_Message(DEBUG, "RDLength is" & RData_Length'Image);
 
+      -- RData parsing often needs the whole packet if DNS Compression is used, so give it
+      -- a copy, and set the offset for them.
+      Parsed_Response.Raw_Packet := new Stream_Element_Array(1..Raw_Data'Last);
+      Parsed_Response.Raw_Packet.all := Raw_Data.all;
+      Parsed_Response.RData_Offset := Offset;
 
       declare
          subtype RData is String (1 .. Integer (RData_Length));
