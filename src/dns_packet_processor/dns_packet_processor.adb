@@ -121,7 +121,7 @@ package body DNS_Packet_Processor is
          -- Given we're already in the correct memory format, we'll just use bitwise ops
          -- because I've already raged hard enough here
 
-         if (Section_Length and 2#11#) /= 0 -- Not compressed
+         if (Section_Length and 16#c0#) = 0 -- Not compressed
          then
             Offset := Offset + 1; -- Move past the length
 
@@ -138,7 +138,7 @@ package body DNS_Packet_Processor is
                Offset := Offset + Stream_Element_Offset (Section_Length);
             end;
 
-         elsif (Section_Length and 2#11#) = 0
+         elsif (Section_Length and 16#c0#) /= 0
          then
             -- Standard compression is nuts. We have a pointer within the packet that basically
             -- contains a link to the string segment we need next. Let's see if we can grab it and
