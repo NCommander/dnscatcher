@@ -17,6 +17,8 @@ package body DNS_RData_Processor is
          -- Handle all DNS responses which are just a name
          when CNAME =>
             Working_Record := new Parsed_DNR_RData;
+         when PTR =>
+            Working_Record := new Parsed_DNR_RData;
          when NS =>
             Working_Record := new Parsed_DNR_RData;
          when others =>

@@ -27,5 +27,6 @@ package Test_Packet_Parser is
    procedure Test_Parse_SOA_Record (T : in out Test_Cases.Test_Case'Class);
    procedure Test_Parse_CNAME_Record (T : in out Test_Cases.Test_Case'Class);
    procedure Test_Parse_NS_Record (T : in out Test_Cases.Test_Case'Class);
+   procedure Test_Parse_PTR_Record (T : in out Test_Cases.Test_Case'Class);
 
 end Test_Packet_Parser;
