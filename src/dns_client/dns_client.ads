@@ -3,6 +3,7 @@ with DNS_Packet_Processor; use DNS_Packet_Processor;
 
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 with Ada.Numerics.Discrete_Random;
+with Ada.Containers.Vectors; use Ada.Containers;
 
 with Interfaces.C.Extensions; use Interfaces.C.Extensions;
 
