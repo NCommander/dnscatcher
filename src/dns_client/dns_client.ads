@@ -1,9 +1,9 @@
 with DNS_Core_Constructs; use DNS_Core_Constructs;
 with DNS_Packet_Processor; use DNS_Packet_Processor;
+with DNS_Core_Constructs.Raw_Packet_Records; use DNS_Core_Constructs.Raw_Packet_Records;
 
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 with Ada.Numerics.Discrete_Random;
-with Ada.Containers.Vectors; use Ada.Containers;
 
 with Interfaces.C.Extensions; use Interfaces.C.Extensions;
 
@@ -31,7 +31,7 @@ package DNS_Client is
    -- Placeholder for now until we figure out what this is supposed to
    -- actually look like
 
-   procedure Run_Query(This: in out Client);
+   function Create_Packet (This : in out Client) return Raw_Packet_Record_Ptr ;
    -- Utility functions;
    function Create_DNS_Packet_Name_Record(Question: Parsed_DNS_Question) return Unbounded_String;
 end DNS_Client;

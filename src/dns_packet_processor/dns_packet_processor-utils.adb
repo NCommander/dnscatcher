@@ -16,6 +16,20 @@ package body DNS_Packet_Processor.Utils is
       return Internal (Network_Long);
    end Ntohl;
 
+   function Htons (Host_Short : Unsigned_16) return Unsigned_16 is
+      function Internal (Host_Short: Unsigned_16) return Unsigned_16;
+      pragma Import (C, Internal, "htons");
+   begin
+      return Internal (Host_Short);
+   end Htons;
+
+   function Htonl (Host_Long : Unsigned_32) return Unsigned_32 is
+      function Internal (Host_Long: Unsigned_32) return Unsigned_32;
+      pragma Import (C, Internal, "htonl");
+   begin
+      return Internal (Host_Long);
+   end Htonl;
+
    -- Bullshit functions to handle Endianess, wish Ada handled this better
    function Read_Unsigned_16 (Raw_Data :        Stream_Element_Array_Ptr;
       Offset                           : in out Stream_Element_Offset) return Unsigned_16
