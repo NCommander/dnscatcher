@@ -13,7 +13,7 @@ package body DNS_Client is
       This.Header.Identifier := Random_Transaction_ID.Random (Generator);
 
       -- We're a client, set the flags
-      This.Header.Query_Response_Flag := True;
+      This.Header.Query_Response_Flag := False;
       This.Header.Opcode              := 0; -- Client response
       This.Header.Truncated           := False;
       This.Header.Recursion_Desired   := True;
@@ -119,7 +119,7 @@ package body DNS_Client is
       return DNS_Name_Record;
    end Create_DNS_Packet_Name_Record;
 
-   function Create_Packet (This : in out Client) return Raw_Packet_Record_Ptr is
+   function Create_Packet (This : in out Client; Config: Configuration_Ptr) return Raw_Packet_Record_Ptr is
       DNS_Packet_Names : Unbounded_String;
       Outbound_Packet  : constant Raw_Packet_Record_Ptr := new Raw_Packet_Record;
 
@@ -141,8 +141,14 @@ package body DNS_Client is
       begin
          Outbound_Packet.Raw_Data.Data := new Stream_Element_Array(1..QData'Length);
          Outbound_Packet.Raw_Data.Data.all := String_To_Packet (QData);
+         Outbound_Packet.Raw_Data_Length := DNS_PACKET_HEADER_SIZE+QData'Length;
       end;
 
+      -- Set our sender information
+      Outbound_Packet.From_Address := To_Unbounded_String("127.0.0.1");
+      Outbound_Packet.From_Port := 53;
+      Outbound_Packet.To_Address := Config.Upstream_DNS_Server;
+      Outbound_Packet.To_Port := Config.Upstream_DNS_Server_Port;
       return Outbound_Packet;
    end Create_Packet;
 

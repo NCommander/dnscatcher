@@ -17,6 +17,7 @@ package DNS_Transaction_Manager is
       Server_Resolver_Address       : Unbounded_String;
       Server_Resolver_Port          : Port_Type;
       DNS_Transaction_Id            : Unsigned_16;
+      Local_Request                 : Boolean;
       From_Client_Resolver_Packet   : Raw_Packet_Record_Ptr;
       From_Upstream_Resolver_Packet : Raw_Packet_Record_Ptr;
    end record;
@@ -34,7 +35,7 @@ package DNS_Transaction_Manager is
    task type DNS_Transaction_Manager_Task is
       entry Start;
       entry Set_Packet_Queue (Queue : DNS_Raw_Packet_Queue_Ptr);
-      entry From_Client_Resolver_Packet (Packet : Raw_Packet_Record_Ptr);
+      entry From_Client_Resolver_Packet (Packet : Raw_Packet_Record_Ptr; Local: Boolean);
       entry From_Upstream_Resolver_Packet (Packet : Raw_Packet_Record_Ptr);
       entry Stop;
    end DNS_Transaction_Manager_Task;

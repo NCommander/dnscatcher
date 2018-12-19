@@ -98,7 +98,7 @@ package body DNS_Receiver_Interface_IPv4_UDP is
                   -- Was this a server response, or client response?
                   if DNS_Config.Upstream_DNS_Server /= (Image (Incoming_Address.Addr))
                   then
-                     DNS_Transaction_Manager.From_Client_Resolver_Packet (Packet => DNS_Packet);
+                     DNS_Transaction_Manager.From_Client_Resolver_Packet (Packet => DNS_Packet, Local => False);
                   else
                      DNS_Transaction_Manager.From_Upstream_Resolver_Packet (Packet => DNS_Packet);
                   end if;

@@ -10,7 +10,7 @@ package body DNS_Sender_Interface_IPv4_UDP is
    task body Send_Packet_Task is
       DNS_Socket            : Socket_Type;
       DNS_Packet            : Raw_Packet_Record;
-      Outbound_Packet_Queue : DNS_Raw_Packet_Queue_Ptr;
+      Outbound_Packet_Queue : DNS_Raw_Packet_Queue_Ptr := null;
       Outgoing_Address      : Inet_Addr_Type;
       Outgoing_Port         : Port_Type;
       Length                : Stream_Element_Offset;
@@ -20,7 +20,11 @@ package body DNS_Sender_Interface_IPv4_UDP is
    begin
       loop
          -- Either just started or stopping, we're terminatable in this state
-         while Process_Packets = False
+         if Outbound_Packet_Queue /= null then
+           Outbound_Packet_Queue.Count (Packet_Count);
+         end if;
+
+         while Process_Packets = False and Packet_Count = 0
          loop
             select
                accept Initialize (Socket : Socket_Type; Packet_Queue : DNS_Raw_Packet_Queue_Ptr) do
@@ -46,7 +50,7 @@ package body DNS_Sender_Interface_IPv4_UDP is
          end loop;
 
          -- We're actively processing packets
-         while Process_Packets
+         while Process_Packets or Packet_Count > 0
          loop
             Logger_Packet := new Logger_Message_Packet;
             Logger_Packet.Push_Component("UDP Sender");
@@ -64,17 +68,17 @@ package body DNS_Sender_Interface_IPv4_UDP is
                if Packet_Count > 0
                then
                   Outbound_Packet_Queue.Get (DNS_Packet);
-                  Outgoing_Address := Inet_Addr (To_String (DNS_Packet.To_Address));
-                  Outgoing_Port    := DNS_Packet.To_Port;
-
-                  -- And send the damn thing
-                  Logger_Packet.Log_Message(DEBUG, "Sent packet to " & Image (Outgoing_Address));
-
-                  -- Create the outbound message
                   declare
                      Buffer : Stream_Element_Array (1 .. DNS_Packet.Raw_Data_Length);
                      Header : SEA_DNS_Packet_Header;
                   begin
+                     Outgoing_Address := Inet_Addr (To_String (DNS_Packet.To_Address));
+                     Outgoing_Port    := DNS_Packet.To_Port;
+
+                     -- And send the damn thing
+                     Logger_Packet.Log_Message(DEBUG, "Sent packet to " & Image (Outgoing_Address));
+
+                     -- Create the outbound message
                      Header := DNS_Packet_Header_To_SEA (DNS_Packet.Raw_Data.Header);
                      Buffer := Header & DNS_Packet.Raw_Data.Data.all;
                      Send_Socket

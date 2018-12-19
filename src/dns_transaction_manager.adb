@@ -60,7 +60,7 @@ package body DNS_Transaction_Manager is
             Logger_Packet.Push_Component ("Transaction Manager");
 
             select
-               accept From_Client_Resolver_Packet (Packet : Raw_Packet_Record_Ptr) do
+               accept From_Client_Resolver_Packet (Packet : Raw_Packet_Record_Ptr; Local: Boolean) do
                   declare
                      Log_String         : Unbounded_String;
                      Transaction_String : String (1 .. 8);
@@ -89,6 +89,7 @@ package body DNS_Transaction_Manager is
                      Transaction.Server_Resolver_Address := Packet.To_Address;
                      Transaction.Server_Resolver_Port    := Packet.To_Port;
                      Transaction.DNS_Transaction_Id      := Packet.Raw_Data.Header.Identifier;
+                     Transaction.Local_Request           := Local;
                      Transaction_Hashmap.Insert (Hashmap_Key, Transaction);
                   end if;
 
@@ -158,11 +159,14 @@ package body DNS_Transaction_Manager is
                   end loop;
                   Free_Parsed_DNS_Packet(Parsed_Packet);
 
-                  -- Flip the packet around so it goes to the right place
-                  Outbound_Packet            := Packet.all;
-                  Outbound_Packet.To_Address := Transaction.Client_Resolver_Address;
-                  Outbound_Packet.To_Port    := Transaction.Client_Resolver_Port;
-                  Outbound_Packet_Queue.Put (Outbound_Packet);
+                  -- If we're a local response, we don't resend it
+                  if Transaction.Local_Request /= True then
+                     -- Flip the packet around so it goes to the right place
+                     Outbound_Packet            := Packet.all;
+                     Outbound_Packet.To_Address := Transaction.Client_Resolver_Address;
+                     Outbound_Packet.To_Port    := Transaction.Client_Resolver_Port;
+                     Outbound_Packet_Queue.Put (Outbound_Packet);
+                  end if;
 
                exception
                   when Exp_Error : others =>
