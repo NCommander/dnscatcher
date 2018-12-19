@@ -177,42 +177,8 @@ package body DNS_Transaction_Manager is
                end From_Upstream_Resolver_Packet;
             or
                accept Stop do
-                  declare
-
-                     -- Clean up the pool and get rid of everything we don't need
-                     procedure Empty_Hash_Map (c : DNS_Transaction_Maps.Cursor) is
-                        procedure Free_Transaction is new Ada.Unchecked_Deallocation
-                          (Object => DNS_Transaction, Name => DNS_Transaction_Ptr);
-                        procedure Free_Packet is new Ada.Unchecked_Deallocation
-                          (Object => Raw_Packet_Record, Name => Raw_Packet_Record_Ptr);
-                        P : DNS_Transaction_Ptr;
-                     begin
-                        P := Element (c);
-
-                        if P.From_Client_Resolver_Packet /= null
-                        then
-                           if P.From_Client_Resolver_Packet.Raw_Data.Data /= null
-                           then
-                              Free_Stream_Element_Array_Ptr
-                                (P.From_Client_Resolver_Packet.Raw_Data.Data);
-                           end if;
-                           Free_Packet (P.From_Client_Resolver_Packet);
-                        end if;
-
-                        if P.From_Upstream_Resolver_Packet /= null
-                        then
-                           if P.From_Upstream_Resolver_Packet.Raw_Data.Data /= null
-                           then
-                              Free_Stream_Element_Array_Ptr
-                                (P.From_Upstream_Resolver_Packet.Raw_Data.Data);
-                           end if;
-                           Free_Packet (P.From_Upstream_Resolver_Packet);
-                        end if;
-
-                        Free_Transaction (P);
-                     end Empty_Hash_Map;
                   begin
-                     Transaction_Hashmap.Iterate (Empty_Hash_Map'Access);
+                     Transaction_Hashmap.Iterate (Free_Hash_Map_Entry'Access);
                   end;
 
                   Running := False;
@@ -226,6 +192,39 @@ package body DNS_Transaction_Manager is
          end loop;
       end loop;
    end DNS_Transaction_Manager_Task;
+
+   -- Clean up the pool and get rid of everything we don't need
+   procedure Free_Hash_Map_Entry (c : DNS_Transaction_Maps.Cursor) is
+      procedure Free_Transaction is new Ada.Unchecked_Deallocation
+        (Object => DNS_Transaction, Name => DNS_Transaction_Ptr);
+      procedure Free_Packet is new Ada.Unchecked_Deallocation
+        (Object => Raw_Packet_Record, Name => Raw_Packet_Record_Ptr);
+      P : DNS_Transaction_Ptr;
+   begin
+      P := Element (c);
+
+      if P.From_Client_Resolver_Packet /= null
+      then
+         if P.From_Client_Resolver_Packet.Raw_Data.Data /= null
+         then
+            Free_Stream_Element_Array_Ptr
+              (P.From_Client_Resolver_Packet.Raw_Data.Data);
+         end if;
+         Free_Packet (P.From_Client_Resolver_Packet);
+      end if;
+
+      if P.From_Upstream_Resolver_Packet /= null
+      then
+         if P.From_Upstream_Resolver_Packet.Raw_Data.Data /= null
+         then
+            Free_Stream_Element_Array_Ptr
+              (P.From_Upstream_Resolver_Packet.Raw_Data.Data);
+         end if;
+         Free_Packet (P.From_Upstream_Resolver_Packet);
+      end if;
+
+      Free_Transaction (P);
+   end Free_Hash_Map_Entry;
 
    function IP_Transaction_Key_HashID (id : IP_Transaction_Key) return Hash_Type is
    begin

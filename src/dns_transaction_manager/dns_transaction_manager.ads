@@ -31,6 +31,7 @@ package DNS_Transaction_Manager is
       Element_Type => DNS_Transaction_Ptr, Hash => IP_Transaction_Key_HashID,
       Equivalent_Keys                                        => "=");
    use DNS_Transaction_Maps;
+   procedure Free_Hash_Map_Entry (c : DNS_Transaction_Maps.Cursor);
 
    task type DNS_Transaction_Manager_Task is
       entry Start;

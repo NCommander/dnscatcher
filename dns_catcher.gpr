@@ -4,6 +4,7 @@ with "gnat/dns_core_constructs";
 with "gnat/dns_packet_processor";
 with "gnat/dns_rdata_processor";
 with "gnat/dns_client";
+with "gnat/dns_transaction_manager";
 
 project DNS_Catcher is
    for Create_Missing_Dirs use "True";

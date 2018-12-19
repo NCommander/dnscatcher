@@ -13,15 +13,16 @@ package body DNS_Client is
       This.Header.Identifier := Random_Transaction_ID.Random (Generator);
 
       -- We're a client, set the flags
-      This.Header.Query_Response_Flag := False;
-      This.Header.Opcode              := 0; -- Client response
-      This.Header.Truncated           := False;
-      This.Header.Recursion_Desired   := True;
-      This.Header.Recursion_Available := False; -- Should be false for client requests
-      This.Header.Zero                := False;
-      This.Header.Authenticated_Data  := True;
-      This.Header.Checking_Disabled   := False; -- Recursive server should check DNSSEC for us
-      This.Header.Response_Code       := 0;
+      This.Header.Query_Response_Flag  := False;
+      This.Header.Opcode               := 0; -- Client response
+      This.Header.Authoritative_Answer := False;
+      This.Header.Truncated            := False;
+      This.Header.Recursion_Desired    := True;
+      This.Header.Recursion_Available  := False; -- Should be false for client requests
+      This.Header.Zero                 := False;
+      This.Header.Authenticated_Data   := True;
+      This.Header.Checking_Disabled    := False; -- Recursive server should check DNSSEC for us
+      This.Header.Response_Code        := 0;
 
       -- Zero the question counts
       This.Header.Question_Count          := 0;
@@ -47,7 +48,7 @@ package body DNS_Client is
    -- Convert a DNS Name Record (this probably belongs somewhere else)
    function Create_DNS_Packet_Name_Record (Question : Parsed_DNS_Question) return Unbounded_String
    is
-      subtype QAttributes is String(1..2);
+      subtype QAttributes is String (1 .. 2);
       DNS_Name_Record     : Unbounded_String;
       String_Offset       : Positive := 1;
       Last_Section_Offset : Integer  := 1;
@@ -57,20 +58,21 @@ package body DNS_Client is
       function Uint8_To_Character is new Ada.Unchecked_Conversion (Source => Unsigned_8,
          Target                                                           => Character);
       function Uint16_To_String is new Ada.Unchecked_Conversion (Source => Unsigned_16,
-                                                                 Target => QAttributes);
+         Target                                                         => QAttributes);
       -- Actually does the dirty work of creating a question
       function Create_QName_Record (Domain_Section : String) return String is
          Label : String (1 .. Domain_Section'Length + 1);
       begin
-         if Domain_Section /= "." then
+         if Domain_Section /= "."
+         then
             Label (1) := Uint8_To_Character (Unsigned_8 (Domain_Section'Length));
             Label (2 .. Domain_Section'Length + 1) := Domain_Section;
          else
             -- If this is a "." by itself, it's the terminator, and we need to do special handling
             declare
-               Empty_Label : String(1..1);
+               Empty_Label : String (1 .. 1);
             begin
-               Empty_Label(1) := Uint8_To_Character (Unsigned_8 (0));
+               Empty_Label (1) := Uint8_To_Character (Unsigned_8 (0));
                return Empty_Label;
             end;
          end if;
@@ -105,13 +107,11 @@ package body DNS_Client is
       end loop;
 
       -- Append the final section with is zero
-      DNS_Name_Record :=
-        DNS_Name_Record &
-        To_Unbounded_String(Create_QName_Record("."));
+      DNS_Name_Record := DNS_Name_Record & To_Unbounded_String (Create_QName_Record ("."));
 
       -- Append the QTYPE and QCLASS
-      QType_Str (1..2)  := Uint16_To_String(Htons(Unsigned_16 (Question.QType'Enum_Rep)));
-      QClass_Str (1..2) := Uint16_To_String(Htons(Unsigned_16 (Question.QClass'Enum_Rep)));
+      QType_Str (1 .. 2)  := Uint16_To_String (Htons (Unsigned_16 (Question.QType'Enum_Rep)));
+      QClass_Str (1 .. 2) := Uint16_To_String (Htons (Unsigned_16 (Question.QClass'Enum_Rep)));
 
       DNS_Name_Record :=
         DNS_Name_Record & To_Unbounded_String (QType_Str) & To_Unbounded_String (QClass_Str);
@@ -119,7 +119,9 @@ package body DNS_Client is
       return DNS_Name_Record;
    end Create_DNS_Packet_Name_Record;
 
-   function Create_Packet (This : in out Client; Config: Configuration_Ptr) return Raw_Packet_Record_Ptr is
+   function Create_Packet (This : in out Client;
+      Config                    :        Configuration_Ptr) return Raw_Packet_Record_Ptr
+   is
       DNS_Packet_Names : Unbounded_String;
       Outbound_Packet  : constant Raw_Packet_Record_Ptr := new Raw_Packet_Record;
 
@@ -136,19 +138,19 @@ package body DNS_Client is
          QData : constant String := To_String (DNS_Packet_Names);
          subtype QData_SEA is Stream_Element_Array (1 .. QData'Length);
          function String_To_Packet is new Ada.Unchecked_Conversion (Source => String,
-                                                                    Target => QData_SEA);
+            Target                                                         => QData_SEA);
 
       begin
-         Outbound_Packet.Raw_Data.Data := new Stream_Element_Array(1..QData'Length);
+         Outbound_Packet.Raw_Data.Data     := new Stream_Element_Array (1 .. QData'Length);
          Outbound_Packet.Raw_Data.Data.all := String_To_Packet (QData);
-         Outbound_Packet.Raw_Data_Length := DNS_PACKET_HEADER_SIZE+QData'Length;
+         Outbound_Packet.Raw_Data_Length   := DNS_PACKET_HEADER_SIZE + QData'Length;
       end;
 
       -- Set our sender information
-      Outbound_Packet.From_Address := To_Unbounded_String("127.0.0.1");
-      Outbound_Packet.From_Port := 53;
-      Outbound_Packet.To_Address := Config.Upstream_DNS_Server;
-      Outbound_Packet.To_Port := Config.Upstream_DNS_Server_Port;
+      Outbound_Packet.From_Address := To_Unbounded_String ("127.0.0.1");
+      Outbound_Packet.From_Port    := 53;
+      Outbound_Packet.To_Address   := Config.Upstream_DNS_Server;
+      Outbound_Packet.To_Port      := Config.Upstream_DNS_Server_Port;
       return Outbound_Packet;
    end Create_Packet;
 

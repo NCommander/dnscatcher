@@ -8,7 +8,6 @@ with DNS_Client;
 with DNS_Common.Config;
 with DNS_Common.Logger;                      use DNS_Common.Logger;
 with DNS_Core_Constructs;                    use DNS_Core_Constructs;
-with DNS_Core_Constructs.Utils;              use DNS_Core_Constructs.Utils;
 with DNS_Core_Constructs.Raw_Packet_Records; use DNS_Core_Constructs.Raw_Packet_Records;
 with DNS_Transaction_Manager;                use DNS_Transaction_Manager;
 with DNS_Sender_Interface_IPv4_UDP;
@@ -93,8 +92,6 @@ begin
    Sender_Interface.Shutdown;
    Transaction_Manager_Ptr.Stop;
    Receiver_Interface.Shutdown;
-
-   Free_Raw_Packet_Record_Ptr (Outbound_Packet);
 
    Logger_Task.Stop;
    Free_DNSCatacher_Config (Capture_Config);

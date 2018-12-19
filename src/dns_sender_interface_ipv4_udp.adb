@@ -16,7 +16,7 @@ package body DNS_Sender_Interface_IPv4_UDP is
       Length                : Stream_Element_Offset;
       Process_Packets       : Boolean := False;
       Packet_Count          : Integer := 0;
-      Logger_Packet           : Logger_Message_Packet_Ptr;
+      Logger_Packet         : Logger_Message_Packet_Ptr;
    begin
       loop
          -- Either just started or stopping, we're terminatable in this state
