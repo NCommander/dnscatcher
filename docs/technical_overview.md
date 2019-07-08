@@ -1,16 +1,16 @@
 # Technical Overview of the DNSCatcher Project
 
-This document is a high level design and overview of the DNSCatcher system, it's underlying mechanisms, data collection mechanisms, and security measures put in place. It is intended as an introduction to the project, as well as an overview of how it intends to provide research into the DNS recursive resolver infrastructure, as well as provide a deeper level of sanity checking and security to recursive resolvers.
+This document is a high level design overview of the DNSCatcher system, its underlying mechanisms, data collection mechanisms, and security measures. It is intended as an introduction to the project, as well as an overview of how it can enable research into the DNS recursive resolver infrastructure and provide a deeper level of sanity checking and security to recursive resolvers.
 
 ## DNS Ecosystem As Of 2019
 
-DNS is one of the core protocols of the Internet, primarily used to map IP addresses such as 172.217.12.142 to google.com. DNS is designed as a highly distributed hierarchy system that descends from the root server zone to individual domains distributed throughout the Internet. Heavy caching allows it to handle millions requests per second through a series of caching and recursive resolvers that serve as end points to the DNS.
+DNS is one of the core protocols of the Internet, primarily used to map IP addresses such as 172.217.12.142 to google.com. DNS is designed as a highly distributed hierarchy system that descends from the root server zone to individual domains distributed throughout the Internet. Heavy caching allows it to handle millions of requests per second through a series of caching and recursive resolvers that serve as end points to the DNS.
 
-However, as a protocol designed in the late 80s however, DNS was not built with security in mind. Several efforts, most notable DNSSEC and more recently, DNS-over-TLS/DNS-over-HTTPS has been brought forward to try and help improve the underlying integrity of the DNS system. Unfortunately, neither of these mechanisms provide true end to end security to DNS. Two mechanisms have emerged to help provide a deeper level of security to the ecosystem, but do not solve a fundamental issue within DNS - specifically recursive resolvers can lie.
+However, as a protocol designed in the late 1980s, DNS was not built with security in mind. Several efforts, most notable DNSSEC and more recently, DNS-over-TLS/DNS-over-HTTPS, have been made to try and help improve the underlying integrity of the DNS system. Unfortunately, neither of these mechanisms provide true end to end security to DNS. These two mechanisms have emerged to help provide a deeper level of security to the ecosystem, but do not solve a fundamental issue within DNS - specifically recursive resolvers can lie. 
 
 ### The Problem: Lying Recursive Resolvers
 
-As previously described, DNS is designed as a distributed system; end user systems typically only talk to a DNS resolver that is given to them by DHCP during network configuration. Unless manually overridden, an end system will typically only that resolver for all lookups.
+As previously described, DNS is designed as a distributed system; end user systems typically only talk to a DNS resolver that is given to them by DHCP during network configuration. Unless manually overridden, an end system will typically only use that resolver for all lookups.
 
 DNSSEC (described below) information is not relayed to the end-user unless specifically requested (and validated) and most DNS client implementations depend on the the recursive resolver to perform all validation and lookups. As DNSSEC information is not typically checked at the last mile, nor is universally available, this leaves the recursive resolver free to manipulate the data as it sees fit.
 
