@@ -136,7 +136,7 @@ As the name suggests, DoT simply wraps traditional DNS calls over the Transport 
 
 WebPKI is an extremely complicated best, but I will try to simplify it as best as possible. In WebPKI, both web browsers, and operating systems provide a set of "known good" CA root certificates. Google, Mozilla, Microsoft, and Apple all operate trust stores that contain the set of certificates they trust. Many open source projects as well as Linux distributions such as Debian and Ubuntu use the Mozilla certificate store as it is free and open source. As of writing, there are 154 root certificates in this store (https://ccadb-public.secure.force.com/mozilla/IncludedCACertificateReport).
 
-Like the KSK, CA root certificates are essentially hardcoded into operating system and TLS libraries. While it is almost always possible for an end user to add or remove roots, generally deployment or removal of a root certificate can take upwards of several years to deploy as the root store must first be updated and then trickle down via various methods to end users.
+Like the KSK, CA root certificates are essentially hard-coded into operating system and TLS libraries. While it is almost always possible for an end user to add or remove roots, generally deployment or removal of a root certificate can take upwards of several years to deploy as the root store must first be updated and then trickle down via various methods to end users.
 
 CA rules and regulations are managed by the Certificate Authority/Browser (CA/B) Forum which publishes the Baseline Requirements (BR) on how certificates may be issued, auditing requirements, and similar rules and regulation. As of writing, the current version of the Baseline Requirements is 1.6.5 (https://cabforum.org/wp-content/uploads/CA-Browser-Forum-BR-1.6.5.pdf), and will be referenced from this point forward.
 
@@ -358,7 +358,7 @@ As such the same public and private key pair used for a server's KSK can be re-e
 
 At the time of client enlistment, the CA signed KSK's PEM certificate is sent to the client, and shows the encoded fields within the cert which include the organization, issuer, city, state, and country, plus the CN for the DNSCatcher domain. DNSCatcher automatically publishes CERT records so the chain can easily be downloaded for verification and to help avoid misissuance.
 
-**NOTE:** CAA records are NOT checked for S/MIME certificates per the BR as of writing. If this changes or a similar mechanism is implemented, it will be added to DNSCatcher ASAP.
+**NOTE:** CAA records are NOT checked for S/MIME certificates per the BR as of writing. If this changes or a similar mechanism is implemented, it will be added to DNSCatcher ASAP. CAA records shall be added however for standard TLS issuance.
 
 As DNSCatcher clients validate this key through OCSP and/or CRLs, certificate authorities can revoke misissued keys if one is fraudantly obtained from a certificate authority, reducing risk, and increasing the strength of attributation and accountability.
 
@@ -409,6 +409,13 @@ After initial configuration is complete, DNSCatcher will begin a self-check of i
 
 After this process, the server is in RUNNING mode and is fully ready to process client requests.
 
+### DNS Diagnostic Checks
+As a design goal, one of many DNSCatcher's features is to provide a health indicator to the state of the recursive resolver infrastructure as used on the Internet. To this end, DNSCatcher clients run a comprehensive set of tests checking the behavior and data returned by recursive resolvers.
+
+To this end, the Catcher server will create a set of authoritive domains and records that test aspects of various RFCs to ensure they're correctly implemented such as CD bit handling, various DNSSEC hashing algrthimns, and RRtype handling. For more information, see the Client section on Resolver Diagonsitics.
+
+This data is collected and processed by the server.
+
 ### DNS RR Validation
 As DNSCatcher's primary purpose is to provide validation and cross-check of DNS records, the server is primarily entrusted to building safe paths to validate records and return their status to the client as detailed above.
 
@@ -448,12 +455,38 @@ In the most common cases however, DNSCatcher needs to do some ground work to det
 
 A full list of operations and paths used to validate records are sent to the client for information purposes.
 
+### Work Units
+DNSCatcher servers can propose work units that clients execute to run specific lookups against their local resolvers to provide a deeper picture on the state of the Internet. This mechanism is designed to understand attacks against the DNS ecosystem, as well as provide definitive answers to questions such as TLD name collision concerns.
+
+Because this mechanism can be abused to launch DDoS attacks, identify individual users to third party servers and other mayhem, processing of Work Units is opt-in on the part of the client, and WUs must be signed with a special WU-Signing key before they're kept valid. The WU-Signing key is not stored on the DNSCatcher server for security reason; instead, proposed WUs must be downloaded by a system admin, signed, and uploaded before distributed to willing clients.
+
+WU-Signing keys are indicated by SMIMEA records (proposed DANE extension for S/MIME), and subject to standard expiration and revocation checks.
+
+### Post-Processing
+
+Finally, as part of it's use as a research tool, Catcher performs a number of post-processing steps. This isn't meant as an exhaustive list.
+
+ * Recursive Resolver information is collected from the client, to determine if it using a local resolver, an ISP provided one, or a known public resolver
+  * IP address information from clients is run through a GeoIP database to determine ISP information from where a client is connecting from at a given moment
+  * Skewed records are identified and highlighted and anazylized for trends (i.e., is ISP A blocking access to website B?)
+  * DNS Diagnostic Information is categorized and sorted
+  * Work units for client testing is suggested and sent to the system administrators for verification 
+
+Information is stored for an sysadmin defined retention period before being deleted. Raw IP addresses are only retained up to the point of post-processing to preserve user anonymity.
+
+### RFC1918/ULA (Private Network) Deployment
+
+Due to logisitical difficulties relating to WebPKI certificates in a private network, special steps, and modifications of the above must be used in place of the above menthoned deployment mechanisms. This section documents these challenges, and how Catcher can be deployed in these environments.
+
+### Server To Server Operation (S2S)
+In certain cases, a DNSCatcher server should be deployed as a slave to a higher server. This is primarily in cases of private network deployment, or when a network endpoint is managing a large number of outgoing standard DNS requests such as a Tor exit node, or VPN endpoint. S2S operation allows information from this hosts to be collected without compromising their anomynity.
+
+(TBD)
+
 ## Client Operation
 
 Catcher client software (either in the form of a standalone client, or browser extension) is slaved to a given Catcher server and begins providing telemetry and cross-checking information. Upon initialization, the following steps take place.
 
- * Initial connection to the Catcher resolver, either via DNS or HTTP-REST
- * If commun
 
 ### Key Pinning
 
@@ -464,9 +497,50 @@ Catcher client software (either in the form of a standalone client, or browser e
 ### DNS CHK_IN Class
 
 #### Caching Resolver Interaction
+
 ## Work Unit Interface
 
 ### Operations
 
 #### Client DNS Lookup
 
+## Security Concerns
+
+Due to the large amount of data that could be collected by a DNSCatcher instance, an understanding of the risk factors and information collected is extremely important.
+
+Out of the box, DNSCatcher could inadvertently collect the following information. **NOTE:** Much of the security factors listed below are true of DNS recursive resolvers in general and the data logging they generate, and are not unique to the DNSCatcher proect:
+
+### Sensitive domains and record types
+
+It is not uncommon for people to misuse DNS and place far too much information about a given network. This is similar to the concept of zone walking that required the creation of the NSEC3 record in DNSSEC and work towards the NSEC5 standard. Where possible, a compromise between keeping the data set usable, while protecting user privacy must be made and is extremely important.
+  * **Possible migations:**
+    * Redact information beyond the second or third level domain after a period of time. Said domains can be hashed and salted to provide generalized trends of information while not revealing everything in case of database comprimise. Information can be stored as a hash beyond this point given that second level domain zone files are at least accessible through ICANN.
+    * As the cross-check mechanism requires knowing the full DNS label and RRType, it is not possible to directly migate this in the client. It is possible that DNSCurve technology could however be used; further research required.
+
+### Accidental Collection Personally Identifiable Information
+See above, although this is less common in DNS as it is in other mediums.
+
+
+### Leak of split-horizon DNS information
+
+Split-horizon is not considered a good practice by the DNS community, but it's extremely common in practice. Given Catcher needs to determine if it's seeing a split horizon domain, this information has to be sent from the server to the client
+  * **Potential Mitigation:** 
+    * Determination of split horizon domain names can result it negative caching, or caching with a short TTL to prevent leak of data information. An exception however can be granted in the case of studying name collision issues where long-lived data is extremely valuable for top level domains (while only revealing minimal amounts of information)
+    * **NOTE:** As there is no "sure fire" way to determine if split horizon is indeed in affect, some information will still be collected as a result of "invalid" determinations by the DNSCatcher server.
+
+### Collection of vulerable DNS server information
+
+As part of determining the health of the recursive resolver ecosystem, the DNSCatcher client will run a comphrenesive test of the local resolvers abilities, and any responses to the de-facto mechanism of CH bind.version. As such, we may inadvertently collect a large list of site's that are running vulerable or obselete software.
+
+  * **Mitigations:** 
+    * We can limit the retention of IP address information of these servers; furthermore, it is expected that most vulerable servers will not be directly accessible from the Internet; and thus not subject to direct attack.
+    * We could delete all data except test results after a period of time; reducing the amount of information available incase of breach.
+
+### Work Unit System Can Expose Users
+
+The WU system described above is important for understanding how certain queries are seen from various aspects of the Internet. However, this mechanism is also subject to abuse as detailed above.
+
+  * **Mitigations:**
+    * Work Unit functionality is opt-in
+    * Signing keys for WUs are not stored as part of the server, and are instead kept seperately. While an attacker could potentially reconfigure the server to change the trusted WU accepted keys, the requirement for class 2 S/MIME certificates issued by a public CA + S/MIME key pinning + requirement of an email address from the DNSCatcher domain (to prevent use of compromised technically constrainted CAs) drastically complicates the attack in such a way that an attacker would have to get a key fradulantly issued by a CA.
+      * There are concerned on how robust the CA infrastructure is in identity validation, especially in regards to S/MIME are in this area.
