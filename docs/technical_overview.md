@@ -20,7 +20,7 @@ Even in non-malicious cases, recursive resolvers can either lie or be buggy. As 
 
 To further complicate matters, as typical DNS traffic (on port 53) is not encrypted or signed, a malicious actor can re-write records in flight. This type of attack is known and can be used to execute cache poisoning attacks (https://en.wikipedia.org/wiki/DNS_spoofing#Cache_poisoning_attacks) on properly configured and behaving DNS resolvers.
 
-While DNS-over-TLS/DNS-over-HTTPS specifically protect against these, deployment of these technologies beyond the web browser has been at best limited. Let us take a moment to step by and look at the two major security enhancements to DNS and show that they do not entirely solve the problems listed above.
+While DNS-over-TLS/DNS-over-HTTPS specifically protect against these, deployment of these technologies beyond the web browser has been at best limited. Let us take a moment to step back and look at the two major security enhancements to DNS and show that they do not entirely solve the problems listed above.
 
 ### DNSSEC 
 
