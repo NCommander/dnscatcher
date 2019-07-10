@@ -311,12 +311,14 @@ Currently, it is planned for a Catcher response to contain the following informa
      * Additional information is sent as Additional Responses
    * For unsigned domains, the chain up to the point where a NSEC(3) record is encountered for DS, and terminated
    * For DLV, the DLV trust anchor + full chain as above
-     * DLV is not expected to be commonly used
+     * DLV is not expected to be commonly used except in unusual deployment scenarios detailed below.
  * Information on Catcher's data sources and methods to build a path
  * A status message on verification, one of the following states
    * valid
    * valid-secure
      * This record passed DNSSEC validation to the root KSK
+   * valid-secure-dlv
+     * This record passed DNSSEC validation, but was secured by a DLV record provided in the bootstrap file. This should never occur on Internet resolvable domain names.
    * valid-stale
      * the local resolver returned old DNS records that haven't reached their TTL and the Catcher server could confirm this)
    * state-unconfirmed
@@ -426,10 +428,10 @@ In the simplist of cases, the server can definitively prove that a record is cor
 There are three cases where DNSCatcher can directly attest that a record is correct either from it's own knowledge, or by a single recursive resolve.
 
 ##### DNSCatcher is the Authortive Server
-For a small subset of requests, DNSCatcher will return AA=1 for records it directly manages. In these cases, Catcher's path validate simply returns authoritive and includes the DNSSEC chain (if available). The validation path simply returns 'authoritive'
+For a small subset of requests, DNSCatcher will return AA=1 for records it directly manages. In these cases, Catcher's path validate simply returns authoritive and includes the DNSSEC chain. The validation path simply returns 'authoritive'
 
 ##### The Record Set is Signed
-If a given RRtype is signed with DNSSEC, and DNSCatcher can successfully retrieve the entire chain, no further validation is required. 'valid-secure' is returned, and processing is ended. The chain is cached. The path returned is 'dnssec-signed'
+If a given RRtype is signed with DNSSEC, and DNSCatcher can successfully retrieve the entire chain, no further validation is required. 'valid-secure' is returned, and processing is ended. The chain is cached. The path returned is 'dnssec-signed'. In the case of DLV, the path returned is 'dnssec-dlv-signed'
 
 ##### DNSCatcher has a local copy of the zone file
 Part of Catcher's design is to import zone files to both reduce load on the root servers and on the TLD domains. TLD zone files are available through ICANN's CZDB, and at a minimium, all Catcher instances can import the root zone, and .arpa. If a record from one of these local copies is requested *and* the record is still valid TTL, DNSCatcher may response with a validation path of 'has-local-zone-file'
@@ -476,23 +478,251 @@ Information is stored for an sysadmin defined retention period before being dele
 
 ### RFC1918/ULA (Private Network) Deployment
 
-Due to logisitical difficulties relating to WebPKI certificates in a private network, special steps, and modifications of the above must be used in place of the above menthoned deployment mechanisms. This section documents these challenges, and how Catcher can be deployed in these environments.
+This section may also apply to Catcher instances on the endpoint of an anonymization network such as a VPN, Tor or I2P, where said endpoint is unable or unwilling to deploy DNSSEC or obtain standard X.509 certificates. For DNSCatcher instances deployed in tandium with an anonymitization exit node, please see that section of the specification for further details.
+
+Due to logisitical difficulties relating to WebPKI certificates in a private network, special steps, and modifications of the above must be used in place of the above menthoned deployment mechanisms. This section documents these challenges, and how Catcher can be deployed in these environments. Deployment within a private network should also strongly using S2S as descirbed below.
+
+#### Issues with Internal CAs
+The two private challenges that are faced in this deployment scenario is that the CA/B BR disallow issuance of certificates for non-public domains and IP space. In an corporate environment, an internal CA can be created which can issue these certificates, but deployment of these types of certificates can be difficult. For example, Windows Active Directory has intergrated mechanisms to deploy root CAs, but only adds it to the Windows CA Store list; TLS applications using OpenSSL may not query this list by default.
+
+Furthermore, internal CAs may have unreliable or unavailable OCSP servers or CRLs download point, AIA may be unavailable, the certificates may be issued to outdated standards, and have no assurance of quality. Non-public CAs also represent a MITN risk factor, and several commerical anti-virus/anti-malware such as AVG Business deploy their own CA root certificates on the system and perform MITN attacks to allow for deep packet inspection. As such, blind trust of these certificate stores is dangerous.
+
+If a Catcher client is connected to a server signed by an Internal CA, a bootstrap file **must** be used to provide the entire certificate chain and the root certificate. The bootstrap file location may be provided by the network through SRV records or multicast DNS. Besides warning the user, use of an Internal CA certificate will undergo the following checks:
+
+(These checks will be performed on all certificates, but BR compliant certs will pass these checks).
+
+1. The certificate path length must be 3 or greater; that is the key must not be issued from the root certificate, keeping in best current practices.
+2. The certificates signatures must be SHA-256, or the current signing algromith as approved by the BR forum for the full length of the chain.
+3. The issued certificates must be properly constrained. It is recommended the intermediate certificate have a PATHLEN: 1 so it can't issue CA:TRUE certificates.
+4. AIA information for revocation **must** be available, either within the certificate (preferred) or in the bootstrap file. The leaf certificates **must** have OCSP available. The intermediate certificate may use CRLs alone.
+5. An OCSP check for all certificates must pass. The OCSP server must be configured with an intermediate certificate that is constrained to this purposes. This is required for OCSP-Stapling. If CRLs are available, they will be used to check intermediate certificates.
+6. It is recommended that two intermediate certificates are used, one constrained for server/clientAuth, and another for emailProtection (S/MIME). This is BCP for X.509 certificates.
+7. All certificates must contain full Class 2/OV information as though they were publicly issued certificates. DNSCatcher will generate CSRs as normal which can be signed by the Internal CA.
+
+To ease this process. DNSCatcher will include tools for creating a root CA system with the necessary setup and include documentation on running a minimal CA for use with DNSCatcher. As usual, DNSCatcher will pin it's certificate chain and keys via DANE. Where possible, documentation will also be provided for popular CA management tools.
+
+In certain cases, a DNSCatcher server may be deployed in a split-horizon scenario (for collecting information from work laptops outside the corporate network for example). In this case, either multiple certificates can be used, a single certificate which is shown on all interfaces, or a S2S setup (in a manner similar to Exchange Edge Transport in cases where compliance to specifications like PCI is required).
+
+When enrollment is used with a bootstrap file or via local network autodiscovery with an internal CA, the user will be warned about the security risks. For enterprise deployment, a method of configuring clients preconfigured will be provided.
+
+#### DNSSEC Chaining Considerations (DLV)
+When DNSCatcher is deployed on a private network, it may be in a position where a DNSSEC chain to the root can not be made. For example, Windows 2003 Small Business Server was hardcoded to setup networks with a .local namespace, and this practice remained in Microsoft's documents for years. As such, many corporate networks use non-public domains, invalid TLDs, or in the most extreme scenarios, a TLD directly (such as .companyname).
+
+As these domain entries exist outside the public DNS system, there is no way to form a signed chain to the root KSK. Fortunately, a mechanism exists within DNSSEC to allow specification of a trust anchor that is not in the root zone known as Domain Lookaside Validation. DLV was designed for deployment of DNSSEC in an era before the root zone was signed, and also perfectly serves our needs here.
+
+For use and deployment with local domain names, the DNSCatcher server may create a DLV anchor for itself, and deployed to its internal DNS server. This anchor shall cover the entire DNSCatcher namespace, and included in the bootstrap file. DLV anchors need to be deployed to recursive resolvers in use throughout an enterprises setup for proper functionality of DNSSEC.
+
+During client initialization and self-tests, the Catcher resolver will test validation of resolving DNSSEC information with the DLV anchor and report if the anchor is both deployed, and if local network resolvers are properly using it as a seperate set of tests. Records signed with the DLV anchor will be marked valid-secure-dlv during cross-check.
+
 
 ### Server To Server Operation (S2S)
 In certain cases, a DNSCatcher server should be deployed as a slave to a higher server. This is primarily in cases of private network deployment, or when a network endpoint is managing a large number of outgoing standard DNS requests such as a Tor exit node, or VPN endpoint. S2S operation allows information from this hosts to be collected without compromising their anomynity.
 
-(TBD)
+In S2S, one server operates as a master, and a downstream server acts as a slave. A slave server can report to multiple masters, or a chain of servers can be formed depending on deployment requirements. A S2S setup is created when one server registers to another server via the "Server Registration" method noted in the Client Operations section of this document. S2S connections are authenticated through TLS client certificates (clientAuth).
+
+S2S client servers are allowed to perform bulk data upload to the central server, as well as download and relay work unit requests. S2S servers can choose to limit the data they submit to the upstream server. S2S servers may directly resolve validation questions, or forward them to the upstream server for an answer. End user clients will see that signed requests come from an upstream server, and can build a validation path to said upstream servers both for purposes of validating WU signing, as well as standard validation responses.
+
+S2S is primarily designed to act as an endpoint for "legacy" DNS clients being collected to a central point; this deployment scenario is envisions for use in Tor exit nodes or other areas with a large amount of legacy DNS traffic. In this deployment scenario, DNS requests are received by DNSCatcher which performs the recursive resolution, and then normal cross-check as detailed above. Data is registered as anonymous submissions, and then submitted to the central server for aggreation. Anonymization may be performed before upload. The upstream can see which exit node data was collected from (and which if any are under attack), while revealing limited information about the users of said node.
 
 ## Client Operation
 
 Catcher client software (either in the form of a standalone client, or browser extension) is slaved to a given Catcher server and begins providing telemetry and cross-checking information. Upon initialization, the following steps take place.
 
+1. If the client is freshly installed, it prompts for the user to select a Catcher server, or provide a URL to a bootstrap file to allow enrollment. The user chooses if they wish to be anonymous, registered, or verified as defined below.
 
-### Key Pinning
+2. The server establishes a connection to the DNSCatcher server and checks key pins to ensure MITN is not taking place. The key pins can be obtained from the bootstrap file, or DNSSEC signed DANE (if possible).
+
+3. The client determines it's IP address relative to the DNSCatcher server. If said address is local, it also tries to determine it's external IP address.
+
+4. The client registers with the server, as either anonymousily, or as registered, or verified user. See below.
+
+5. The default resolver for the system is tested for it's behavior, and quirks. In certain cases, this step may be skipped if the client such as if the client deployed on an anonymization service platform such as Tor Browser. If multiple resolvers are available, each is tested. In short, the following is checked.
+
+ * Successful lookup via UDP of a known-good resource
+ * Successful lookup via TCP of a known-good resource
+ * Expected Fail (XFAIL) of a non-existant domain (NXDOMAIN)
+ * Determination of the resolvers ability to access v4 and v6 addresses
+   * Lookup of a domain name that is only accessible by IPv4 NS records
+   * Lookup of a domain name that is only accessible by IPv6 NS records
+ * Test reverse lookup of a known good record source
+ * Test lookup of all IANA registered DNS RRtypes in the IN zone against the Catcher DNS test points.
+   * Proper operation of the trunciated bit is also tested at this time.
+* Test lookup of unknown record types to ensure they're not managed.
+* Test DNSSEC Capabilities
+  * Test lookup against known good DNSSEC signed records, and check for AD=1.
+  * Test behavior with DO=1, and check if sigchase is possible to the root
+  * Check SERVFAIL behavior on invalid DNSSEC signed records.
+  * Test DNSSEC algronmith support
+    * For each defined signature type, a test RRSIG signed with that type will be available from a test end point. Some types such as MD5 should fail, others will succeed, and some are optional pass.
+    * The intent of this test is to categorize readiness of various DNSSEC algromthins should SHA-256 collisions become viable in the future.
+* Additional tests may be added in the future, so this list is a starting point. The intention is that the test list will be provided from the DNSCatcher server in a manner similar to the WU format.
+
+6. The results from the above queries are collected, and submitted to the Catcher server directly, which verifies that the answers are correct and returns the validation results to the client. These are displayed to the user and a score is generated on how "compliant" their local DNS setup is.
+
+7. Once running, the client splits DNS requests between the system resolver and the upstream DNSCatcher server to get determination on if the information is available. In case of a failed cross-check, the client can be configured on how to react (with sane defaults pre-coded), and prompt the user how to proceed.
+
+8. On regular intervals, the client, if opted into work units, may request them from the DNSCatcher server and perform the actions contained within. As usual, WU verification with valid keys must be done.
+
+### Client Registration
+To balanace the need for privacy for the need reliable information, clients can register against the DNSCatcher server in one of three ways. 
+
+
+### DNSCatcher Bootstrap File (DCB)
+DCBs are an alternative mechanism for establishing security parameters between a Catcher client and server. As DNSCatcher depends on DANE and DNSSEC to pin its keys securely, it is necessary for the local resolver to successfully be able to provide DNSSEC data and sigchase to the root KSK. It must also not managle TLSA or SMIMEA RRtypes. As shown above, it can not be assumed that that the local resolver is capable of this action, nor can it be assumed that the client can obtain the information through known good DNS servers (through standard port 53 DNS, DoT or DoH on public servers).
+
+Furthermore, as detailed in private network operation, a Catcher server may be dependent on DLV and internal CA roots to secure it's operation and thus a chain of trust can not be established directly. The DCB is a method designed to side-step this problem by providing all the paramters required to bootstrap a client behind a buggy recursive resolver.
+
+The DCB is envisioned as a S/MIME signed JSON document that has the following paramters in it. The file is signed with the X.509 encoded KSK described above.
+
+ * The DNSCatcher KSK(s)
+  * A chain from the root KSK to the Catcher KSK *or* the DLV anchor to the catcher KSK
+ * DANE pins for public certificates
+   * This includes all keys listed in the Key Pinning section of this document
+ * If DLV is being used, the DLV anchor
+   * If DLV is used, *and* the DLV anchor is in a position where it can be encoded with DNSSEC (this may be true in cases where split horizon DNS has been deployed, and is using the same domain name internally and externally).
+   * If the DLV anchor can be validated via DNSSEC, it shall allow for auto configuration to take place.
+ * Certificate chains for all leaf certificates, including a copy of the root
+   * This is used to enroll internal CAs for DNSCatcher clients
+ * Copies of SRV records to determine relevant domain names for testing and other services.
+ * Alternative KSKs to use
+   * This feature is intended for use in development environments only with a root server zone emulator.
+
+Information in the DCB including the client certificates are displayed as they would be during normal client enrollment (see section in this doc on accountability). If private CA certificates are used or non-OV/Class 2 S/MIME certificates, additional warnings are put in place describing the risk factors.
+
+Once the user agrees to the settings in the DCB, standard bootstrap begins as described above. The DCB is recommended to be stored on the HTTPS endpoint in /.well-known/dnscatcher/bootstrap.dcb.
+
+#### Anonymous Users
+Anonymous users are only identified by their public IP address, and do no provide any sort of attribution to the client being used. Legacy DNS clients are also considered anonymous unless an EDNS extension is used to identify the client by public key.
+
+Anonymous information is tagged as such in the backend, and may be disabled in case of abuse; in addition, anonymous users are considered opted-out for the purposes of work-unit look-ups.
+
+#### Registered Users
+Registered users generate a public/private key pair, and a UUID is derieved from this keypair which is submitted during the registration step. Registered users can see a history of their own DNS lookups and determinations made by the Catcher server, as well as a breakdown of GeoIP information on the servers looked up.
+
+Data submission is signed with the client keypair, and can be used for clientAuth to the server for strict protection. Registeration is recommended for data integrity. Registered users may also opt-in to the work-unit registeration system.
+
+Registered users may request their data be deleted from the backend.
+
+#### Verified Users
+Verified users operate like registered users, but provide additional information such as a name, and email address and can be contacted by Catcher administrators. Verified users are considered to provide the high quality of client data. In API terms, verified users operate identically to registered users.
+
+Verified users can request that their verification be deleted in addition to their data history.
+
+#### S2S Client
+DNSCatcher servers operating downstream to a master server run through the standard client interface. S2S clients must be verified, and have access to bulk submission APIs for the upstream server. Like any DNSCatcher client, it may submit results for itself and be assigned work units.
+
+### Network Change Events
+The client shall listen to system interfaces for events relating to network changes, and upon a network change, re-identify it's relative IP address, and perform DNS diagonsistics if necessary. This can be done via dbus/NetworkManager or the netaddr interface on Linux, NotifyAddrChange on Windows, and Android NETWORK_CHANGE system notifications. TBD: iOS/Mac OS equivelent.
+
+If the environment prevents listening for network change events, the client shall occassionally poll the backend server to determine it's outbound IP address and use that as a mechanism to determine if it needs to re-run diagonsistic tests.
+
+### Client Capabilities
+Depending on the environment it's deployed in, the DNSCatcher client may only have limited access to the system resolver or the ability to request arbiertary records. Clients register their capabilities to the upstream server for non-anonymous users.
+
+Two clients are planned at this time, a native code implementation primarily built around shared code with the server, and an implementationin JavaScript for intergration into Mozilla and Chrome via browser extensions.
+
+## Key Pinning
+
+As a DNSCatcher server is both a wealth of information and a tempting target for MITN attacks, it's essential that the identify of a Catcher server be confirmed. Wherever possible, TLS key pinning shall be used to ensure that connections are not silently MITNed (such as a network based TLS intercepter).
+
+The following keys in the infrastructure are pinned
+ - DNSCatcher KSK (pinned through DNSSEC or DLV+bootstrap file)
+ - DoT/DoH certificates (pinned through DANE, cross-checked through CA)
+ - Work unit signature certificates (pinned through SMIMEA records)
+ - S2S connections
+   - Downstream server keys pinned through enrollment or DANE
+   - Upstream server keys pinned as above
+ - Client registeration keys (pinned on enrollment)
+   - NOTE: may change to internal CA within DNSCatcher. TBD
+ - REST S/MIME signing key (if used)
+
+To ease system administration as much as possible, pins will be automatically published and managed through Catcher's administrative interfaces. This will increase reliability and decrease the chance of human errors.
+
+For use in environments where outbound encrypted traffic *must* be decryptable for inspection, certain key pinning features of the client may be disabled as an Advanced Option. This ranges from allowing a second pin to be manually added or for pins to be entirely diabled.
 
 ## Client Interfaces
 
-### HTTP-REST
+Two client interfaces are intended at this point, one based upon standard REST prinpicals with minor modifications, and a second based on the DNS protocol itself which will also allow for caching through the recursive resolver mechanisms built into DNS.
+
+This document specificies the type of end-points and usage of them, but doesn't lock down the format. That will be defined in an upcoming document and implemented in the reference implementation.
+
+As of writing, endpoints for server administration have not been defined.
+
+### DNS IN/CH Zone Information and Endpoints
+For bootstrapping Catcher clients, as well as performing diagonsis, the Catcher server defines certain "well-known" names that are used for both bootstrap and diagonstic purposes. These names take the form of subdomains and version number from the DNSCatcher base domain.
+
+For example, if DNSCatcher is installed at dnscatcher.example.org, the check-ip endpoint would be check-ip.dnscatcher.example.org.
+
+#### Information stored at the Catcher apex
+The following DNS records (in addition to standard records such as A/AAAA/MX) shall be stored at the APEX
+
+ * TLSA records for DANE key pinning of TLS connections
+ * SRV records for test serices or alternate locations for DoT/DoH (see below)
+ * CERT records for X.509 encoded KSK(s)
+ * SMIMEA records for work-unit authentication
+   * This may be moved to a different endpoint
+
+The Catcher apex zone shall always be DNSSEC signed.
+
+#### CH class records
+DNSCatcher shall respond to "bind.version" with the server name and version. In the case of the reference implementation, it shall respond with a string similar to "DNSCatcher-Reference *verstring*.
+
+The domains string "dnscatcher.protocol.version" shall be used to define the revision of the Catcher protocol as a TXT record. This shall be 1, and is intended as a diagonstic feature if server/client negotation fails. Other information about the server may be added to the CH zone.
+
+The CH class is not DNSSEC signed.
+
+#### Endpoint lookups
+Endpoint names are designed to be flexible or allow relaying to other Catcher servers for purposes of loadbalancing. Each endpoint is defined as a "well known name" which is published as a SRV record to the base Catcher domain.
+
+#### Diagnostic Subdomains
+
+Diagnostic domains are used for testing recursive resolver behaviors as defined in client operations. Each endpoint is intended to check for specific behavior of a DNS client such as DNSSEC pass/fail, algrothmin compatibility, and record handling capabilities as described in client operations.
+
+A client can pull the list of types of endpoints available, and request generation of said endpoints. The necessary records are created and published to a randomly generated name with randomly encoded (but valid) test data. For example, a Catcher client may request testing of CAA record handling. Upon reciept, the Catcher server will create the following.
+
+ * Domain name: caa.zabca1.dns-test.v1.dnscatcher.example.org
+ * Record: CAA (TYPE257)
+ * Value: *.nonexistant.example
+
+#### Work Unit Subdomains
+
+In certain cases, Work Units may test operation of commands such as DNS UPDATE. To provide an interface for these work units, domains will be dynamically generated for the work unit. See work unit operations.
+
+### HTTPS-REST
+
+HTTP/REST is an extremely common web interface design, where a client makes simple HTTP commands to various end points and parses results relating to it. At it's base, REST uses the standard HTTP verbs (GET, POST, PUT, PATCH, and DELETE) to interact with data and mutate it. As such, a REST interface can be trivially accessed with any standard HTTP library or command line tool such as cURL. Responses are traditionally encoded in JSON or XML. However, for security and validation reasons, these formats in of itself are not good enough.
+
+#### S/MIME Signed JSON (SSJ)
+It is intended that responses from the REST interface are returned in an S/MIME document containing a JSON payload, and a signature from either KSK or a designated S/MIME signature key for this purpose. While standard TLS provides connection layer integrity and encryption, the deployment of the DNSCatcher server may have TLS termination seperate from the Catcher server itself (for example, at a load balancer). As such, to prevent security attacks in this "plain text" last mile, the responses shall be signed with S/MIME, and be cachable both client side and server side to reduce server load.
+
+This feature is also to ensure data integrity in environments where deep packet inspection of TLS is required via an corporate internal CA where DNSCatcher's strict security would no longer be able to be used.
+
+S/MIME Signed JSON is also used for data submission from registered and verified users, as well as S2S servers. Anonymous users shall use JSON. For this section, all use of the term of JSON shall considered as per this paragraph unless otherwise specified.
+
+#### Endpoints
+
+The following endpoints are expected to be implemented.
+
+##### Relative IP Lookup
+Returns the IP address of the client as relative to the Catcher server.
+
+#### Client Registeration Endpoint
+Allows for creation of registered and verified users.
+
+##### DNS Lookup Submission
+The query submission API takes encoded DNS data in SSJ or JSON format, and begins the cross-check process on it as described above. Upon completion of the cross-check, an JSON document is returned with the cross-check results.
+
+##### DNS Diagonsises
+Upon a GET request to this end-point, the server shall return all DNS tests available on this Catcher server. The client should determine which tests it is capable of running.
+
+A test run request is sent as a POST message back to this end-point, and a SSJ document is sent with the endpoints and any other necessary data to perform the tests.
+
+Upon completing the test and collecting all relevant information, the client shall create a JSON document, and submit it to the test submission endpoint. The server shall tally up a score between the gathered results vs. expected results and return the results to the client.
+
+#### Work Unit Download/Submission
+Work units can be downloaded for a given client. A client's eligibility for a work unit can depend on it's current location, results of the diagonistic test, or other criteria. Work units take the form of S/MIME Signed JSON documents, but are signed with the Work-Unit Signer key and not the standard signature key.
+
+Work unit behavior is detailed further below.
 
 ### DNS CHK_IN Class
 
