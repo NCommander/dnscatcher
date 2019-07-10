@@ -16,7 +16,7 @@ DNSSEC (described below) information is not relayed to the end-user unless speci
 
 For example, my home ISP redirects non-existent webpages (ones that would return NXDOMAIN) to a parking site with advertising. DNS hijacking is also used for implementing captive portals such as wifi hotspot signin pages. In other cases, DNS record manipulation can be used for censorship, man-in-the-middle attacks, and other malicious uses.
 
-Even in non-malicious cases, recursive resolvers can either lie or be buggy. As an example of a non-malicious use case PiHole (https://pi-hole.net/) acts as a DNS blacklist to filter out advertising ing web sites. If the security measures currently implemented in DNS were fully effected; it would be impossible for either of these types of non-malicious hijackings to occur. In other cases, buggy or misconfigured resolvers prevent resolution of record types beyond the standard A and CNAME types.
+Even in non-malicious cases, recursive resolvers can either lie or be buggy. As an example of a non-malicious use case PiHole (https://pi-hole.net/) acts as a DNS blacklist to filter out advertising ing web sites. If the security measures currently implemented in DNS were fully affected; it would be impossible for either of these types of non-malicious hijackings to occur. In other cases, buggy or misconfigured resolvers prevent resolution of record types beyond the standard A and CNAME types.
 
 To further complicate matters, as typical DNS traffic (on port 53) is not encrypted or signed, a malicious actor can re-write records in flight. This type of attack is known and can be used to execute cache poisoning attacks (https://en.wikipedia.org/wiki/DNS_spoofing#Cache_poisoning_attacks) on properly configured and behaving DNS resolvers.
 
@@ -130,7 +130,7 @@ In summary, DNSSEC is both difficult to validate, may be impossible to validate 
 
 ### DNS-over-TLS/DNS-over-HTTPS
 
-DNS-over-TLS (DoT) and DNS-over-HTTPS (DoH) represent the second standardized mechanisms to help protect and secure DNS traffic. As these methods have nearly identical characteristics, I'm only going to cover DNS-over-TLS unless otherwise noted. DoT suffers from problems that will limit it's deployment, and adds a tremendous layer of complexity to a core Internet protocol while also failing to solve some of more fundamental issues with DNS. To understand these problems, we need to understand the trust mechanisms used in TLS, how they integrated with DNS, issues in deployment, and other related topics.
+DNS-over-TLS (DoT) and DNS-over-HTTPS (DoH) represent the second standardized mechanisms to help protect and secure DNS traffic. As these methods have nearly identical characteristics, I am only going to cover DNS-over-TLS unless otherwise noted. DoT suffers from problems that will limit it's deployment, and adds a tremendous layer of complexity to a core Internet protocol while also failing to solve some the of more fundamental issues with DNS. To understand these problems, we need to understand the trust mechanisms used in TLS, how they integrated with DNS, issues in deployment, and other related topics.
 
 As the name suggests, DoT simply wraps traditional DNS calls over the Transport Layer Security protocol. TLS is the industry standard used to secure internet traffic, and provides both authentication and encryption functionality; for example HTTPS is simply the standard HTTP protocol wrapped around TLS which provides enough security to allow transmission of credit card information. It is for this reason that DoH provides and inhertits the same security and risk factors that DoT does. TLS is underpinned by a system of certificate authorities that act as trust anchors in a manner similar to the root KSK in DNSSEC. The trust mechanism used on the Internet is collectively known as Web Public Key Infrastructure or WebPKI for short.
 
@@ -234,7 +234,7 @@ Leaf certificates describe the entity they are protecting, and can be summarized
 
 In this example, this certificate protects the resource dns.google (CN or common name), and the certificate authority has validated that the receiving organization is Google. As X.509 certificates can cover multiple domain names, and IP addresses, that information is covered in a section known as the subjectAlternativeName, listed above which covers various domain and IP addresses that Google's Public DNS service runs on.
 
-We can also see that the certificate was issued by Google Trust Services's which is an intermediate certificate for the GlobalSign root certificate (which Google acquired in 2016).
+We can also see that the certificate was issued by Google Trust Services which is an intermediate certificate for the GlobalSign root certificate (which Google acquired in 2016).
 
 #### TLS Certificate Revocation and AIA
 
@@ -268,7 +268,7 @@ google-leaf.pem: OK
 
 As seen in the above, certificate revocation checking is a non-trivial affair. Further complicating matters is that there is an inhabitant bootstrapping problem; revocation information is encoded in X.509 certificates as a domain, as such, a DNS lookup is required to successfully check the revocation status of a DoT server. Furthermore, even if OCSP/CRL information was encoded as an IP address, it still requires communicating with a third-party server to check the certificate which leaks information to the certificate authority.
 
-In response to this problem, there is a mechanism known as OCSP-Stapling which embeds a OCSP signature in the TLS handshake, proving the state of revocation as part of a normal connection. OCSP-Stapling is well supported for HTTPS, but other server products have some to no support for it. Notably, Google's DoT server does not support OCSP Stapling.
+In response to this problem, there is a mechanism known as OCSP-Stapling which embeds an OCSP signature in the TLS handshake, proving the state of revocation as part of a normal connection. OCSP-Stapling is well supported for HTTPS, but other server products have some to no support for it. Notably, Google's DoT server does not support OCSP Stapling.
 
 The issues relating to TLS certificate revocation are long and complicated, and thus I recommend reading Gibson's Research Corporation's report on certificate revocation (https://www.grc.com/revocation/ocsp-must-staple.htm) for more information. In summary though, revocation is an extremely difficult thing to get correct in WebPKI.
 
@@ -352,7 +352,7 @@ DNSCatcher servers act as a central repostiory of trust and validation for DNS r
 DNSCatcher should be deployed on it's own IPv4 and IPv6 address.
 
 ### X.509 Encoded KSK
-An important note with the operation of DNSCatcher is that since it is a centralized service providing authentication, it is vulnerable to malicious operators providing false assurances or misleading data to clients. This problem is inhertiant to any type of trust authority and thus Catcher's approach is to ensure that server operators are verified to say whom they are. Identication services offered by CAs are used to attest the ownership of a given private key.
+An important note with the operation of DNSCatcher is that since it is a centralized service providing authentication, it is vulnerable to malicious operators providing false assurances or misleading data to clients. This problem is inherent to any type of trust authority and thus Catcher's approach is to ensure that server operators are verified to say whom they are. Identication services offered by CAs are used to attest the ownership of a given private key.
 
 At it's core, both DNSSEC and TLS can make use of RSA2048 key pairs, abiet it with different encodings. This is also true of elliptic-curve cryptography pairs, but as EC-DNSSEC is not well supported as of yet, this feature is deferred for now.
 
@@ -372,12 +372,12 @@ Seperate TLS certificates are used for DoT/DoH services.
 
 DNSCatcher operates four services, a standard DNS server on port 53, DNS-over-TLS on port 853, DNS over HTTPS and a REST interface on port 443. An optional web interface can also be run against the REST interface. Alternate ports from IANA will be requested so Catcher can be run alongside another server without conflict. Catcher acts as an autherative server for it's own subdomain; for example, given the domain example.org, DNSCatcher should be deployed to dnscatcher.example.org with a NS delegation of the dnscatcher subdomain.
 
-Catcher has the ability to run as a recursive resolver for legacy (normal DNS clients), although this functionality is disabled by default. It can also act as a forwarding DNS server, performing validation and verification in real time for legacy clients. Instead, this DNS server is primarily intended to hold the CHK_IN class, receive zone transfer requests, and manage it's own TLSA signing records. It also hosts the DNSCatcher Bootstrap file which can be used by clients that are otherwise unable to resolve or validate Catcher's server information or for use in private networks.
+Catcher has the ability to run as a recursive resolver for legacy (normal DNS clients), although this functionality is disabled by default. It can also act as a forwarding DNS server, performing validation and verification in real time for legacy clients. Instead, this DNS server is primarily intended to hold the CHK_IN class, receive zone transfer requests, and manage it's own TLSA signing records. It also hosts the DNSCatcher Bootstrap file which can be used by clients that are otherwise unable to resolve or validate Catcher's server information for use in private networks.
 
 ### First Run
-On first run, the server will undertake several initialization steps. This section assuming a publicly reachable DNSCatcher instance; see the section on private networks for steps regarding that setup.
+On first run, the server will undertake several initialization steps. This section assumes a publicly reachable DNSCatcher instance (See the section on private networks for steps regarding that setup).
 
-First, it will initialize it's backend database (currently expected to be PostgreSQL), create the initial administrator user, and finally generate a 2048-bit RSA public and private key, and generate a certificate signing request. This keypair will be used for DNSSEC, locally signed RRSIGs/DLV (see below) and a signed X.509 certificate will provide attribution information. This certificate should be signed for S/MIME signatures, and be a OV (Class 2 S/MIME) or better certificate.
+First, it will initialize it's backend database (currently expected to be PostgreSQL), then create the initial administrator user, and finally generate a 2048-bit RSA public and private key, and generate a certificate signing request. This keypair will be used for DNSSEC, locally signed RRSIGs/DLV (see below) and a signed X.509 certificate will provide attribution information. This certificate should be signed for S/MIME signatures, and be an OV (Class 2 S/MIME) or better certificate.
 
 A seperate certificate for serverAuth is generated which has the server's hostnames and (ideally) the ipAddress encoded as the subect alternate names. This can be a DV certificate, although it is recommended that it be in the form of OV or EV.
 
@@ -421,7 +421,7 @@ This data is collected and processed by the server.
 ### DNS RR Validation
 As DNSCatcher's primary purpose is to provide validation and cross-check of DNS records, the server is primarily entrusted to building safe paths to validate records and return their status to the client as detailed above.
 
-In the simplist of cases, the server can definitively prove that a record is correct; we'll cover these cases first.
+In the simplist of cases, the server can definitively prove that a record is correct. We will cover these cases first.
 
 #### No External Validation Cases
 
@@ -437,11 +437,11 @@ If a given RRtype is signed with DNSSEC, and DNSCatcher can successfully retriev
 Part of Catcher's design is to import zone files to both reduce load on the root servers and on the TLD domains. TLD zone files are available through ICANN's CZDB, and at a minimium, all Catcher instances can import the root zone, and .arpa. If a record from one of these local copies is requested *and* the record is still valid TTL, DNSCatcher may response with a validation path of 'has-local-zone-file'
 
 #### External Validation Required
-In the most common cases however, DNSCatcher needs to do some ground work to determine if a record is actually valid. As Catcher is in of itself a DNS resolver, it is supsectable to the DNS attacks listed at the top of this document. To ensure that Catcher is getting accurate records, a system known as cross-check is used to build a qurom. This involves several steps.
+In the most common cases however, DNSCatcher needs to do some ground work to determine if a record is actually valid. As Catcher is in of itself a DNS resolver, it is supsectable to the DNS attacks listed at the top of this document. To ensure that Catcher is getting accurate records, a system known as cross-check is used to build a consensus. This involves several steps.
 
-1. The client submits a request to validate a record submitting what it sent as a question and the answer received.
+1. The client submits a request to validate a record and submits what it sent as a question and the answer received.
 
-2. The DNSCatcher server performs a recursive resolve from the root to the records designed, utilizing its own internals caches as necessary to speed up processing. In the best case scenario, this information can entirely be pulled from the database with no network traffic required. This forms one half of the quorm. Because DoT/DoH is not present on most DNS servers, this primarily takes the form of unencrypted DNS requests and thus is susceptible to tampering.
+2. The DNSCatcher server performs a recursive resolve from the root to the records designed, and utilizing its own internals caches as necessary to speed up processing. In the best case scenario, this information can entirely be pulled from the database with no network traffic required. This forms one half of the consensus. Because DoT/DoH is not present on most DNS servers, this primarily takes the form of unencrypted DNS requests and thus is susceptible to tampering.
 
 3. A cross-check server (from the list set by the server admin) is selected at random, and the client's question is run, and an answer is received. Cross-check servers always use DNS-over-TLS/DNS-over-HTTPS to ensure inflight intergrity. Cross-check servers are simply public DNS recursive resolvers that support DoT/DoH. Where possible, key pinning will be used to further harden these connections. **NOTE:** A client may opt out of choosing to be cross-checked, only depending on Catcher's recursive resolve + any cached records for reasons of privacy.
 
@@ -449,18 +449,18 @@ In the most common cases however, DNSCatcher needs to do some ground work to det
 
 5. If the cross-check fails, but the client's answer matches one of the responses, Catcher can request additional information such as SOA information to attempt to determine if a stale record is in play. If so, valid-stale, or stale-unconfirmed is returned. Each cross-check lookup is stored in the database so the process does not need to repeat for every single lookup
 
-6. If the recursive resolve and the cross-check mismatch (possible due to DNS caching), search continues to the next server on the list up to max-tries. This continues until qurom is reached, or the server list is exhausted. If qurom succeeds with two cross-check servers, a valid response is returned to the client, and a warning is logged that the Catcher server may be under attack.
+6. If the recursive resolve and the cross-check mismatch (possible due to DNS caching), search continues to the next server on the list up to max-tries. This continues until consensus is reached, or the server list is exhausted. If consensus succeeds with two cross-check servers, a valid response is returned to the client, and a warning is logged that the Catcher server may be under attack.
 
 7. If the recursive resolver, and the cross-check server match each other, but not the client, the server will try to determine if the client is under split-horizon or other cases where a mismatch can occur. If this proves impossible, an invalid/blackhole response is sent.
 
-8. If all data sources return different answers, and quorm can not be reached, DNSCatcher sends up the white flag and returns "unknown".
+8. If all data sources return different answers, and consensus can not be reached, DNSCatcher sends up the white flag and returns "unknown".
 
 A full list of operations and paths used to validate records are sent to the client for information purposes.
 
 ### Work Units
 DNSCatcher servers can propose work units that clients execute to run specific lookups against their local resolvers to provide a deeper picture on the state of the Internet. This mechanism is designed to understand attacks against the DNS ecosystem, as well as provide definitive answers to questions such as TLD name collision concerns.
 
-Because this mechanism can be abused to launch DDoS attacks, identify individual users to third party servers and other mayhem, processing of Work Units is opt-in on the part of the client, and WUs must be signed with a special WU-Signing key before they're kept valid. The WU-Signing key is not stored on the DNSCatcher server for security reason; instead, proposed WUs must be downloaded by a system admin, signed, and uploaded before distributed to willing clients.
+Because this mechanism can be abused to launch DDoS attacks, identify individual users to third party servers (or cause other mayhem), processing of Work Units is opt-in on the part of the client, and WUs must be signed with a special WU-Signing key before they're kept valid. The WU-Signing key is not stored on the DNSCatcher server for security reason; instead, proposed WUs must be downloaded by a system admin, signed, and uploaded before distributed to willing clients.
 
 WU-Signing keys are indicated by SMIMEA records (proposed DANE extension for S/MIME), and subject to standard expiration and revocation checks.
 
@@ -478,22 +478,22 @@ Information is stored for an sysadmin defined retention period before being dele
 
 ### RFC1918/ULA (Private Network) Deployment
 
-This section may also apply to Catcher instances on the endpoint of an anonymization network such as a VPN, Tor or I2P, where said endpoint is unable or unwilling to deploy DNSSEC or obtain standard X.509 certificates. For DNSCatcher instances deployed in tandium with an anonymitization exit node, please see that section of the specification for further details.
+This section may also apply to Catcher instances on the endpoint of an anonymization network such as a VPN, Tor or I2P, where said endpoint is unable or unwilling to deploy DNSSEC or obtain standard X.509 certificates. For DNSCatcher instances deployed in tandem with an anonymitization exit node, please see that section of the specification for further details.
 
 Due to logisitical difficulties relating to WebPKI certificates in a private network, special steps, and modifications of the above must be used in place of the above menthoned deployment mechanisms. This section documents these challenges, and how Catcher can be deployed in these environments. Deployment within a private network should also strongly using S2S as descirbed below.
 
 #### Issues with Internal CAs
 The two private challenges that are faced in this deployment scenario is that the CA/B BR disallow issuance of certificates for non-public domains and IP space. In an corporate environment, an internal CA can be created which can issue these certificates, but deployment of these types of certificates can be difficult. For example, Windows Active Directory has intergrated mechanisms to deploy root CAs, but only adds it to the Windows CA Store list; TLS applications using OpenSSL may not query this list by default.
 
-Furthermore, internal CAs may have unreliable or unavailable OCSP servers or CRLs download point, AIA may be unavailable, the certificates may be issued to outdated standards, and have no assurance of quality. Non-public CAs also represent a MITN risk factor, and several commerical anti-virus/anti-malware such as AVG Business deploy their own CA root certificates on the system and perform MITN attacks to allow for deep packet inspection. As such, blind trust of these certificate stores is dangerous.
+Furthermore, internal CAs may have unreliable or unavailable OCSP servers or CRLs download point, AIA may be unavailable, the certificates may be issued to outdated standards, or have no assurance of quality. Non-public CAs also represent a MITN risk factor, and several commerical anti-virus/anti-malware such as AVG Business deploy their own CA root certificates on the system and perform MITN attacks to allow for deep packet inspection. As such, blind trust of these certificate stores is dangerous.
 
 If a Catcher client is connected to a server signed by an Internal CA, a bootstrap file **must** be used to provide the entire certificate chain and the root certificate. The bootstrap file location may be provided by the network through SRV records or multicast DNS. Besides warning the user, use of an Internal CA certificate will undergo the following checks:
 
 (These checks will be performed on all certificates, but BR compliant certs will pass these checks).
 
-1. The certificate path length must be 3 or greater; that is the key must not be issued from the root certificate, keeping in best current practices.
+1. The certificate path length must be 3 or greater; that is, the key must not be issued from the root certificate, keeping in line  with best current practices.
 2. The certificates signatures must be SHA-256, or the current signing algromith as approved by the BR forum for the full length of the chain.
-3. The issued certificates must be properly constrained. It is recommended the intermediate certificate have a PATHLEN: 1 so it can't issue CA:TRUE certificates.
+3. The issued certificates must be properly constrained. It is recommended the intermediate certificate have a PATHLEN: 1 so it cannot issue CA:TRUE certificates.
 4. AIA information for revocation **must** be available, either within the certificate (preferred) or in the bootstrap file. The leaf certificates **must** have OCSP available. The intermediate certificate may use CRLs alone.
 5. An OCSP check for all certificates must pass. The OCSP server must be configured with an intermediate certificate that is constrained to this purposes. This is required for OCSP-Stapling. If CRLs are available, they will be used to check intermediate certificates.
 6. It is recommended that two intermediate certificates are used, one constrained for server/clientAuth, and another for emailProtection (S/MIME). This is BCP for X.509 certificates.
@@ -510,7 +510,7 @@ When DNSCatcher is deployed on a private network, it may be in a position where 
 
 As these domain entries exist outside the public DNS system, there is no way to form a signed chain to the root KSK. Fortunately, a mechanism exists within DNSSEC to allow specification of a trust anchor that is not in the root zone known as Domain Lookaside Validation. DLV was designed for deployment of DNSSEC in an era before the root zone was signed, and also perfectly serves our needs here.
 
-For use and deployment with local domain names, the DNSCatcher server may create a DLV anchor for itself, and deployed to its internal DNS server. This anchor shall cover the entire DNSCatcher namespace, and included in the bootstrap file. DLV anchors need to be deployed to recursive resolvers in use throughout an enterprises setup for proper functionality of DNSSEC.
+For use and deployment with local domain names, the DNSCatcher server may create a DLV anchor for itself, and be deployed to its internal DNS server. This anchor will cover the entire DNSCatcher namespace, and also included in the bootstrap file. DLV anchors need to be deployed to recursive resolvers in use throughout an enterprises setup for proper functionality of DNSSEC.
 
 During client initialization and self-tests, the Catcher resolver will test validation of resolving DNSSEC information with the DLV anchor and report if the anchor is both deployed, and if local network resolvers are properly using it as a seperate set of tests. Records signed with the DLV anchor will be marked valid-secure-dlv during cross-check.
 
@@ -522,7 +522,7 @@ In S2S, one server operates as a master, and a downstream server acts as a slave
 
 S2S client servers are allowed to perform bulk data upload to the central server, as well as download and relay work unit requests. S2S servers can choose to limit the data they submit to the upstream server. S2S servers may directly resolve validation questions, or forward them to the upstream server for an answer. End user clients will see that signed requests come from an upstream server, and can build a validation path to said upstream servers both for purposes of validating WU signing, as well as standard validation responses.
 
-S2S is primarily designed to act as an endpoint for "legacy" DNS clients being collected to a central point; this deployment scenario is envisions for use in Tor exit nodes or other areas with a large amount of legacy DNS traffic. In this deployment scenario, DNS requests are received by DNSCatcher which performs the recursive resolution, and then normal cross-check as detailed above. Data is registered as anonymous submissions, and then submitted to the central server for aggreation. Anonymization may be performed before upload. The upstream can see which exit node data was collected from (and which if any are under attack), while revealing limited information about the users of said node.
+S2S is primarily designed to act as an endpoint for "legacy" DNS clients being collected to a central point; this deployment scenario is envisioned for use in Tor exit nodes or other areas with a large amount of legacy DNS traffic. In this deployment scenario, DNS requests are received by DNSCatcher which performs the recursive resolution, and then normal cross-check as detailed above. Data is registered as anonymous submissions, and then submitted to the central server for aggreation. Anonymization may be performed before upload. The upstream Catcher server can see which exit node data was collected from (and which if any are under attack), while revealing limited information about the users of said node.
 
 ## Client Operation
 
@@ -534,7 +534,7 @@ Catcher client software (either in the form of a standalone client, or browser e
 
 3. The client determines it's IP address relative to the DNSCatcher server. If said address is local, it also tries to determine it's external IP address.
 
-4. The client registers with the server, as either anonymousily, or as registered, or verified user. See below.
+4. The client registers with the server, as either anonymously or as a registered or verified user. See below.
 
 5. The default resolver for the system is tested for it's behavior, and quirks. In certain cases, this step may be skipped if the client such as if the client deployed on an anonymization service platform such as Tor Browser. If multiple resolvers are available, each is tested. In short, the following is checked.
 
@@ -559,7 +559,7 @@ Catcher client software (either in the form of a standalone client, or browser e
 
 6. The results from the above queries are collected, and submitted to the Catcher server directly, which verifies that the answers are correct and returns the validation results to the client. These are displayed to the user and a score is generated on how "compliant" their local DNS setup is.
 
-7. Once running, the client splits DNS requests between the system resolver and the upstream DNSCatcher server to get determination on if the information is available. In case of a failed cross-check, the client can be configured on how to react (with sane defaults pre-coded), and prompt the user how to proceed.
+7. Once running, the client splits DNS requests between the system resolver and the upstream DNSCatcher server to determine whether on if the information is available. In case of a failed cross-check, the client can be configured on how to react (with sane defaults pre-coded), and prompt the user how to proceed.
 
 8. On regular intervals, the client, if opted into work units, may request them from the DNSCatcher server and perform the actions contained within. As usual, WU verification with valid keys must be done.
 
@@ -568,7 +568,7 @@ To balanace the need for privacy for the need reliable information, clients can 
 
 
 ### DNSCatcher Bootstrap File (DCB)
-DCBs are an alternative mechanism for establishing security parameters between a Catcher client and server. As DNSCatcher depends on DANE and DNSSEC to pin its keys securely, it is necessary for the local resolver to successfully be able to provide DNSSEC data and sigchase to the root KSK. It must also not managle TLSA or SMIMEA RRtypes. As shown above, it can not be assumed that that the local resolver is capable of this action, nor can it be assumed that the client can obtain the information through known good DNS servers (through standard port 53 DNS, DoT or DoH on public servers).
+DCBs are an alternative mechanism for establishing security parameters between a Catcher client and server. As DNSCatcher depends on DANE and DNSSEC to pin its keys securely, it is necessary for the local resolver to successfully be able to provide DNSSEC data and sigchase to the root KSK. It must also not mangle TLSA or SMIMEA RRtypes. As shown above, it can not be assumed that that the local resolver is capable of this action, nor can it be assumed that the client can obtain the information through known good DNS servers (through standard port 53 DNS, DoT or DoH on public servers).
 
 Furthermore, as detailed in private network operation, a Catcher server may be dependent on DLV and internal CA roots to secure it's operation and thus a chain of trust can not be established directly. The DCB is a method designed to side-step this problem by providing all the paramters required to bootstrap a client behind a buggy recursive resolver.
 
@@ -580,7 +580,7 @@ The DCB is envisioned as a S/MIME signed JSON document that has the following pa
    * This includes all keys listed in the Key Pinning section of this document
  * If DLV is being used, the DLV anchor
    * If DLV is used, *and* the DLV anchor is in a position where it can be encoded with DNSSEC (this may be true in cases where split horizon DNS has been deployed, and is using the same domain name internally and externally).
-   * If the DLV anchor can be validated via DNSSEC, it shall allow for auto configuration to take place.
+   * If the DLV anchor can be validated via DNSSEC, it will allow for auto configuration to take place.
  * Certificate chains for all leaf certificates, including a copy of the root
    * This is used to enroll internal CAs for DNSCatcher clients
  * Copies of SRV records to determine relevant domain names for testing and other services.
@@ -604,7 +604,7 @@ Data submission is signed with the client keypair, and can be used for clientAut
 Registered users may request their data be deleted from the backend.
 
 #### Verified Users
-Verified users operate like registered users, but provide additional information such as a name, and email address and can be contacted by Catcher administrators. Verified users are considered to provide the high quality of client data. In API terms, verified users operate identically to registered users.
+Verified users operate like registered users, but provide additional information such as a name, and email address and can be contacted by Catcher administrators. Verified users are considered to provide high quality client data. In API terms, verified users operate identically to registered users.
 
 Verified users can request that their verification be deleted in addition to their data history.
 
@@ -617,9 +617,9 @@ The client shall listen to system interfaces for events relating to network chan
 If the environment prevents listening for network change events, the client shall occassionally poll the backend server to determine it's outbound IP address and use that as a mechanism to determine if it needs to re-run diagonsistic tests.
 
 ### Client Capabilities
-Depending on the environment it's deployed in, the DNSCatcher client may only have limited access to the system resolver or the ability to request arbiertary records. Clients register their capabilities to the upstream server for non-anonymous users.
+Depending on the environment in which it is deployed, the DNSCatcher client may only have limited access to the system resolver or the ability to request arbitrary records. Clients register their capabilities to the upstream server for non-anonymous users.
 
-Two clients are planned at this time, a native code implementation primarily built around shared code with the server, and an implementationin JavaScript for intergration into Mozilla and Chrome via browser extensions.
+Two clients are planned at this time, a native code implementation primarily built around shared code with the server, and an implementationin in JavaScript for intergration into Mozilla and Chrome via browser extensions. Full implementation may require a native code client running in tandem with the extension.
 
 ## Key Pinning
 
@@ -644,7 +644,7 @@ For use in environments where outbound encrypted traffic *must* be decryptable f
 
 Two client interfaces are intended at this point, one based upon standard REST prinpicals with minor modifications, and a second based on the DNS protocol itself which will also allow for caching through the recursive resolver mechanisms built into DNS.
 
-This document specificies the type of end-points and usage of them, but doesn't lock down the format. That will be defined in an upcoming document and implemented in the reference implementation.
+This document specifies the types of end-points and usage of them, but doesn't lock down the format. That will be defined in an upcoming document and implemented in the reference implementation.
 
 As of writing, endpoints for server administration have not been defined.
 
@@ -652,7 +652,7 @@ As of writing, endpoints for server administration have not been defined.
 A minor extension is planned for traditional DNS clients to be identifiable to Catcher servers. The DC_IDENT extension includes the public key + hash of the Question section to allow legacy clients to gain the ability to be properly tracked without requiring a full catcher client.
 
 ### DNS IN/CH Zone Information and Endpoints
-For bootstrapping Catcher clients, as well as performing diagonsis, the Catcher server defines certain "well-known" names that are used for both bootstrap and diagonstic purposes. These names take the form of subdomains and version number from the DNSCatcher base domain.
+For bootstrapping Catcher clients, as well as performing diagonsis, the Catcher server defines certain "well-known" names that are used for both bootstrap and diagonstic purposes. These names take the form of subdomains and version numbers from the DNSCatcher base domain.
 
 For example, if DNSCatcher is installed at dnscatcher.example.org, the check-ip endpoint would be check-ip.dnscatcher.example.org.
 
@@ -675,11 +675,11 @@ The domains string "dnscatcher.protocol.version" shall be used to define the rev
 The CH class is not DNSSEC signed.
 
 #### Endpoint lookups
-Endpoint names are designed to be flexible or allow relaying to other Catcher servers for purposes of loadbalancing. Each endpoint is defined as a "well known name" which is published as a SRV record to the base Catcher domain.
+Endpoint names are designed to be flexible or allow relaying to other Catcher servers for purposes of load balancing. Each endpoint is defined as a "well known name" which is published as a SRV record to the base Catcher domain.
 
 #### Diagnostic Subdomains
 
-Diagnostic domains are used for testing recursive resolver behaviors as defined in client operations. Each endpoint is intended to check for specific behavior of a DNS client such as DNSSEC pass/fail, algrothmin compatibility, and record handling capabilities as described in client operations.
+Diagnostic domains are used for testing recursive resolver behaviors as defined in client operations. Each endpoint is intended to check for specific behavior of a DNS client such as DNSSEC pass/fail, algorithm compatibility, and record handling capabilities as described in client operations.
 
 A client can pull the list of types of endpoints available, and request generation of said endpoints. The necessary records are created and published to a randomly generated name with randomly encoded (but valid) test data. For example, a Catcher client may request testing of CAA record handling. Upon reciept, the Catcher server will create the following.
 
@@ -693,10 +693,10 @@ In certain cases, Work Units may test operation of commands such as DNS UPDATE. 
 
 ### HTTPS-REST
 
-HTTP/REST is an extremely common web interface design, where a client makes simple HTTP commands to various end points and parses results relating to it. At it's base, REST uses the standard HTTP verbs (GET, POST, PUT, PATCH, and DELETE) to interact with data and mutate it. As such, a REST interface can be trivially accessed with any standard HTTP library or command line tool such as cURL. Responses are traditionally encoded in JSON or XML. However, for security and validation reasons, these formats in of itself are not good enough.
+HTTP/REST is an extremely common web interface design, where a client makes simple HTTP commands to various end points and parses results relating to it. At it's base, REST uses the standard HTTP verbs (GET, POST, PUT, PATCH, and DELETE) to interact with data and mutate it. As such, a REST interface can be trivially accessed with any standard HTTP library or command line tool such as cURL. Responses are traditionally encoded in JSON or XML. However, for security and validation reasons, these formats in of themselves are not good enough.
 
 #### S/MIME Signed JSON (SSJ)
-It is intended that responses from the REST interface are returned in an S/MIME document containing a JSON payload, and a signature from either KSK or a designated S/MIME signature key for this purpose. While standard TLS provides connection layer integrity and encryption, the deployment of the DNSCatcher server may have TLS termination seperate from the Catcher server itself (for example, at a load balancer). As such, to prevent security attacks in this "plain text" last mile, the responses shall be signed with S/MIME, and be cachable both client side and server side to reduce server load.
+It is intended that responses from the REST interface are returned in an S/MIME document containing a JSON payload, and a signature from either KSK or a designated S/MIME signature key for this purpose. While standard TLS provides connection layer integrity and encryption, the deployment of the DNSCatcher server may have TLS termination seperate from the Catcher server itself (for example, at a load balancer). As such, to prevent security attacks in this "plain text" last mile, the responses shall be signed with S/MIME, and be cacheable both client side and server side to reduce server load.
 
 This feature is also to ensure data integrity in environments where deep packet inspection of TLS is required via an corporate internal CA where DNSCatcher's strict security would no longer be able to be used.
 
@@ -730,11 +730,11 @@ Work unit behavior is detailed further below.
 ### DNS CHK_IN Class
 A unique and almost unused feature of the DNS protocol is a mechanism known as classes, where multiple views of DNS data can be provided. It is intended to provide the same functionality as defined in the HTTP REST interface as a series of DNS RRTYPES implemented in the CHK_IN class.
 
-As domian name have a total max length of 253 characters, it is not practice to place this information within the IN class as the total length of a domain + suffix may exceed this length. Furthermore, the IN class is supposed to be definitive information, and DNSCatcher would be violating it's own premise if it appended information to these records that were not posted by their original name servers. Thus the creation of a new DNS class is an appropiate way to relay this information.
+As domian names have a total max length of 253 characters, it is not practice to place this information within the IN class as the total length of a domain + suffix may exceed this length. Furthermore, the IN class is supposed to be definitive information, and DNSCatcher would be violating it's own premise if it appended information to these records that were not posted by their original name servers. Thus the creation of a new DNS class is an appropiate way to relay this information.
 
 Exposing Catcher information via the DNS protocol is intended to allow for ease of implementation of Catcher devices in embedded or constrained environments, or allow easy creation of clients where a device already has a full DNS stack (aka, almost everything in existance today).
 
-The full desing of DNSCatcher's CHK_IN zone remains TBD.
+The full design of DNSCatcher's CHK_IN zone remains TBD.
 
 #### DNSSEC Considerations
 
@@ -774,7 +774,7 @@ See above, although this is less common in DNS as it is in other mediums.
 Split-horizon is not considered a good practice by the DNS community, but it's extremely common in practice. Given Catcher needs to determine if it's seeing a split horizon domain, this information has to be sent from the server to the client
   * **Potential Mitigation:** 
     * Determination of split horizon domain names can result it negative caching, or caching with a short TTL to prevent leak of data information. An exception however can be granted in the case of studying name collision issues where long-lived data is extremely valuable for top level domains (while only revealing minimal amounts of information)
-    * **NOTE:** As there is no "sure fire" way to determine if split horizon is indeed in affect, some information will still be collected as a result of "invalid" determinations by the DNSCatcher server.
+    * **NOTE:** As there is no "sure fire" way to determine if split horizon is indeed in effect, some information will still be collected as a result of "invalid" determinations by the DNSCatcher server.
 
 ### Collection of vulerable DNS server information
 
@@ -782,7 +782,7 @@ As part of determining the health of the recursive resolver ecosystem, the DNSCa
 
   * **Mitigations:** 
     * We can limit the retention of IP address information of these servers; furthermore, it is expected that most vulerable servers will not be directly accessible from the Internet; and thus not subject to direct attack.
-    * We could delete all data except test results after a period of time; reducing the amount of information available incase of breach.
+    * We could delete all data except test results after a period of time and reduce the amount of information available incase of breach.
 
 ### Work Unit System Can Expose Users
 
@@ -791,4 +791,4 @@ The WU system described above is important for understanding how certain queries
   * **Mitigations:**
     * Work Unit functionality is opt-in
     * Signing keys for WUs are not stored as part of the server, and are instead kept seperately. While an attacker could potentially reconfigure the server to change the trusted WU accepted keys, the requirement for class 2 S/MIME certificates issued by a public CA + S/MIME key pinning + requirement of an email address from the DNSCatcher domain (to prevent use of compromised technically constrainted CAs) drastically complicates the attack in such a way that an attacker would have to get a key fradulantly issued by a CA.
-      * There are concerned on how robust the CA infrastructure is in identity validation, especially in regards to S/MIME are in this area.
+      * There are concerns on how robust the CA infrastructure is in identity validation, especially in regards to S/MIME are in this area.
