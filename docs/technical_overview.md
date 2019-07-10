@@ -648,6 +648,9 @@ This document specificies the type of end-points and usage of them, but doesn't 
 
 As of writing, endpoints for server administration have not been defined.
 
+#### EDNS DC_IDENT Extension
+A minor extension is planned for traditional DNS clients to be identifiable to Catcher servers. The DC_IDENT extension includes the public key + hash of the Question section to allow legacy clients to gain the ability to be properly tracked without requiring a full catcher client.
+
 ### DNS IN/CH Zone Information and Endpoints
 For bootstrapping Catcher clients, as well as performing diagonsis, the Catcher server defines certain "well-known" names that are used for both bootstrap and diagonstic purposes. These names take the form of subdomains and version number from the DNSCatcher base domain.
 
@@ -725,14 +728,30 @@ Work units can be downloaded for a given client. A client's eligibility for a wo
 Work unit behavior is detailed further below.
 
 ### DNS CHK_IN Class
+A unique and almost unused feature of the DNS protocol is a mechanism known as classes, where multiple views of DNS data can be provided. It is intended to provide the same functionality as defined in the HTTP REST interface as a series of DNS RRTYPES implemented in the CHK_IN class.
 
-#### Caching Resolver Interaction
+As domian name have a total max length of 253 characters, it is not practice to place this information within the IN class as the total length of a domain + suffix may exceed this length. Furthermore, the IN class is supposed to be definitive information, and DNSCatcher would be violating it's own premise if it appended information to these records that were not posted by their original name servers. Thus the creation of a new DNS class is an appropiate way to relay this information.
+
+Exposing Catcher information via the DNS protocol is intended to allow for ease of implementation of Catcher devices in embedded or constrained environments, or allow easy creation of clients where a device already has a full DNS stack (aka, almost everything in existance today).
+
+The full desing of DNSCatcher's CHK_IN zone remains TBD.
+
+#### DNSSEC Considerations
+
+Like all DNS functionality, DNS classes stem from the root zone. However, the root server is not expected nor will ever implement the CHK_IN zone. As such, a trust anchor is required to validate said zone. It is intended for the KSK of a given DNSCatcher zone to represent the root zone of the CHK_IN class. This allows for validation and integrity checking of DNSCatcher information conveyed over DNS.
 
 ## Work Unit Interface
+Work Units are created by the DNSCatcher server software, and then signed with specialized whitelisted S/MIME certificates issued to individuals who have permission to do so; this defensive measure is intended to prevent a server compromise from being used to unmask the identity of DNSCatcher users in the wild.
+
+Work units are deployed in the form of a S/MIME signed JSON document, and are downloaded from endpoints that represent a users IP address, registration identity, or geophysical location.
 
 ### Operations
 
+As of writing, only one type of operation is defined; client DNS lookup.
+
 #### Client DNS Lookup
+
+The packet contains a list of domain names and record types to query via the local resolver, and then submit the results to a given REST/CKH_IN endpoint specificed in the work unit file.
 
 ## Security Concerns
 
@@ -749,7 +768,6 @@ It is not uncommon for people to misuse DNS and place far too much information a
 
 ### Accidental Collection Personally Identifiable Information
 See above, although this is less common in DNS as it is in other mediums.
-
 
 ### Leak of split-horizon DNS information
 
