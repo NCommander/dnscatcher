@@ -31,10 +31,8 @@ package body Packet_Catcher is
       procedure Free_DNSCatacher_Config is new Ada.Unchecked_Deallocation
         (Object => DNS_Common.Config.Configuration, Name => DNS_Common.Config.Configuration_Ptr);
    begin
-      Capture_Config                          := new DNS_Common.Config.Configuration;
-      Capture_Config.Local_Listen_Port        := 53;
-      Capture_Config.Upstream_DNS_Server      := To_Unbounded_String ("4.2.2.2");
-      Capture_Config.Upstream_DNS_Server_Port := 53;
+      -- Load the config file from disk
+      Capture_Config := DNS_Common.Config.Parse_Config_File(To_Unbounded_String("conf/dnscatcherd.conf"));
 
       -- Configure the logger
       Capture_Config.Logger_Config.Log_Level := DEBUG;

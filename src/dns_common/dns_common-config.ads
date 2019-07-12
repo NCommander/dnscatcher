@@ -1,6 +1,8 @@
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
-with GNAT.Sockets;          use GNAT.Sockets;
-with DNS_Common.Logger;     use DNS_Common.Logger;
+with Ada.Containers.Indefinite_Ordered_Maps;
+
+with GNAT.Sockets;      use GNAT.Sockets;
+with DNS_Common.Logger; use DNS_Common.Logger;
 
 package DNS_Common.Config is
    type Configuration is record
@@ -16,4 +18,22 @@ package DNS_Common.Config is
       -- Configuration used by the logger
    end record;
    type Configuration_Ptr is access Configuration;
+
+   -- Functions
+   procedure Initialize_Config_Parse;
+   function Parse_Config_File (Config_File_Path : Unbounded_String) return Configuration_Ptr;
+
+   type Parse_Procedure is access procedure (Config : Configuration_Ptr; Value_Str : String);
+   procedure Parse_Local_Listen_Port (Config : Configuration_Ptr; Value_Str : String);
+   procedure Parse_Upstream_DNS_Server (Config : Configuration_Ptr; Value_Str : String);
+   procedure Parse_Upstream_DNS_Server_Port (Config : Configuration_Ptr; Value_Str : String);
+
+
+   -- Type for handling configuration variables
+   package GCP_Management is new Ada.Containers.Indefinite_Ordered_Maps (String, Parse_Procedure);
+
+   GCP_Map : GCP_Management.Map;
+
+   -- Defined Exceptions
+   Malformed_Line : exception;
 end DNS_Common.Config;
