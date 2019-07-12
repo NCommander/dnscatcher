@@ -1,25 +1,27 @@
-with AUnit; use AUnit;
+with AUnit;            use AUnit;
 with AUnit.Test_Cases; use AUnit.Test_Cases;
 
 with DNS_Common.Config;
-with DNS_Common.Logger;       use DNS_Common.Logger;
+with DNS_Common.Logger; use DNS_Common.Logger;
 
 package Test_Packet_Parser is
    type Packet_Parser_Test is new Test_Cases.Test_Case with record
-      Capture_Config          : DNS_Common.Config.Configuration_Ptr;
-      Logger_Task             : DNS_Common.Logger.Logger;
+      Capture_Config : DNS_Common.Config.Configuration_Ptr;
+      Logger_Task    : DNS_Common.Logger.Logger;
    end record;
 
    -- Setup the DNS Catcher library
-   procedure Set_Up_Case(T: in out Packet_Parser_Test);
+   procedure Set_Up_Case (T : in out Packet_Parser_Test);
 
    -- Teardown here
-   procedure Tear_Down_Case(T: in out Packet_Parser_Test);
+   procedure Tear_Down_Case (T : in out Packet_Parser_Test);
 
-   procedure Register_Tests (T: in out Packet_Parser_Test);
+   procedure Register_Tests (T : in out Packet_Parser_Test);
    -- Register routines to be run
 
-   function Name (T: Packet_Parser_Test) return Message_String;
+   function Name
+     (T : Packet_Parser_Test)
+      return Message_String;
    -- Provide name identifying the test case
 
    -- Test Routines:

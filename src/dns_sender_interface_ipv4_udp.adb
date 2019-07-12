@@ -3,7 +3,7 @@ with Ada.Exceptions; use Ada.Exceptions;
 with Ada.Streams;           use Ada.Streams;
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 with DNS_Core_Constructs;   use DNS_Core_Constructs;
-with DNS_Common.Logger;      use DNS_Common.Logger;
+with DNS_Common.Logger;     use DNS_Common.Logger;
 
 package body DNS_Sender_Interface_IPv4_UDP is
 
@@ -14,31 +14,34 @@ package body DNS_Sender_Interface_IPv4_UDP is
       Outgoing_Address      : Inet_Addr_Type;
       Outgoing_Port         : Port_Type;
       Length                : Stream_Element_Offset;
-      Process_Packets       : Boolean := False;
-      Packet_Count          : Integer := 0;
+      Process_Packets       : Boolean                  := False;
+      Packet_Count          : Integer                  := 0;
       Logger_Packet         : Logger_Message_Packet_Ptr;
    begin
       loop
          -- Either just started or stopping, we're terminatable in this state
-         if Outbound_Packet_Queue /= null then
-           Outbound_Packet_Queue.Count (Packet_Count);
+         if Outbound_Packet_Queue /= null
+         then
+            Outbound_Packet_Queue.Count (Packet_Count);
          end if;
 
          while Process_Packets = False and Packet_Count = 0
          loop
             select
-               accept Initialize (Socket : Socket_Type; Packet_Queue : DNS_Raw_Packet_Queue_Ptr) do
+               accept Initialize
+                 (Socket       : Socket_Type;
+                  Packet_Queue : DNS_Raw_Packet_Queue_Ptr) do
                   DNS_Socket            := Socket;
                   Outbound_Packet_Queue := Packet_Queue;
                end Initialize;
             or
                accept Start do
                   Logger_Packet := new Logger_Message_Packet;
-                  Logger_Packet.Push_Component("UDP Sender");
+                  Logger_Packet.Push_Component ("UDP Sender");
 
                   Process_Packets := True;
-                  Logger_Packet.Log_Message(INFO, "Sender startup");
-                  Logger_Queue.Add_Packet(Logger_Packet);
+                  Logger_Packet.Log_Message (INFO, "Sender startup");
+                  Logger_Queue.Add_Packet (Logger_Packet);
                end Start;
             or
                accept Stop do
@@ -53,7 +56,7 @@ package body DNS_Sender_Interface_IPv4_UDP is
          while Process_Packets or Packet_Count > 0
          loop
             Logger_Packet := new Logger_Message_Packet;
-            Logger_Packet.Push_Component("UDP Sender");
+            Logger_Packet.Push_Component ("UDP Sender");
 
             select
                accept Start do
@@ -69,20 +72,26 @@ package body DNS_Sender_Interface_IPv4_UDP is
                then
                   Outbound_Packet_Queue.Get (DNS_Packet);
                   declare
-                     Buffer : Stream_Element_Array (1 .. DNS_Packet.Raw_Data_Length);
+                     Buffer : Stream_Element_Array
+                       (1 .. DNS_Packet.Raw_Data_Length);
                      Header : SEA_DNS_Packet_Header;
                   begin
-                     Outgoing_Address := Inet_Addr (To_String (DNS_Packet.To_Address));
-                     Outgoing_Port    := DNS_Packet.To_Port;
+                     Outgoing_Address :=
+                       Inet_Addr (To_String (DNS_Packet.To_Address));
+                     Outgoing_Port := DNS_Packet.To_Port;
 
                      -- And send the damn thing
-                     Logger_Packet.Log_Message(DEBUG, "Sent packet to " & Image (Outgoing_Address));
+                     Logger_Packet.Log_Message
+                       (DEBUG, "Sent packet to " & Image (Outgoing_Address));
 
                      -- Create the outbound message
-                     Header := DNS_Packet_Header_To_SEA (DNS_Packet.Raw_Data.Header);
+                     Header :=
+                       DNS_Packet_Header_To_SEA (DNS_Packet.Raw_Data.Header);
                      Buffer := Header & DNS_Packet.Raw_Data.Data.all;
                      Send_Socket
-                       (Socket => DNS_Socket, Item => Buffer, Last => Length,
+                       (Socket => DNS_Socket,
+                        Item   => Buffer,
+                        Last   => Length,
                         To     =>
                           (Family => Family_Inet, Addr => Outgoing_Address,
                            Port   => Outgoing_Port));
@@ -90,7 +99,10 @@ package body DNS_Sender_Interface_IPv4_UDP is
                   exception
                      when Exp_Error : others =>
                         begin
-                           Logger_Packet.Log_Message(ERROR, "Unknown error: " & Exception_Information (Exp_Error));
+                           Logger_Packet.Log_Message
+                             (ERROR,
+                              "Unknown error: " &
+                              Exception_Information (Exp_Error));
                         end;
                   end;
                else
@@ -99,13 +111,15 @@ package body DNS_Sender_Interface_IPv4_UDP is
             end select;
 
             -- Send the logs on their way
-            Logger_Queue.Add_Packet(Logger_Packet);
+            Logger_Queue.Add_Packet (Logger_Packet);
          end loop;
       end loop;
    end Send_Packet_Task;
 
-   procedure Initialize (This : in out IPv4_UDP_Sender_Interface; Config : Configuration_Ptr;
-      Socket                  :        Socket_Type)
+   procedure Initialize
+     (This   : in out IPv4_UDP_Sender_Interface;
+      Config :        Configuration_Ptr;
+      Socket :        Socket_Type)
    is
    begin
       -- Save our config for good measure
@@ -126,13 +140,15 @@ package body DNS_Sender_Interface_IPv4_UDP is
    procedure Shutdown (This : in out IPv4_UDP_Sender_Interface) is
    begin
       -- Cleanly shuts down the interface
-      if This.Sender_Task /= null then
+      if This.Sender_Task /= null
+      then
          This.Sender_Task.Stop;
       end if;
    end Shutdown;
 
    function Get_Packet_Queue_Ptr
-     (This : in out IPv4_UDP_Sender_Interface) return DNS_Raw_Packet_Queue_Ptr
+     (This : in out IPv4_UDP_Sender_Interface)
+      return DNS_Raw_Packet_Queue_Ptr
    is
    begin
       return This.Packet_Queue;

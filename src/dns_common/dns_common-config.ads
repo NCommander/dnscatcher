@@ -21,16 +21,27 @@ package DNS_Common.Config is
 
    -- Functions
    procedure Initialize_Config_Parse;
-   function Parse_Config_File (Config_File_Path : Unbounded_String) return Configuration_Ptr;
+   function Parse_Config_File
+     (Config_File_Path : Unbounded_String)
+      return Configuration_Ptr;
 
-   type Parse_Procedure is access procedure (Config : Configuration_Ptr; Value_Str : String);
-   procedure Parse_Local_Listen_Port (Config : Configuration_Ptr; Value_Str : String);
-   procedure Parse_Upstream_DNS_Server (Config : Configuration_Ptr; Value_Str : String);
-   procedure Parse_Upstream_DNS_Server_Port (Config : Configuration_Ptr; Value_Str : String);
+   type Parse_Procedure is access procedure
+     (Config    : Configuration_Ptr;
+      Value_Str : String);
+   procedure Parse_Local_Listen_Port
+     (Config    : Configuration_Ptr;
+      Value_Str : String);
+   procedure Parse_Upstream_DNS_Server
+     (Config    : Configuration_Ptr;
+      Value_Str : String);
+   procedure Parse_Upstream_DNS_Server_Port
+     (Config    : Configuration_Ptr;
+      Value_Str : String);
 
-
-   -- Type for handling configuration variables
-   package GCP_Management is new Ada.Containers.Indefinite_Ordered_Maps (String, Parse_Procedure);
+      -- Type for handling configuration variables GCP = Global Config
+      -- Paramters
+   package GCP_Management is new Ada.Containers.Indefinite_Ordered_Maps
+     (String, Parse_Procedure);
 
    GCP_Map : GCP_Management.Map;
 

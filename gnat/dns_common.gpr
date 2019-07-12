@@ -40,8 +40,16 @@ library project DNS_Common is
    end Builder;
    
    package Pretty_Printer is
-      for Default_Switches ("ada") use ("-A1", "-A2", "-A3", "-A4", "-A5", "-M99", "--separate-stmt-name", "-c2", "--vertical-enum-types", "--vertical-array-types", "--vertical-named-aggregates", "--vertical-case-alternatives", 
-         "--separate-loop-then");
+      for Default_Switches ("ada") use (
+      "-rnb",
+      "-c4",
+      "--call_threshold=1",
+      "--par_threshold=1",
+      "--separate-stmt-name",
+      "--vertical-enum-types",
+      "--vertical-array-types",
+      "--vertical-case-alternatives",
+      "--separate-loop-then");
    end Pretty_Printer;
 
    for Languages use ("Ada", "C");

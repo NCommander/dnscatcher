@@ -17,22 +17,28 @@ package body Packet_Catcher is
 
    procedure Run_Catcher is
       -- Input and Output Sockets
-      DNS_Transactions        : DNS_Transaction_Manager.DNS_Transaction_Manager_Task;
-      Capture_Config          : DNS_Common.Config.Configuration_Ptr;
-      Receiver_Interface      : DNS_Receiver_Interface_IPv4_UDP.IPv4_UDP_Receiver_Interface;
-      Sender_Interface        : DNS_Sender_Interface_IPv4_UDP.IPv4_UDP_Sender_Interface;
+      DNS_Transactions : DNS_Transaction_Manager.DNS_Transaction_Manager_Task;
+      Capture_Config     : DNS_Common.Config.Configuration_Ptr;
+      Receiver_Interface : DNS_Receiver_Interface_IPv4_UDP
+        .IPv4_UDP_Receiver_Interface;
+      Sender_Interface : DNS_Sender_Interface_IPv4_UDP
+        .IPv4_UDP_Sender_Interface;
       Logger_Task             : DNS_Common.Logger.Logger;
       Transaction_Manager_Ptr : DNS_Transaction_Manager_Task_Ptr;
       Socket                  : Socket_Type;
       Logger_Packet           : DNS_Common.Logger.Logger_Message_Packet_Ptr;
 
       procedure Free_Transaction_Manager is new Ada.Unchecked_Deallocation
-        (Object => DNS_Transaction_Manager_Task, Name => DNS_Transaction_Manager_Task_Ptr);
+        (Object => DNS_Transaction_Manager_Task,
+         Name   => DNS_Transaction_Manager_Task_Ptr);
       procedure Free_DNSCatacher_Config is new Ada.Unchecked_Deallocation
-        (Object => DNS_Common.Config.Configuration, Name => DNS_Common.Config.Configuration_Ptr);
+        (Object => DNS_Common.Config.Configuration,
+         Name   => DNS_Common.Config.Configuration_Ptr);
    begin
       -- Load the config file from disk
-      Capture_Config := DNS_Common.Config.Parse_Config_File(To_Unbounded_String("conf/dnscatcherd.conf"));
+      Capture_Config :=
+        DNS_Common.Config.Parse_Config_File
+          (To_Unbounded_String ("conf/dnscatcherd.conf"));
 
       -- Configure the logger
       Capture_Config.Logger_Config.Log_Level := DEBUG;
@@ -47,12 +53,15 @@ package body Packet_Catcher is
       Logger_Packet.Log_Message (NOTICE, "DNSCatcher starting up ...");
       DNS_Common.Logger.Logger_Queue.Add_Packet (Logger_Packet);
 
-      -- Socket has to be shared between receiver and sender. This likely needs to move to
-      -- to a higher level class
+      -- Socket has to be shared between receiver and sender. This likely needs
+      -- to move to to a higher level class
       begin
-         Create_Socket (Socket => Socket, Mode => Socket_Datagram);
+         Create_Socket
+           (Socket => Socket,
+            Mode   => Socket_Datagram);
          Set_Socket_Option
-           (Socket => Socket, Option => (GNAT.Sockets.Receive_Timeout, Timeout => 1.0));
+           (Socket => Socket,
+            Option => (GNAT.Sockets.Receive_Timeout, Timeout => 1.0));
          Bind_Socket
            (Socket  => Socket,
             Address =>
@@ -64,17 +73,18 @@ package body Packet_Catcher is
                Logger_Packet := new DNS_Common.Logger.Logger_Message_Packet;
                Logger_Packet.Log_Message
                  (ERROR, "Socket error: " & Exception_Information (Exp_Error));
-               Logger_Packet.Log_Message
-                 (ERROR, "Refusing to start!");
+               Logger_Packet.Log_Message (ERROR, "Refusing to start!");
                Logger_Queue.Add_Packet (Logger_Packet);
                goto Shutdown_Procedure;
             end;
       end;
 
-      Receiver_Interface.Initialize (Capture_Config, Transaction_Manager_Ptr, Socket);
+      Receiver_Interface.Initialize
+        (Capture_Config, Transaction_Manager_Ptr, Socket);
       Sender_Interface.Initialize (Capture_Config, Socket);
 
-      Transaction_Manager_Ptr.Set_Packet_Queue (Sender_Interface.Get_Packet_Queue_Ptr);
+      Transaction_Manager_Ptr.Set_Packet_Queue
+        (Sender_Interface.Get_Packet_Queue_Ptr);
       Transaction_Manager_Ptr.Start;
       Receiver_Interface.Start;
       Sender_Interface.Start;

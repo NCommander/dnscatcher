@@ -1,10 +1,13 @@
 with DNS_Core_Constructs.Utils; use DNS_Core_Constructs.Utils;
 
 package body DNS_Core_Constructs is
-   function To_String (RR_Type : RR_Types) return String is
+   function To_String
+     (RR_Type : RR_Types)
+      return String
+   is
    begin
-      -- This **** is required because 'in' is a keyword and Ada
-      -- is case insensitive
+      -- This **** is required because 'in' is a keyword and Ada is case
+      -- insensitive
       case RR_Type is
          when WILDCARD =>
             return "*";
@@ -14,10 +17,13 @@ package body DNS_Core_Constructs is
 
    end To_String;
 
-   function To_String (DNS_Class : Classes) return String is
+   function To_String
+     (DNS_Class : Classes)
+      return String
+   is
    begin
-      -- This **** is required because 'in' is a keyword and Ada
-      -- is case insensitive
+      -- This **** is required because 'in' is a keyword and Ada is case
+      -- insensitive
       case DNS_Class is
          when INternet =>
             return "IN";

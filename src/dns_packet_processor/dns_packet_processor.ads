@@ -4,13 +4,14 @@ with Ada.Streams;             use Ada.Streams;
 with Interfaces.C.Extensions; use Interfaces.C.Extensions;
 
 with DNS_Common.Logger; use DNS_Common.Logger;
-with DNS_Core_Constructs.Raw_Packet_Records; use DNS_Core_Constructs.Raw_Packet_Records;
-with DNS_Core_Constructs;                    use DNS_Core_Constructs;
-with DNS_RData_Processor;                    use DNS_RData_Processor;
+with DNS_Core_Constructs.Raw_Packet_Records;
+use DNS_Core_Constructs.Raw_Packet_Records;
+with DNS_Core_Constructs; use DNS_Core_Constructs;
+with DNS_RData_Processor; use DNS_RData_Processor;
 
 package DNS_Packet_Processor is
-   -- Create vector types for each type of section
-   -- DNS question converted from wire format to human parsable format
+   -- Create vector types for each type of section DNS question converted from
+   -- wire format to human parsable format
    type Parsed_DNS_Question is record
       QName  : Unbounded_String;
       QType  : RR_Types;
@@ -18,17 +19,18 @@ package DNS_Packet_Processor is
    end record;
 
    type Parsed_DNS_Resource_Record is record
-      RName  : Unbounded_String;
-      RType  : RR_Types;
-      RClass : Unsigned_16;
-      TTL    : Unsigned_32;
-      RData  : Unbounded_String;
+      RName        : Unbounded_String;
+      RType        : RR_Types;
+      RClass       : Unsigned_16;
+      TTL          : Unsigned_32;
+      RData        : Unbounded_String;
       Raw_Packet : Stream_Element_Array_Ptr; -- Because sometimes we need the whole packet to decode
       RData_Offset : Stream_Element_Offset;
    end record;
 
    package Question_Vector is new Vectors (Positive, Parsed_DNS_Question);
-   package Resource_Record_Vector is new Vectors (Positive, Parsed_RData_Access);
+   package Resource_Record_Vector is new Vectors (Positive,
+      Parsed_RData_Access);
 
    type Parsed_DNS_Packet is record
       Header     : DNS_Packet_Header;
@@ -39,26 +41,38 @@ package DNS_Packet_Processor is
    end record;
    type Parsed_DNS_Packet_Ptr is access Parsed_DNS_Packet;
 
-   function Packet_Parser (Logger: Logger_Message_Packet_Ptr; Packet : Raw_Packet_Record_Ptr) return Parsed_DNS_Packet_Ptr;
-   pragma Test_Case(Name => "Packet_Parser",
-                    Mode => Robustness);
+   function Packet_Parser
+     (Logger : Logger_Message_Packet_Ptr;
+      Packet : Raw_Packet_Record_Ptr)
+      return Parsed_DNS_Packet_Ptr;
+   pragma Test_Case (Name => "Packet_Parser", Mode => Robustness);
 
-   function Parse_DNS_Packet_Name_Records (Raw_Data :        Raw_DNS_Packet_Data;
-      Offset : in out Stream_Element_Offset) return Unbounded_String;
+   function Parse_DNS_Packet_Name_Records
+     (Raw_Data :        Raw_DNS_Packet_Data;
+      Offset   : in out Stream_Element_Offset)
+      return Unbounded_String;
 
-   function Parse_DNS_RR_Type (Raw_Data :        Raw_DNS_Packet_Data;
-      Offset                            : in out Stream_Element_Offset) return RR_Types;
+   function Parse_DNS_RR_Type
+     (Raw_Data :        Raw_DNS_Packet_Data;
+      Offset   : in out Stream_Element_Offset)
+      return RR_Types;
 
-   function Parse_DNS_Class (Raw_Data :        Raw_DNS_Packet_Data;
-      Offset                          : in out Stream_Element_Offset) return Classes;
+   function Parse_DNS_Class
+     (Raw_Data :        Raw_DNS_Packet_Data;
+      Offset   : in out Stream_Element_Offset)
+      return Classes;
 
-   function Parse_Question_Record (Logger: Logger_Message_Packet_Ptr;
-                                   Raw_Data :        Raw_DNS_Packet_Data;
-                                   Offset : in out Stream_Element_Offset) return Parsed_DNS_Question;
+   function Parse_Question_Record
+     (Logger   :        Logger_Message_Packet_Ptr;
+      Raw_Data :        Raw_DNS_Packet_Data;
+      Offset   : in out Stream_Element_Offset)
+      return Parsed_DNS_Question;
 
-   function Parse_Resource_Record_Response (Logger: Logger_Message_Packet_Ptr;
-                                            Raw_Data :        Raw_DNS_Packet_Data;
-                                            Offset : in out Stream_Element_Offset) return Parsed_RData_Access;
+   function Parse_Resource_Record_Response
+     (Logger   :        Logger_Message_Packet_Ptr;
+      Raw_Data :        Raw_DNS_Packet_Data;
+      Offset   : in out Stream_Element_Offset)
+      return Parsed_RData_Access;
 
    Unknown_RCode              : exception;
    Unknown_RR_Type            : exception;
