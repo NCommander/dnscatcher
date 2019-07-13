@@ -6,5 +6,5 @@ before_install:
 script:
   - make coverage
 
- after_success:
+after_success:
   - bash <(curl -s https://codecov.io/bash)
