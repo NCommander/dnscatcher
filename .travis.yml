@@ -3,9 +3,8 @@ dist: xenial
 before_install:
   - sudo apt-get install -y gnat gprbuild libaunit17.2017-dev
 
-install:
- - make coverage
+script:
+  - make coverage
 
  after_success:
   - bash <(curl -s https://codecov.io/bash)
-
