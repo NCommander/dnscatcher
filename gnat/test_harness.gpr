@@ -4,10 +4,11 @@ with "compiler_settings";
 with "libdnscatcher";
 
 project Test_Harness is
-   for Create_Missing_Dirs use "True";
+   -- Not supported by gprbuild on Trusty
+   -- for Create_Missing_Dirs use "True";
 
    for Source_Dirs use ("../tests");
-   for Object_Dir use "../obj";
+   for Object_Dir use "../build/test-obj";
    for Main use ("test_runner.adb");
 
    for Exec_Dir use "../bin";

@@ -6,7 +6,7 @@ limited with "dns_packet_processor";
 library project DNS_Transaction_Manager is
    for Library_Name use "dns_transaction_manager";
    for Source_Dirs use ("../src/dns_transaction_manager");
-   for Object_Dir use "../obj/dns_transaction_manager";
+   for Object_Dir use "../build/obj/dns_transaction_manager";
    for Library_Dir use "../lib";
 
    package Compiler renames Compiler_Settings.Compiler;

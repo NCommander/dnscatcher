@@ -11,7 +11,7 @@ library project LibDNSCatcher is
        "../src/dns_transaction_manager",
        "../src/dns_packet_processor",
        "../src");
-   for Object_Dir use "../obj/libdnscatcher";
+   for Object_Dir use "../build/obj/libdnscatcher";
    for Library_Dir use "../lib";
 
    Version := "0";

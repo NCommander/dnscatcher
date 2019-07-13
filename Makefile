@@ -2,7 +2,21 @@
 
 BASE_DIR=$(shell pwd)
 
-coverage: distclean
+
+mk_dirs:
+	-mkdir -p build/test-obj
+	-mkdir -p build/obj/dns_client
+	-mkdir -p build/obj/dns_common
+	-mkdir -p build/obj/dns_core_constructs
+	-mkdir -p build/obj/dns_packet_processor
+	-mkdir -p build/obj/dns_rdata_processor
+	-mkdir -p build/obj/dns_transaction_manager
+	-mkdir -p build/obj/libdnscatcher
+	-mkdir -p gcov
+	-mkdir -p lib
+	-mkdir -p bin
+
+coverage: mk_dirs
 	gprbuild -XBUILD=RELEASE -XCOVERAGE_ENABLED=TRUE -Pgnat/test_harness
 	-rm -rf gcov
 
@@ -16,13 +30,13 @@ coverage: distclean
 	# Run coverage test
 	cd gcov && \
 	ln -s ../tests && \
-	GCOV_PREFIX=`pwd`  GCOV_PREFIX_STRIP=6 ../bin/test_runner
+	GCOV_PREFIX=`pwd`  GCOV_PREFIX_STRIP=99 ../bin/test_runner
 
 	# Process output
-	find obj -name *.gcno | xargs -I{} cp -u {} gcov
+	find build -name *.gcno | xargs -I{} cp -u {} gcov
 
 	# Needed cause genhtml is braindead
-	cp obj/b__test_runner.adb $(BASE_DIR)
+	cp build/test-obj/b__test_runner.adb $(BASE_DIR)
 	cd gcov && lcov \
 		--base-directory $(BASE_DIR) \
 		-d . \
@@ -33,4 +47,4 @@ coverage: distclean
 	rm -f $(BASE_DIR)/b__test_runner.adb
 
 distclean:
-	-rm -rf bin obj lib gcov
+	-rm -rf bin lib gcov build
