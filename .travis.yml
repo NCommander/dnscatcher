@@ -1,3 +1,4 @@
+language: c
 dist: xenial
 before_install:
   - sudo apt-get install -y gnat gprbuild libaunit17.2017-dev
