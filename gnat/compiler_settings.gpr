@@ -1,0 +1,78 @@
+-- Loosely based off Matreska's build comm file
+abstract project Compiler_Settings is
+   type Build_Type is ("RELEASE", "DEBUG");
+   type Coverage is ("TRUE", "FALSE");
+   Build : Build_Type := external ("BUILD", "RELEASE");
+   Coverage_Enabled : Coverage := external("COVERAGE_ENABLED", "FALSE");
+
+   Common_Ada_Switches :=
+     ("-g",
+      "-gnatwa",
+      "-gnat12",
+      "-gnatW8");
+   
+   Release_Build_Switches :=
+     ("-O2",
+      "-gnatn");
+   
+   Common_Coverage_Switches :=
+     ("-fprofile-arcs",
+      "-ftest-coverage");
+
+   Common_C_Switches :=
+     ("-g",
+      "-fPIC");
+
+   Release_Build_C_Switches :=
+     ("-O2");
+
+   Linker_Build_Swtiches := ();
+   Linker_Coverage_Build_Switches := ("-lgcov");
+   
+   Build_Switches := Common_Ada_Switches;
+   Build_C_Switches := Common_C_Switches;
+
+   case Build is
+      when "RELEASE" =>
+         Build_Switches := Build_Switches & Release_Build_Switches;
+         Build_C_Switches := Build_Switches & Release_Build_C_Switches;
+      when others =>
+         null;
+   end case;
+   
+   case Coverage_Enabled is
+      when "TRUE" =>
+         Build_Switches := Build_Switches & Common_Coverage_Switches;
+         Build_C_Switches := Build_C_Switches & Common_Coverage_Switches;
+         Linker_Build_Swtiches := Linker_Build_Swtiches & Linker_Coverage_Build_Switches;
+      when others =>
+         null;
+   end case;
+
+   package Compiler is
+      for Default_Switches ("ada") use Build_Switches;
+   end Compiler;
+
+   package Builder is
+      for Default_Switches ("ada") use Build_Switches;
+   end Builder;
+   
+   package Linker is
+      for Default_Switches ("ada") use Linker_Build_Swtiches;
+      for Default_Switches ("c") use Linker_Build_Swtiches;
+   end Linker;
+
+   package Pretty_Printer is
+      for Default_Switches ("ada") use (
+      "-rnb",
+      "-c4",
+      "--call_threshold=1",
+      "--par_threshold=1",
+      "--separate-stmt-name",
+      "--vertical-enum-types",
+      "--vertical-array-types",
+      "--vertical-case-alternatives",
+      "--separate-loop-then");
+   end Pretty_Printer;
+end Compiler_Settings;
+

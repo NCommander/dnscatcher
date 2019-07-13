@@ -1,4 +1,5 @@
-with "dns_common.gpr";
+with "compiler_settings";
+with "dns_common";
 with "dns_core_constructs";
 limited with "dns_packet_processor";
 
@@ -8,6 +9,6 @@ library project DNS_Transaction_Manager is
    for Object_Dir use "../obj/dns_transaction_manager";
    for Library_Dir use "../lib";
 
-   package Compiler renames DNS_Common.Compiler;
-   package Pretty_Printer renames DNS_Common.Pretty_Printer;
+   package Compiler renames Compiler_Settings.Compiler;
+   package Pretty_Printer renames Compiler_Settings.Pretty_Printer;
 end DNS_Transaction_Manager;

@@ -1,4 +1,4 @@
-with "dns_common.gpr";
+with "compiler_settings";
 
 library project DNS_Core_Constructs is
    for Library_Name use "dns_core_constructs";
@@ -6,7 +6,7 @@ library project DNS_Core_Constructs is
    for Object_Dir use "../obj/dns_core_constructs";
    for Library_Dir use "../lib";
 
-   package Compiler renames DNS_Common.Compiler;
-
+   package Compiler renames Compiler_Settings.Compiler;
+   package Pretty_Printer renames Compiler_Settings.Pretty_Printer;
 end DNS_Core_Constructs;
 

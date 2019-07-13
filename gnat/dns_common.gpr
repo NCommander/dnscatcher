@@ -1,62 +1,14 @@
+with "compiler_settings.gpr";
+
 -- Loosely based off Matreska's build comm file
 library project DNS_Common is
-   type Build_Type is ("RELEASE", "DEBUG");
-   Build : Build_Type := external ("BUILD", "RELEASE");
-   
-   Common_Ada_Switches :=
-     ("-g",
-      "-gnatwa",
-      "-gnat12",
-      "-gnatW8");
-   
-   Release_Build_Switches :=
-     ("-O2",
-      "-gnatn");
-   
-   Common_C_Switches :=
-     ("-g",
-      "-fPIC");
-
-   Release_Build_C_Switches :=
-     ("-O2");
-   
-   Build_Switches := Common_Ada_Switches;
-   Build_C_Switches := Common_C_Switches;
-
-   case Build is
-      when "RELEASE" =>
-         Build_Switches := Build_Switches & Release_Build_Switches;
-         Build_C_Switches := Build_Switches & Release_Build_C_Switches;
-      when others =>
-         null;
-   end case;
-   
-   package Compiler is
-      for Default_Switches ("ada") use Build_Switches;
-   end Compiler;
-
-   package Builder is
-      for Default_Switches ("ada") use Build_Switches;
-   end Builder;
-   
-   package Pretty_Printer is
-      for Default_Switches ("ada") use (
-      "-rnb",
-      "-c4",
-      "--call_threshold=1",
-      "--par_threshold=1",
-      "--separate-stmt-name",
-      "--vertical-enum-types",
-      "--vertical-array-types",
-      "--vertical-case-alternatives",
-      "--separate-loop-then");
-   end Pretty_Printer;
-
    for Languages use ("Ada", "C");
    for Library_Name use "dns_common";
    for Source_Dirs use ("../src/dns_common");
    for Object_Dir use "../obj/dns_common";
-   for Library_Dir use "../lib";
-   
+   for Library_Dir use "../lib"; 
+
+   package Compiler renames Compiler_Settings.Compiler;
+   package Pretty_Printer renames Compiler_Settings.Pretty_Printer;
 end DNS_Common;
 
