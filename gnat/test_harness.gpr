@@ -5,7 +5,7 @@ with "libdnscatcher";
 
 project Test_Harness is
    -- Not supported by gprbuild on Trusty
-   -- for Create_Missing_Dirs use "True";
+   for Create_Missing_Dirs use "True";
 
    for Source_Dirs use ("../tests");
    for Object_Dir use "../build/test-obj";
