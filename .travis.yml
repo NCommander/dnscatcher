@@ -30,10 +30,14 @@ install:
   # Extract GNAT from its package
   - (mkdir -p ada-compiler && cd ada-compiler && tar --strip-components 1 -xzf $GNAT_TAR_PATH)
 
+  # Grab lcov for coverage
+  - sudo apt-get install -y lcov
+
   # Add GNAT to $PATH
   - export PATH=$PWD/ada-compiler/bin:$PATH
 
 script:
+  - gprbuild --version
   - make coverage
 
 after_success:
