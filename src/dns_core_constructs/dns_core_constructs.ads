@@ -217,8 +217,8 @@ package DNS_Core_Constructs is
       NXRRSet,
       NotAuth,
       NotZone,
-      BADSIG,
-      -- 16 can also be BADVERS but that's not trivial to represent
+      BADVERS,
+      -- 16 can also be BADSIG but that's not trivial to represent
       BADKEY,
       BADTIME,
       BADMODE,
@@ -239,7 +239,7 @@ package DNS_Core_Constructs is
                    NXRRSet => 8,
                    NotAuth => 9,
                    NotZone => 10,
-                   BADSIG => 16,
+                   BADVERS => 16,
                    BADKEY => 17,
                    BADTIME => 18,
                    BADMODE => 19,
