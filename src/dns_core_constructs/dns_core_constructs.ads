@@ -249,6 +249,44 @@ package DNS_Core_Constructs is
                    BADCOOKIE => 23);
    --!pp on
 
+   -- Casing and spelling comes directly from IANA reserved list
+   type EDNS0_Option_Codes is
+     (LLQ,
+      UL,
+      NSID,
+      DAU,
+      DHU,
+      N3U,
+      edns_client_subnet,
+      EDNS_EXPIRE,
+      COOKIE,
+      edns_tcp_keepalive,
+      Padding,
+      CHAIN,
+      edns_key_tag,
+      EDNS_Client_Tag,
+      EDNS_Server_Tag,
+      DeviceID);
+
+   --!pp off
+   for EDNS0_Option_Codes use (LLQ => 1,
+                               UL => 2,
+                               NSID => 3,
+                               DAU => 5,
+                               DHU => 6,
+                               N3U => 7,
+                               edns_client_subnet => 8,
+                               EDNS_EXPIRE => 9,
+                               COOKIE => 10,
+                               edns_tcp_keepalive => 11,
+                               Padding => 12,
+                               CHAIN => 13,
+                               edns_key_tag => 14,
+                               EDNS_Client_Tag => 16,
+                               EDNS_Server_Tag => 17,
+                               DeviceID => 26946);
+   --!pp on
+
    type DNS_Packet_Header is record
       Identifier              : Unsigned_16;
       Query_Response_Flag     : Boolean;
