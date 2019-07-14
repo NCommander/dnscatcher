@@ -1,6 +1,7 @@
 with DNS_Packet_Processor;           use DNS_Packet_Processor;
 with DNS_RData_Processor.A_Parser;   use DNS_RData_Processor.A_Parser;
 with DNS_RData_Processor.SOA_Parser; use DNS_RData_Processor.SOA_Parser;
+with DNS_RData_Processor.OPT_Parser; use DNS_RData_Processor.OPT_Parser;
 with DNS_RData_Processor.Domain_Name_Response_Parser;
 use DNS_RData_Processor.Domain_Name_Response_Parser;
 with DNS_RData_Processor.Unknown_Parser;
@@ -18,7 +19,8 @@ package body DNS_RData_Processor is
             Working_Record := new Parsed_A_RData;
          when SOA =>
             Working_Record := new Parsed_SOA_RData;
-
+         when OPT =>
+            Working_Record := new Parsed_OPT_RData;
             -- Handle all DNS responses which are just a name
          when CNAME =>
             Working_Record := new Parsed_DNR_RData;
