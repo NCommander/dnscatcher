@@ -15,12 +15,14 @@ package DNS_RData_Processor is
    type Parsed_RData_Access is access all Parsed_RData'Class;
 
    function To_Parsed_RData
-     (Parsed_RR : DNS_Packet_Processor.Parsed_DNS_Resource_Record)
+     (DNS_Header : DNS_Packet_Header;
+      Parsed_RR : DNS_Packet_Processor.Parsed_DNS_Resource_Record)
       return Parsed_RData_Access;
 
    -- Represents RData in a string like fashion
    procedure From_Parsed_RR
      (This      : in out Parsed_RData;
+      DNS_Header : DNS_Packet_Header;
       Parsed_RR : DNS_Packet_Processor.Parsed_DNS_Resource_Record) is abstract;
    function RClass_To_String
      (This : in Parsed_RData)

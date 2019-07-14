@@ -6,14 +6,17 @@ package body DNS_RData_Processor.A_Parser is
 
    -- A records are simply four octlets which we need to turn into integers
    -- then decode back into an ASCII string
+   pragma Warnings (Off, "formal parameter ""DNS_Header"" is not referenced");
    procedure From_Parsed_RR
-     (This      : in out Parsed_A_RData;
-      Parsed_RR :        Parsed_DNS_Resource_Record)
+     (This       : in out Parsed_A_RData;
+      DNS_Header :        DNS_Packet_Header;
+      Parsed_RR  :        Parsed_DNS_Resource_Record)
    is
    begin
       --This.A_Record := Decode_DNS_IPv4_Address (Parsed_RR);
       This.A_Record := Inet_Ntop (IPv4, Parsed_RR.RData);
    end From_Parsed_RR;
+   pragma Warnings (On, "formal parameter ""DNS_Header"" is not referenced");
 
    pragma Warnings (Off, "formal parameter ""This"" is not referenced");
    function RClass_To_String

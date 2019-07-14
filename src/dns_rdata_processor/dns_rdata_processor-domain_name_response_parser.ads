@@ -8,8 +8,9 @@ package DNS_RData_Processor.Domain_Name_Response_Parser is
    type Parsed_DNR_RData_Access is access all Parsed_DNR_RData;
 
    procedure From_Parsed_RR
-     (This      : in out Parsed_DNR_RData;
-      Parsed_RR :        Parsed_DNS_Resource_Record);
+     (This       : in out Parsed_DNR_RData;
+      DNS_Header :        DNS_Packet_Header;
+      Parsed_RR  :        Parsed_DNS_Resource_Record);
    function RData_To_String
      (This : in Parsed_DNR_RData)
       return String;

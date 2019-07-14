@@ -9,9 +9,11 @@ package body DNS_RData_Processor.SOA_Parser is
    -- SOA records are messy. There are two compressed domain names we need to
    -- decode, then some 32 bit ints that follow afterwards, so let's try and
    -- get that data first and out of the way
+   pragma Warnings (Off, "formal parameter ""DNS_Header"" is not referenced");
    procedure From_Parsed_RR
-     (This      : in out Parsed_SOA_RData;
-      Parsed_RR :        Parsed_DNS_Resource_Record)
+     (This       : in out Parsed_SOA_RData;
+      DNS_Header :        DNS_Packet_Header;
+      Parsed_RR  :        Parsed_DNS_Resource_Record)
    is
       Offset : Stream_Element_Offset := Parsed_RR.RData_Offset;
    begin
@@ -26,6 +28,7 @@ package body DNS_RData_Processor.SOA_Parser is
       This.Expire  := Read_Unsigned_32 (Parsed_RR.Raw_Packet, Offset);
       This.Minimum := Read_Unsigned_32 (Parsed_RR.Raw_Packet, Offset);
    end From_Parsed_RR;
+   pragma Warnings (On, "formal parameter ""DNS_Header"" is not referenced");
 
    pragma Warnings (Off, "formal parameter ""This"" is not referenced");
    function RClass_To_String
@@ -53,7 +56,7 @@ package body DNS_RData_Processor.SOA_Parser is
       return String
    is
    begin
-      return "SOA" & This.RData_To_String;
+      return "SOA " & This.RData_To_String;
    end Print_Packet;
 
    -- Obliberate ourselves

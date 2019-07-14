@@ -13,8 +13,9 @@ package DNS_RData_Processor.SOA_Parser is
    type Parsed_SOA_RData_Access is access all Parsed_SOA_RData;
 
    procedure From_Parsed_RR
-     (This      : in out Parsed_SOA_RData;
-      Parsed_RR :        Parsed_DNS_Resource_Record);
+     (This       : in out Parsed_SOA_RData;
+      DNS_Header :        DNS_Packet_Header;
+      Parsed_RR  :        Parsed_DNS_Resource_Record);
    function RData_To_String
      (This : in Parsed_SOA_RData)
       return String;

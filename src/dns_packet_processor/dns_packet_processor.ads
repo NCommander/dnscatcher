@@ -22,6 +22,7 @@ package DNS_Packet_Processor is
       RName        : Unbounded_String;
       RType        : RR_Types;
       RClass       : Unsigned_16;
+      RCode        : Unsigned_4;
       TTL          : Unsigned_32;
       RData        : Unbounded_String;
       Raw_Packet : Stream_Element_Array_Ptr; -- Because sometimes we need the whole packet to decode
@@ -70,7 +71,7 @@ package DNS_Packet_Processor is
 
    function Parse_Resource_Record_Response
      (Logger   :        Logger_Message_Packet_Ptr;
-      Raw_Data :        Raw_DNS_Packet_Data;
+      Packet   :        Raw_DNS_Packet;
       Offset   : in out Stream_Element_Offset)
       return Parsed_RData_Access;
 

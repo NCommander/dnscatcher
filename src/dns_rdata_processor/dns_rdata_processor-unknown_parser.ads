@@ -6,8 +6,9 @@ package DNS_RData_Processor.Unknown_Parser is
    type Parsed_Unknown_RData_Access is access all Parsed_Unknown_RData;
 
    procedure From_Parsed_RR
-     (This      : in out Parsed_Unknown_RData;
-      Parsed_RR :        Parsed_DNS_Resource_Record);
+     (This       : in out Parsed_Unknown_RData;
+      DNS_Header :        DNS_Packet_Header;
+      Parsed_RR  :        Parsed_DNS_Resource_Record);
    function RData_To_String
      (This : in Parsed_Unknown_RData)
       return String;

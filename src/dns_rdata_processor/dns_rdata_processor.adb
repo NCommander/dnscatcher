@@ -9,7 +9,8 @@ use DNS_RData_Processor.Unknown_Parser;
 package body DNS_RData_Processor is
 
    function To_Parsed_RData
-     (Parsed_RR : Parsed_DNS_Resource_Record)
+     (DNS_Header : DNS_Packet_Header;
+      Parsed_RR : Parsed_DNS_Resource_Record)
       return Parsed_RData_Access
    is
       Working_Record : Parsed_RData_Access;
@@ -35,7 +36,7 @@ package body DNS_RData_Processor is
       Working_Record.RName := Parsed_RR.RName;
       Working_Record.RType := Parsed_RR.RType;
       Working_Record.TTL   := Parsed_RR.TTL;
-      Working_Record.From_Parsed_RR (Parsed_RR);
+      Working_Record.From_Parsed_RR (DNS_Header, Parsed_RR);
       return Working_Record;
    end To_Parsed_RData;
 end DNS_RData_Processor;

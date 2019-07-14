@@ -77,21 +77,21 @@ package body DNS_Packet_Processor is
       loop
          Parsed_Packet.Answer.Append
            (Parse_Resource_Record_Response
-              (Logger, Packet.Raw_Data.Data, Current_Offset));
+              (Logger, Packet.Raw_Data, Current_Offset));
       end loop;
 
       for i in 1 .. Parsed_Packet.Header.Authority_Record_Count
       loop
          Parsed_Packet.Authority.Append
            (Parse_Resource_Record_Response
-              (Logger, Packet.Raw_Data.Data, Current_Offset));
+              (Logger, Packet.Raw_Data, Current_Offset));
       end loop;
 
       for i in 1 .. Parsed_Packet.Header.Additional_Record_Count
       loop
          Parsed_Packet.Additional.Append
            (Parse_Resource_Record_Response
-              (Logger, Packet.Raw_Data.Data, Current_Offset));
+              (Logger, Packet.Raw_Data, Current_Offset));
       end loop;
 
       Logger.Pop_Component;
@@ -302,15 +302,19 @@ package body DNS_Packet_Processor is
 
    function Parse_Resource_Record_Response
      (Logger   :        Logger_Message_Packet_Ptr;
-      Raw_Data :        Raw_DNS_Packet_Data;
+      Packet   :        Raw_DNS_Packet;
       Offset   : in out Stream_Element_Offset)
       return Parsed_RData_Access
    is
       Parsed_Response : Parsed_DNS_Resource_Record;
+      Raw_Data        :  Raw_DNS_Packet_Data;
 
       RData_Length          : Unsigned_16;
       Parsed_RData_Response : Parsed_RData_Access;
    begin
+      -- Create direct reference to the raw data
+      Raw_Data := Packet.Data;
+
       Logger.Push_Component ("RRecord Parser");
       Parsed_Response.RName :=
         Parse_DNS_Packet_Name_Records (Raw_Data, Offset);
@@ -347,7 +351,7 @@ package body DNS_Packet_Processor is
          Offset := Offset + Stream_Element_Offset (RData_Length);
       end;
 
-      Parsed_RData_Response := To_Parsed_RData (Parsed_Response);
+      Parsed_RData_Response := To_Parsed_RData (Packet.Header, Parsed_Response);
       Logger.Log_Message
         (DEBUG, "RData is " & Parsed_RData_Response.RData_To_String);
       Logger.Pop_Component;

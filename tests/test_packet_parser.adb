@@ -463,7 +463,6 @@ package body Test_Packet_Parser is
         ((Answer.RType = DNS_Core_Constructs.OPT), "Incorrect RName!");
       AUnit.Assertions.Assert ((Answer.TTL = 0), "Incorrect TTL!");
 
-
       Free_Raw_Packet_Record_Ptr (Inbound_Packet);
       Free_Parsed_DNS_Packet (Parsed_Packet);
    end Test_Parse_OPT_Record;

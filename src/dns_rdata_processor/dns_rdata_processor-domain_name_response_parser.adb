@@ -5,8 +5,10 @@ package body DNS_RData_Processor.Domain_Name_Response_Parser is
 
    -- A records are simply four octlets which we need to turn into integers
    -- then decode back into an ASCII string
+   pragma Warnings (Off, "formal parameter ""DNS_Header"" is not referenced");
    procedure From_Parsed_RR
      (This      : in out Parsed_DNR_RData;
+      DNS_Header :        DNS_Packet_Header;
       Parsed_RR :        Parsed_DNS_Resource_Record)
    is
       Offset : Stream_Element_Offset := Parsed_RR.RData_Offset;
@@ -14,6 +16,7 @@ package body DNS_RData_Processor.Domain_Name_Response_Parser is
       This.Domain_Name :=
         Parse_DNS_Packet_Name_Records (Parsed_RR.Raw_Packet, Offset);
    end From_Parsed_RR;
+   pragma Warnings (On, "formal parameter ""DNS_Header"" is not referenced");
 
    pragma Warnings (Off, "formal parameter ""This"" is not referenced");
    function RClass_To_String
