@@ -1,6 +1,7 @@
 with Ada.Characters.Latin_1;
 with Ada.Text_IO;             use Ada.Text_IO;
 with Ada.Characters.Handling; use Ada.Characters.Handling;
+with Ada.Integer_Text_IO; use Ada.Integer_Text_IO;
 
 package body DNS_Common.Config is
    procedure Initialize_Config_Parse is
@@ -62,7 +63,6 @@ package body DNS_Common.Config is
 
       -- Set sane defaults
       Parsed_Config.Local_Listen_Port        := 53;
-      Parsed_Config.Upstream_DNS_Server := To_Unbounded_String ("4.2.2.2");
       Parsed_Config.Upstream_DNS_Server_Port := 53;
 
       -- Try to open the configuration file
@@ -75,6 +75,7 @@ package body DNS_Common.Config is
       loop
          declare
             Current_Line  : constant String := Get_Line (Config_File);
+            Key_End_Loc   : Integer         := 0;
             Equals_Loc    : Integer         := 0;
             Value_Loc     : Integer         := 0;
             Is_Whitespace : Boolean         := True;
@@ -105,6 +106,17 @@ package body DNS_Common.Config is
                   Equals_Loc := I;
                end if;
 
+               -- Determine length of the key
+               --
+               -- This is a little non-obvious at first glance. We subtract
+               -- 2 here to remove the character we want, and the previous char
+               -- because a 17 char string will be 1..18 in the array.
+
+               if (Is_Whitespace = True or Current_Line (I) = '=') and
+                 Key_End_Loc = 0 then
+                  Key_End_Loc := I-2;
+               end if;
+
                exit when Is_Whitespace and Equals_Loc /= 0;
                -- We also want to confirm there's a = in there somewhere
             end loop;
@@ -130,11 +142,12 @@ package body DNS_Common.Config is
             for C in GCP_Map.Iterate
             loop
                -- Slightly annoying, but need to handle not reading past the
-               -- end of Current_Line
-               if Current_Line'Length >= Key (C)'Length
+               -- end of Current_Line. We also need to check that the next char
+               -- is a space or = so we don't match substrings by accident.
+               if Key_End_Loc = Key (C)'Length
                then
                   if Key (C) = To_Upper (Current_Line
-                         (1 .. Key (C)'Length))
+                                         (1 .. Key (C)'Length))
                   then
                      -- Determine the starting character of the value
                      for I in Current_Line
@@ -167,6 +180,13 @@ package body DNS_Common.Config is
 
       -- Clean up
       Close (Config_File);
+
+      -- Confirm mandatory values are set
+      if Parsed_Config.Upstream_DNS_Server = ""
+      then
+         raise Missing_Mandatory_Config_Option
+           with "Upstream_DNS_Server must be set";
+      end if;
 
       return Parsed_Config;
    end Parse_Config_File;

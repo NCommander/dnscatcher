@@ -47,4 +47,5 @@ package DNS_Common.Config is
 
    -- Defined Exceptions
    Malformed_Line : exception;
+   Missing_Mandatory_Config_Option : exception;
 end DNS_Common.Config;

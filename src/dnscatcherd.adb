@@ -20,6 +20,12 @@ exception
          Put_Line (Standard_Error, Exception_Message (Error));
          Packet_Catcher.Stop_Catcher;
       end;
+   when Error : DNS_Common.Config.Missing_Mandatory_Config_Option =>
+      begin
+         Put (Standard_Error, "FATAL: Missing mandatory config line. ");
+         Put_Line (Standard_Error, Exception_Message (Error));
+         Packet_Catcher.Stop_Catcher;
+      end;
    when Error : DNS_Common.Config.Malformed_Line =>
       begin
          Put (Standard_Error, "FATAL: Unable to parse config file. ");
