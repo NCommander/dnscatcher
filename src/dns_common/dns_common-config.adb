@@ -1,7 +1,6 @@
 with Ada.Characters.Latin_1;
 with Ada.Text_IO;             use Ada.Text_IO;
 with Ada.Characters.Handling; use Ada.Characters.Handling;
-with Ada.Integer_Text_IO; use Ada.Integer_Text_IO;
 
 package body DNS_Common.Config is
    procedure Initialize_Config_Parse is
@@ -112,7 +111,7 @@ package body DNS_Common.Config is
                -- 2 here to remove the character we want, and the previous char
                -- because a 17 char string will be 1..18 in the array.
 
-               if (Is_Whitespace = True or Current_Line (I) = '=') and
+               if (Is_Whitespace or Current_Line (I) = '=') and
                  Key_End_Loc = 0 then
                   Key_End_Loc := I-2;
                end if;
