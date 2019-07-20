@@ -19,7 +19,7 @@
 -- DEALINGS IN THE SOFTWARE.
 
 with "aunit";
-with "gnat/dnscatcher_config";
+with "gnat/dnscatcher";
 with "gnat/dns_common";
 with "gnat/dns_core_constructs";
 with "gnat/dns_packet_processor";

@@ -20,7 +20,7 @@
 
 with "compiler_settings.gpr";
 
-with "dnscatcher_config.gpr";
+with "dnscatcher.gpr";
 
 with "dns_common.gpr";
 with "dns_core_constructs.gpr";

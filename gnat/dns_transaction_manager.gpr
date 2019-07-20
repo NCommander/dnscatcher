@@ -1,4 +1,5 @@
 with "compiler_settings";
+with "dnscatcher";
 with "dns_common";
 with "dns_core_constructs";
 limited with "dns_packet_processor";

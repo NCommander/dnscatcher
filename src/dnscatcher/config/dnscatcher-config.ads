@@ -22,7 +22,7 @@ with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 with Ada.Containers.Indefinite_Ordered_Maps;
 
 with GNAT.Sockets;      use GNAT.Sockets;
-with DNS_Common.Logger; use DNS_Common.Logger;
+with DNSCatcher.Utils.Logger; use DNSCatcher.Utils.Logger;
 
 package DNSCatcher.Config is
    type Configuration is record

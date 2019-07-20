@@ -22,12 +22,12 @@ with AUnit;            use AUnit;
 with AUnit.Test_Cases; use AUnit.Test_Cases;
 
 with DNSCatcher.Config;
-with DNS_Common.Logger; use DNS_Common.Logger;
+with DNSCatcher.Utils.Logger; use DNSCatcher.Utils.Logger;
 
 package Test_Packet_Parser is
    type Packet_Parser_Test is new Test_Cases.Test_Case with record
       Capture_Config : DNSCatcher.Config.Configuration_Ptr;
-      Logger_Task    : DNS_Common.Logger.Logger;
+      Logger_Task    : DNSCatcher.Utils.Logger.Logger;
    end record;
 
    -- Setup the DNS Catcher library

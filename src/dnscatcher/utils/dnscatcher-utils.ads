@@ -18,16 +18,6 @@
 -- FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 -- DEALINGS IN THE SOFTWARE.
 
-with "compiler_settings";
-with "dnscatcher";
-with "dns_common";
+package DNSCatcher.Utils is
 
-library project DNSCatcher_Config is
-   for Library_Name use "dnscatcher-config";
-   for Source_Dirs use ("../src/dnscatcher/config");
-   for Object_Dir use "../build/obj/dnscatcher/config";
-   for Library_Dir use "../lib";
-
-   package Compiler renames Compiler_Settings.Compiler;
-   package Pretty_Printer renames Compiler_Settings.Pretty_Printer;
-end DNSCatcher_Config;
+end DNSCatcher.Utils;

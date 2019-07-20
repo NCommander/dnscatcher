@@ -22,11 +22,10 @@ with Ada.Unchecked_Conversion;
 
 with Ada.Unchecked_Deallocation;
 with Ada.Exceptions; use Ada.Exceptions;
-
 with GNAT.Sockets;          use GNAT.Sockets;
 
 with DNSCatcher.Config;
-with DNS_Common.Logger;       use DNS_Common.Logger;
+with DNSCatcher.Utils.Logger; use DNSCatcher.Utils.Logger;
 with DNS_Receiver_Interface_IPv4_UDP;
 with DNS_Sender_Interface_IPv4_UDP;
 with DNS_Transaction_Manager; use DNS_Transaction_Manager;
@@ -42,10 +41,10 @@ package body Packet_Catcher is
         .IPv4_UDP_Receiver_Interface;
       Sender_Interface : DNS_Sender_Interface_IPv4_UDP
         .IPv4_UDP_Sender_Interface;
-      Logger_Task             : DNS_Common.Logger.Logger;
+      Logger_Task             : DNSCatcher.Utils.Logger.Logger;
       Transaction_Manager_Ptr : DNS_Transaction_Manager_Task_Ptr;
       Socket                  : Socket_Type;
-      Logger_Packet           : DNS_Common.Logger.Logger_Message_Packet_Ptr;
+      Logger_Packet           : DNSCatcher.Utils.Logger.Logger_Message_Packet_Ptr;
 
       procedure Free_Transaction_Manager is new Ada.Unchecked_Deallocation
         (Object => DNS_Transaction_Manager_Task,
@@ -67,9 +66,9 @@ package body Packet_Catcher is
 
       -- Connect the packet queue and start it all up
       Logger_Task.Start;
-      Logger_Packet := new DNS_Common.Logger.Logger_Message_Packet;
+      Logger_Packet := new DNSCatcher.Utils.Logger.Logger_Message_Packet;
       Logger_Packet.Log_Message (NOTICE, "DNSCatcher starting up ...");
-      DNS_Common.Logger.Logger_Queue.Add_Packet (Logger_Packet);
+      DNSCatcher.Utils.Logger.Logger_Queue.Add_Packet (Logger_Packet);
 
       -- Socket has to be shared between receiver and sender. This likely needs
       -- to move to to a higher level class
@@ -88,7 +87,7 @@ package body Packet_Catcher is
       exception
          when Exp_Error : GNAT.Sockets.Socket_Error =>
             begin
-               Logger_Packet := new DNS_Common.Logger.Logger_Message_Packet;
+               Logger_Packet := new DNSCatcher.Utils.Logger.Logger_Message_Packet;
                Logger_Packet.Log_Message
                  (ERROR, "Socket error: " & Exception_Information (Exp_Error));
                Logger_Packet.Log_Message (ERROR, "Refusing to start!");

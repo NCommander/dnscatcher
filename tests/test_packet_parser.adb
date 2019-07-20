@@ -138,7 +138,7 @@ package body Test_Packet_Parser is
    end Load_Binary_DNS_Dump;
 
    procedure Test_Parse_A_Record (T : in out Test_Cases.Test_Case'Class) is
-      Logger_Packet  : DNS_Common.Logger.Logger_Message_Packet_Ptr;
+      Logger_Packet  : DNSCatcher.Utils.Logger.Logger_Message_Packet_Ptr;
       Parsed_Packet  : Parsed_DNS_Packet_Ptr;
       Inbound_Packet : Raw_Packet_Record_Ptr := new Raw_Packet_Record;
       Question       : Parsed_DNS_Question;
@@ -207,7 +207,7 @@ package body Test_Packet_Parser is
 
    -- Tests if we can parse an SOA record
    procedure Test_Parse_SOA_Record (T : in out Test_Cases.Test_Case'Class) is
-      Logger_Packet  : DNS_Common.Logger.Logger_Message_Packet_Ptr;
+      Logger_Packet  : DNSCatcher.Utils.Logger.Logger_Message_Packet_Ptr;
       Parsed_Packet  : Parsed_DNS_Packet_Ptr;
       Inbound_Packet : Raw_Packet_Record_Ptr := new Raw_Packet_Record;
 
@@ -265,7 +265,7 @@ package body Test_Packet_Parser is
 
    -- Tests if we can parse an CNAME record
    procedure Test_Parse_CNAME_Record (T : in out Test_Cases.Test_Case'Class) is
-      Logger_Packet  : DNS_Common.Logger.Logger_Message_Packet_Ptr;
+      Logger_Packet  : DNSCatcher.Utils.Logger.Logger_Message_Packet_Ptr;
       Parsed_Packet  : Parsed_DNS_Packet_Ptr;
       Inbound_Packet : Raw_Packet_Record_Ptr := new Raw_Packet_Record;
 
@@ -309,7 +309,7 @@ package body Test_Packet_Parser is
    end Test_Parse_CNAME_Record;
 
    procedure Test_Parse_NS_Record (T : in out Test_Cases.Test_Case'Class) is
-      Logger_Packet  : DNS_Common.Logger.Logger_Message_Packet_Ptr;
+      Logger_Packet  : DNSCatcher.Utils.Logger.Logger_Message_Packet_Ptr;
       Parsed_Packet  : Parsed_DNS_Packet_Ptr;
       Inbound_Packet : Raw_Packet_Record_Ptr := new Raw_Packet_Record;
 
@@ -398,7 +398,7 @@ package body Test_Packet_Parser is
 
    -- Tests if we can parse an PTR record
    procedure Test_Parse_PTR_Record (T : in out Test_Cases.Test_Case'Class) is
-      Logger_Packet  : DNS_Common.Logger.Logger_Message_Packet_Ptr;
+      Logger_Packet  : DNSCatcher.Utils.Logger.Logger_Message_Packet_Ptr;
       Parsed_Packet  : Parsed_DNS_Packet_Ptr;
       Inbound_Packet : Raw_Packet_Record_Ptr := new Raw_Packet_Record;
 
@@ -444,7 +444,7 @@ package body Test_Packet_Parser is
 
    -- Tests if we can parse an OPT record
    procedure Test_Parse_OPT_Record (T : in out Test_Cases.Test_Case'Class) is
-      Logger_Packet  : DNS_Common.Logger.Logger_Message_Packet_Ptr;
+      Logger_Packet  : DNSCatcher.Utils.Logger.Logger_Message_Packet_Ptr;
       Parsed_Packet  : Parsed_DNS_Packet_Ptr;
       Inbound_Packet : Raw_Packet_Record_Ptr := new Raw_Packet_Record;
 

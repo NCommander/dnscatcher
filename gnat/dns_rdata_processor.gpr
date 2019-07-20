@@ -1,5 +1,6 @@
 with "compiler_settings";
-with "dns_common.gpr";
+with "dnscatcher";
+with "dns_common";
 with "dns_core_constructs";
 limited with "dns_packet_processor";
 
