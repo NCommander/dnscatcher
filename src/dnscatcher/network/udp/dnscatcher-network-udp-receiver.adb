@@ -23,14 +23,12 @@ with Ada.Streams;           use Ada.Streams;
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 with Ada.Unchecked_Conversion;
 
-with Packet_Catcher;
-
 with DNS_Core_Constructs.Raw_Packet_Records;
 use DNS_Core_Constructs.Raw_Packet_Records;
 with DNS_Core_Constructs; use DNS_Core_Constructs;
 with DNSCatcher.Utils.Logger;   use DNSCatcher.Utils.Logger;
 
-package body DNS_Receiver_Interface_IPv4_UDP is
+package body DNSCatcher.Network.UDP.Receiver is
    task body Receive_Packet_Task is
       DNS_Config              : Configuration_Ptr;
       DNS_Socket              : Socket_Type;
@@ -164,12 +162,12 @@ package body DNS_Receiver_Interface_IPv4_UDP is
          begin
             Logger_Packet.Log_Message
               (ERROR, "Unknown error: " & Exception_Information (Exp_Error));
-            Packet_Catcher.Stop_Catcher;
+            --Packet_Catcher.Stop_Catcher;
          end;
    end Receive_Packet_Task;
 
    procedure Initialize
-     (This                : in out IPv4_UDP_Receiver_Interface;
+     (This                : in out UDP_Receiver_Interface;
       Config              :        Configuration_Ptr;
       Transaction_Manager :        DNS_Transaction_Manager_Task_Ptr;
       Socket              :        Socket_Type)
@@ -184,12 +182,12 @@ package body DNS_Receiver_Interface_IPv4_UDP is
         (Config, This.Receiver_Socket, This.Transaction_Manager);
    end Initialize;
 
-   procedure Start (This : in out IPv4_UDP_Receiver_Interface) is
+   procedure Start (This : in out UDP_Receiver_Interface) is
    begin
       This.Receiver_Task.Start;
    end Start;
 
-   procedure Shutdown (This : in out IPv4_UDP_Receiver_Interface) is
+   procedure Shutdown (This : in out UDP_Receiver_Interface) is
    begin
       -- Cleanly shuts down the interface
       if This.Receiver_Task /= null
@@ -197,4 +195,4 @@ package body DNS_Receiver_Interface_IPv4_UDP is
          This.Receiver_Task.Stop;
       end if;
    end Shutdown;
-end DNS_Receiver_Interface_IPv4_UDP;
+end DNSCatcher.Network.UDP.Receiver;

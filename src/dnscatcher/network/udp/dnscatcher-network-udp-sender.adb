@@ -25,7 +25,7 @@ with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 with DNS_Core_Constructs;   use DNS_Core_Constructs;
 with DNSCatcher.Utils.Logger;     use DNSCatcher.Utils.Logger;
 
-package body DNS_Sender_Interface_IPv4_UDP is
+package body DNSCatcher.Network.UDP.Sender is
 
    task body Send_Packet_Task is
       DNS_Socket            : Socket_Type;
@@ -137,7 +137,7 @@ package body DNS_Sender_Interface_IPv4_UDP is
    end Send_Packet_Task;
 
    procedure Initialize
-     (This   : in out IPv4_UDP_Sender_Interface;
+     (This   : in out UDP_Sender_Interface;
       Config :        Configuration_Ptr;
       Socket :        Socket_Type)
    is
@@ -152,12 +152,12 @@ package body DNS_Sender_Interface_IPv4_UDP is
       This.Sender_Task.Initialize (This.Sender_Socket, This.Packet_Queue);
    end Initialize;
 
-   procedure Start (This : in out IPv4_UDP_Sender_Interface) is
+   procedure Start (This : in out UDP_Sender_Interface) is
    begin
       This.Sender_Task.Start;
    end Start;
 
-   procedure Shutdown (This : in out IPv4_UDP_Sender_Interface) is
+   procedure Shutdown (This : in out UDP_Sender_Interface) is
    begin
       -- Cleanly shuts down the interface
       if This.Sender_Task /= null
@@ -167,11 +167,11 @@ package body DNS_Sender_Interface_IPv4_UDP is
    end Shutdown;
 
    function Get_Packet_Queue_Ptr
-     (This : in out IPv4_UDP_Sender_Interface)
+     (This : in out UDP_Sender_Interface)
       return DNS_Raw_Packet_Queue_Ptr
    is
    begin
       return This.Packet_Queue;
    end Get_Packet_Queue_Ptr;
 
-end DNS_Sender_Interface_IPv4_UDP;
+end DNSCatcher.Network.UDP.Sender;

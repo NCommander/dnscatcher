@@ -26,8 +26,8 @@ with GNAT.Sockets;          use GNAT.Sockets;
 
 with DNSCatcher.Config;
 with DNSCatcher.Utils.Logger; use DNSCatcher.Utils.Logger;
-with DNS_Receiver_Interface_IPv4_UDP;
-with DNS_Sender_Interface_IPv4_UDP;
+with DNSCatcher.Network.UDP.Receiver;
+with DNSCatcher.Network.UDP.Sender;
 with DNS_Transaction_Manager; use DNS_Transaction_Manager;
 
 package body Packet_Catcher is
@@ -37,10 +37,8 @@ package body Packet_Catcher is
       -- Input and Output Sockets
       DNS_Transactions : DNS_Transaction_Manager.DNS_Transaction_Manager_Task;
       Capture_Config     : DNSCatcher.Config.Configuration_Ptr;
-      Receiver_Interface : DNS_Receiver_Interface_IPv4_UDP
-        .IPv4_UDP_Receiver_Interface;
-      Sender_Interface : DNS_Sender_Interface_IPv4_UDP
-        .IPv4_UDP_Sender_Interface;
+      Receiver_Interface : DNSCatcher.Network.UDP.Receiver.UDP_Receiver_Interface;
+      Sender_Interface : DNSCatcher.Network.UDP.Sender.UDP_Sender_Interface;
       Logger_Task             : DNSCatcher.Utils.Logger.Logger;
       Transaction_Manager_Ptr : DNS_Transaction_Manager_Task_Ptr;
       Socket                  : Socket_Type;
@@ -78,6 +76,7 @@ package body Packet_Catcher is
             Mode   => Socket_Datagram);
          Set_Socket_Option
            (Socket => Socket,
+            Level  => IP_Protocol_For_UDP_Level,
             Option => (GNAT.Sockets.Receive_Timeout, Timeout => 1.0));
          Bind_Socket
            (Socket  => Socket,

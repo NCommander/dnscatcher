@@ -26,25 +26,24 @@ with GNAT.Sockets;          use GNAT.Sockets;
 
 with DNSCatcher.DNS.Client;
 with DNSCatcher.Config;
-with DNSCatcher.Utils.Logger;   use DNSCatcher.Utils.Logger;
-with DNS_Core_Constructs; use DNS_Core_Constructs;
+with DNSCatcher.Utils.Logger; use DNSCatcher.Utils.Logger;
+with DNS_Core_Constructs;     use DNS_Core_Constructs;
 with DNS_Core_Constructs.Raw_Packet_Records;
 use DNS_Core_Constructs.Raw_Packet_Records;
 with DNS_Transaction_Manager; use DNS_Transaction_Manager;
-with DNS_Sender_Interface_IPv4_UDP;
-with DNS_Receiver_Interface_IPv4_UDP;
+with DNSCatcher.Network.UDP.Sender;
+with DNSCatcher.Network.UDP.Receiver;
 
 procedure DNSClient is
    DClient                 : DNSCatcher.DNS.Client.Client;
    Capture_Config          : DNSCatcher.Config.Configuration_Ptr;
    Logger_Task             : DNSCatcher.Utils.Logger.Logger;
    Transaction_Manager_Ptr : DNS_Transaction_Manager_Task_Ptr;
-   Sender_Interface : DNS_Sender_Interface_IPv4_UDP.IPv4_UDP_Sender_Interface;
-   Receiver_Interface      : DNS_Receiver_Interface_IPv4_UDP
-     .IPv4_UDP_Receiver_Interface;
-   Outbound_Packet : Raw_Packet_Record_Ptr;
-   Logger_Packet   : DNSCatcher.Utils.Logger.Logger_Message_Packet_Ptr;
-   Socket          : Socket_Type;
+   Sender_Interface : DNSCatcher.Network.UDP.Sender.UDP_Sender_Interface;
+   Receiver_Interface : DNSCatcher.Network.UDP.Receiver.UDP_Receiver_Interface;
+   Outbound_Packet         : Raw_Packet_Record_Ptr;
+   Logger_Packet           : DNSCatcher.Utils.Logger.Logger_Message_Packet_Ptr;
+   Socket                  : Socket_Type;
 
    procedure Free_DNSCatacher_Config is new Ada.Unchecked_Deallocation
      (Object => DNSCatcher.Config.Configuration,
@@ -74,6 +73,7 @@ begin
          Mode   => Socket_Datagram);
       Set_Socket_Option
         (Socket => Socket,
+         Level  => IP_Protocol_For_UDP_Level,
          Option => (GNAT.Sockets.Receive_Timeout, Timeout => 1.0));
       Bind_Socket
         (Socket  => Socket,
