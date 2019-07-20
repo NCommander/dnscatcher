@@ -30,7 +30,7 @@ with Ada.Numerics.Discrete_Random;
 with Interfaces.C.Extensions; use Interfaces.C.Extensions;
 
 -- Creates and handles making DNS client requests
-package DNS_Client is
+package DNSCatcher.DNS.Client is
    -- Subtypes for handing transaction generation
    subtype DNS_Transaction_ID is Unsigned_16;
    package Random_Transaction_ID is new Ada.Numerics.Discrete_Random
@@ -63,4 +63,4 @@ package DNS_Client is
    function Create_DNS_Packet_Name_Record
      (Question : Parsed_DNS_Question)
       return Unbounded_String;
-end DNS_Client;
+end DNSCatcher.DNS.Client;

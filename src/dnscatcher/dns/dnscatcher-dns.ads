@@ -18,20 +18,6 @@
 -- FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 -- DEALINGS IN THE SOFTWARE.
 
-with "compiler_settings.gpr";
+package DNSCatcher.DNS is
 
-with "dnscatcher.gpr";
-
-with "dns_common.gpr";
-with "dns_core_constructs.gpr";
-with "dns_packet_processor.gpr";
-
-library project DNS_Client is
-   for Library_Name use "dns_client";
-   for Source_Dirs use ("../src/dns_client");
-   for Object_Dir use "../build/obj/dns_client";
-   for Library_Dir use "../lib";
-
-   package Compiler renames Compiler_Settings.Compiler;
-end DNS_Client;
-
+end DNSCatcher.DNS;

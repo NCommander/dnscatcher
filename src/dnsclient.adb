@@ -24,7 +24,7 @@ with Ada.Exceptions;        use Ada.Exceptions;
 with Ada.Unchecked_Deallocation;
 with GNAT.Sockets;          use GNAT.Sockets;
 
-with DNS_Client;
+with DNSCatcher.DNS.Client;
 with DNSCatcher.Config;
 with DNSCatcher.Utils.Logger;   use DNSCatcher.Utils.Logger;
 with DNS_Core_Constructs; use DNS_Core_Constructs;
@@ -35,7 +35,7 @@ with DNS_Sender_Interface_IPv4_UDP;
 with DNS_Receiver_Interface_IPv4_UDP;
 
 procedure DNSClient is
-   DClient                 : DNS_Client.Client;
+   DClient                 : DNSCatcher.DNS.Client.Client;
    Capture_Config          : DNSCatcher.Config.Configuration_Ptr;
    Logger_Task             : DNSCatcher.Utils.Logger.Logger;
    Transaction_Manager_Ptr : DNS_Transaction_Manager_Task_Ptr;
