@@ -1,8 +1,28 @@
+-- Copyright 2019 Michael Casadevall <michael@casadevall.pro>
+--
+-- Permission is hereby granted, free of charge, to any person obtaining a copy
+-- of this software and associated documentation files (the "Software"), to
+-- deal in the Software without restriction, including without limitation the
+-- rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+-- sell copies of the Software, and to permit persons to whom the Software is
+-- furnished to do so, subject to the following conditions:
+--
+-- The above copyright notice and this permission notice shall be included in
+-- all copies or substantial portions of the Software.
+--
+-- THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+-- IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+-- FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+-- THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+-- LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+-- FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+-- DEALINGS IN THE SOFTWARE.
+
 with Ada.Characters.Latin_1;
 with Ada.Text_IO;             use Ada.Text_IO;
 with Ada.Characters.Handling; use Ada.Characters.Handling;
 
-package body DNS_Common.Config is
+package body DNSCatcher.Config is
    procedure Initialize_Config_Parse is
    begin
       -- Load String to Type Mapping
@@ -47,7 +67,7 @@ package body DNS_Common.Config is
    end Parse_Upstream_DNS_Server_Port;
 
    function Parse_Config_File
-     (Config_File_Path : Unbounded_String)
+     (Config_File_Path : String)
       return Configuration_Ptr
    is
       Parsed_Config     : Configuration_Ptr;
@@ -68,7 +88,7 @@ package body DNS_Common.Config is
       Open
         (File => Config_File,
          Mode => Ada.Text_IO.In_File,
-         Name => To_String (Config_File_Path));
+         Name => Config_File_Path);
 
       while not End_Of_File (Config_File)
       loop
@@ -190,4 +210,4 @@ package body DNS_Common.Config is
       return Parsed_Config;
    end Parse_Config_File;
 
-end DNS_Common.Config;
+end DNSCatcher.Config;

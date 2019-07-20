@@ -1,12 +1,31 @@
+-- Copyright 2019 Michael Casadevall <michael@casadevall.pro>
+--
+-- Permission is hereby granted, free of charge, to any person obtaining a copy
+-- of this software and associated documentation files (the "Software"), to
+-- deal in the Software without restriction, including without limitation the
+-- rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+-- sell copies of the Software, and to permit persons to whom the Software is
+-- furnished to do so, subject to the following conditions:
+--
+-- The above copyright notice and this permission notice shall be included in
+-- all copies or substantial portions of the Software.
+--
+-- THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+-- IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+-- FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+-- THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+-- LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+-- FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+-- DEALINGS IN THE SOFTWARE.
+
 with Ada.Unchecked_Conversion;
 
 with Ada.Unchecked_Deallocation;
 with Ada.Exceptions; use Ada.Exceptions;
 
-with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 with GNAT.Sockets;          use GNAT.Sockets;
 
-with DNS_Common.Config;
+with DNSCatcher.Config;
 with DNS_Common.Logger;       use DNS_Common.Logger;
 with DNS_Receiver_Interface_IPv4_UDP;
 with DNS_Sender_Interface_IPv4_UDP;
@@ -18,7 +37,7 @@ package body Packet_Catcher is
    procedure Run_Catcher is
       -- Input and Output Sockets
       DNS_Transactions : DNS_Transaction_Manager.DNS_Transaction_Manager_Task;
-      Capture_Config     : DNS_Common.Config.Configuration_Ptr;
+      Capture_Config     : DNSCatcher.Config.Configuration_Ptr;
       Receiver_Interface : DNS_Receiver_Interface_IPv4_UDP
         .IPv4_UDP_Receiver_Interface;
       Sender_Interface : DNS_Sender_Interface_IPv4_UDP
@@ -32,13 +51,12 @@ package body Packet_Catcher is
         (Object => DNS_Transaction_Manager_Task,
          Name   => DNS_Transaction_Manager_Task_Ptr);
       procedure Free_DNSCatacher_Config is new Ada.Unchecked_Deallocation
-        (Object => DNS_Common.Config.Configuration,
-         Name   => DNS_Common.Config.Configuration_Ptr);
+        (Object => DNSCatcher.Config.Configuration,
+         Name   => DNSCatcher.Config.Configuration_Ptr);
    begin
       -- Load the config file from disk
       Capture_Config :=
-        DNS_Common.Config.Parse_Config_File
-          (To_Unbounded_String ("conf/dnscatcherd.conf"));
+        DNSCatcher.Config.Parse_Config_File("conf/dnscatcherd.conf");
 
       -- Configure the logger
       Capture_Config.Logger_Config.Log_Level := DEBUG;

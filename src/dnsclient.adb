@@ -1,3 +1,23 @@
+-- Copyright 2019 Michael Casadevall <michael@casadevall.pro>
+--
+-- Permission is hereby granted, free of charge, to any person obtaining a copy
+-- of this software and associated documentation files (the "Software"), to
+-- deal in the Software without restriction, including without limitation the
+-- rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+-- sell copies of the Software, and to permit persons to whom the Software is
+-- furnished to do so, subject to the following conditions:
+--
+-- The above copyright notice and this permission notice shall be included in
+-- all copies or substantial portions of the Software.
+--
+-- THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+-- IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+-- FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+-- THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+-- LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+-- FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+-- DEALINGS IN THE SOFTWARE.
+
 with Ada.Text_IO;           use Ada.Text_IO;
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 with Ada.Exceptions;        use Ada.Exceptions;
@@ -5,7 +25,7 @@ with Ada.Unchecked_Deallocation;
 with GNAT.Sockets;          use GNAT.Sockets;
 
 with DNS_Client;
-with DNS_Common.Config;
+with DNSCatcher.Config;
 with DNS_Common.Logger;   use DNS_Common.Logger;
 with DNS_Core_Constructs; use DNS_Core_Constructs;
 with DNS_Core_Constructs.Raw_Packet_Records;
@@ -16,7 +36,7 @@ with DNS_Receiver_Interface_IPv4_UDP;
 
 procedure DNSClient is
    DClient                 : DNS_Client.Client;
-   Capture_Config          : DNS_Common.Config.Configuration_Ptr;
+   Capture_Config          : DNSCatcher.Config.Configuration_Ptr;
    Logger_Task             : DNS_Common.Logger.Logger;
    Transaction_Manager_Ptr : DNS_Transaction_Manager_Task_Ptr;
    Sender_Interface : DNS_Sender_Interface_IPv4_UDP.IPv4_UDP_Sender_Interface;
@@ -27,11 +47,11 @@ procedure DNSClient is
    Socket          : Socket_Type;
 
    procedure Free_DNSCatacher_Config is new Ada.Unchecked_Deallocation
-     (Object => DNS_Common.Config.Configuration,
-      Name   => DNS_Common.Config.Configuration_Ptr);
+     (Object => DNSCatcher.Config.Configuration,
+      Name   => DNSCatcher.Config.Configuration_Ptr);
 
 begin
-   Capture_Config := new DNS_Common.Config.Configuration;
+   Capture_Config := new DNSCatcher.Config.Configuration;
    Capture_Config.Local_Listen_Port        := 41231;
    Capture_Config.Upstream_DNS_Server      := To_Unbounded_String ("4.2.2.2");
    Capture_Config.Upstream_DNS_Server_Port := 53;

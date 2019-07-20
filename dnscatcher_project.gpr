@@ -18,23 +18,26 @@
 -- FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 -- DEALINGS IN THE SOFTWARE.
 
-pragma Ada_2012;
+with "aunit";
+with "gnat/dnscatcher_config";
+with "gnat/dns_common";
+with "gnat/dns_core_constructs";
+with "gnat/dns_packet_processor";
+with "gnat/dns_rdata_processor";
+with "gnat/dns_client";
+with "gnat/dns_transaction_manager";
 
-with Test_Packet_Parser;
+project DNSCatcher_Project is
+   -- Not supported by old gprbuilds
+   for Create_Missing_Dirs use "True";
 
-package body Packet_Processor_Test_Suite is
-   use AUnit.Test_Suites;
+   for Source_Dirs use ("src", "tests");
+   for Object_Dir use "build/obj";
+   for Main use ("dnscatcherd.adb", "test_runner.adb", "dnsclient.adb");
 
-   -- Statically allocate test suite;
-   Result : aliased Test_Suite;
+   for Exec_Dir use "bin";
 
-   -- And the test cases
-   Test_Packet_Parser_Ptr : aliased Test_Packet_Parser.Packet_Parser_Test;
+   package Compiler renames DNS_Common.Compiler;
+   package Pretty_Printer renames DNS_Common.Pretty_Printer;
+end DNSCatcher_Project;
 
-   function Suite return AUnit.Test_Suites.Access_Test_Suite is
-   begin
-      Add_Test (Result'Access, Test_Packet_Parser_Ptr'Access);
-      return (Result'Access);
-   end Suite;
-
-end Packet_Processor_Test_Suite;

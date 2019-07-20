@@ -1,3 +1,23 @@
+-- Copyright 2019 Michael Casadevall <michael@casadevall.pro>
+--
+-- Permission is hereby granted, free of charge, to any person obtaining a copy
+-- of this software and associated documentation files (the "Software"), to
+-- deal in the Software without restriction, including without limitation the
+-- rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+-- sell copies of the Software, and to permit persons to whom the Software is
+-- furnished to do so, subject to the following conditions:
+--
+-- The above copyright notice and this permission notice shall be included in
+-- all copies or substantial portions of the Software.
+--
+-- THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+-- IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+-- FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+-- THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+-- LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+-- FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+-- DEALINGS IN THE SOFTWARE.
+
 pragma Ada_2012;
 with Ada.Text_IO; use Ada.Text_IO;
 
@@ -24,12 +44,12 @@ with Interfaces.C.Extensions; use Interfaces.C.Extensions;
 
 package body Test_Packet_Parser is
    procedure Free_DNSCatacher_Config is new Ada.Unchecked_Deallocation
-     (Object => DNS_Common.Config.Configuration,
-      Name   => DNS_Common.Config.Configuration_Ptr);
+     (Object => DNSCatcher.Config.Configuration,
+      Name   => DNSCatcher.Config.Configuration_Ptr);
 
    procedure Set_Up_Case (T : in out Packet_Parser_Test) is
    begin
-      T.Capture_Config := new DNS_Common.Config.Configuration;
+      T.Capture_Config := new DNSCatcher.Config.Configuration;
       T.Capture_Config.Local_Listen_Port        := 53;
       T.Capture_Config.Upstream_DNS_Server := To_Unbounded_String ("4.2.2.2");
       T.Capture_Config.Upstream_DNS_Server_Port := 53;
