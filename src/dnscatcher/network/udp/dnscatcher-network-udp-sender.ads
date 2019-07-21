@@ -19,8 +19,8 @@
 -- DEALINGS IN THE SOFTWARE.
 
 with DNSCatcher.Network;
-with DNS_Core_Constructs.Raw_Packet_Records;
-use DNS_Core_Constructs.Raw_Packet_Records;
+
+with DNSCatcher.Datasets; use DNSCatcher.Datasets;
 
 package DNSCatcher.Network.UDP.Sender is
    -- Tasks Definition

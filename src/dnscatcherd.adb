@@ -29,6 +29,7 @@ with Packet_Catcher;
 with Signal_Handlers;
 
 with DNSCatcher.Config;
+
 procedure DNSCatcherD is
 begin
    Install_Handler (Handler => Signal_Handlers.SIGINT_Handler'Access);

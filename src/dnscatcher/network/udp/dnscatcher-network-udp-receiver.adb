@@ -23,9 +23,7 @@ with Ada.Streams;           use Ada.Streams;
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 with Ada.Unchecked_Conversion;
 
-with DNS_Core_Constructs.Raw_Packet_Records;
-use DNS_Core_Constructs.Raw_Packet_Records;
-with DNS_Core_Constructs; use DNS_Core_Constructs;
+with DNSCatcher.Types; use DNSCatcher.Types;
 with DNSCatcher.Utils.Logger;   use DNSCatcher.Utils.Logger;
 
 package body DNSCatcher.Network.UDP.Receiver is

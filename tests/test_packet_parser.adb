@@ -30,11 +30,10 @@ with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 with Ada.Unchecked_Deallocation;
 with Ada.Unchecked_Conversion;
 
-with DNS_Core_Constructs;       use DNS_Core_Constructs;
-with DNS_Core_Constructs.Utils; use DNS_Core_Constructs.Utils;
+with DNSCatcher.DNS;   use DNSCatcher.DNS;
+with DNSCatcher.Types; use DNSCatcher.Types;
+with DNSCatcher.Utils; use DNSCatcher.Utils;
 
-with DNS_Core_Constructs.Raw_Packet_Records;
-use DNS_Core_Constructs.Raw_Packet_Records;
 with DNS_Packet_Processor;           use DNS_Packet_Processor;
 with DNS_Packet_Processor.Utils;     use DNS_Packet_Processor.Utils;
 with DNS_RData_Processor;            use DNS_RData_Processor;
@@ -162,10 +161,10 @@ package body Test_Packet_Parser is
         (To_String (Question.QName), "apple.com",
          "Incorrect QNAME on decode!");
       AUnit.Assertions.Assert
-        ((Question.QType = DNS_Core_Constructs.A),
+        ((Question.QType = DNSCatcher.DNS.A),
          "Incorrect QTYPE on decode!");
       AUnit.Assertions.Assert
-        ((Question.QClass = DNS_Core_Constructs.INternet),
+        ((Question.QClass = DNSCatcher.DNS.INternet),
          "Incorrect QCLASS on decode!");
 
       -- Verify the response section
@@ -178,7 +177,7 @@ package body Test_Packet_Parser is
       AUnit.Assertions.Assert
         (To_String (Answer.RName), "apple.com", "Incorrect RName!");
       AUnit.Assertions.Assert
-        ((Answer.RType = DNS_Core_Constructs.A), "Incorrect RName!");
+        ((Answer.RType = DNSCatcher.DNS.A), "Incorrect RName!");
       AUnit.Assertions.Assert ((Answer.TTL = 3190), "Incorrect TTL!");
       AUnit.Assertions.Assert
         (Answer.RData_To_String, "17.172.224.47", "RData is incorrect");
@@ -187,7 +186,7 @@ package body Test_Packet_Parser is
       AUnit.Assertions.Assert
         (To_String (Answer.RName), "apple.com", "Incorrect RName!");
       AUnit.Assertions.Assert
-        ((Answer.RType = DNS_Core_Constructs.A), "Incorrect RName!");
+        ((Answer.RType = DNSCatcher.DNS.A), "Incorrect RName!");
       AUnit.Assertions.Assert ((Answer.TTL = 3190), "Incorrect TTL!");
       AUnit.Assertions.Assert
         (Answer.RData_To_String, "17.178.96.59", "RData is incorrect");
@@ -196,7 +195,7 @@ package body Test_Packet_Parser is
       AUnit.Assertions.Assert
         (To_String (Answer.RName), "apple.com", "Incorrect RName!");
       AUnit.Assertions.Assert
-        ((Answer.RType = DNS_Core_Constructs.A), "Incorrect RName!");
+        ((Answer.RType = DNSCatcher.DNS.A), "Incorrect RName!");
       AUnit.Assertions.Assert ((Answer.TTL = 3190), "Incorrect TTL!");
       AUnit.Assertions.Assert
         (Answer.RData_To_String, "17.142.160.59", "RData is incorrect");
@@ -229,10 +228,10 @@ package body Test_Packet_Parser is
         (To_String (Question.QName), "casadevall.pro",
          "Incorrect QNAME on decode!");
       AUnit.Assertions.Assert
-        ((Question.QType = DNS_Core_Constructs.SOA),
+        ((Question.QType = DNSCatcher.DNS.SOA),
          "Incorrect QTYPE on decode!");
       AUnit.Assertions.Assert
-        ((Question.QClass = DNS_Core_Constructs.INternet),
+        ((Question.QClass = DNSCatcher.DNS.INternet),
          "Incorrect QCLASS on decode!");
 
       -- Verify the response section
@@ -284,10 +283,10 @@ package body Test_Packet_Parser is
         (To_String (Question.QName), "mail.casadevall.pro",
          "Incorrect QNAME on decode!");
       AUnit.Assertions.Assert
-        ((Question.QType = DNS_Core_Constructs.CNAME),
+        ((Question.QType = DNSCatcher.DNS.CNAME),
          "Incorrect QTYPE on decode!");
       AUnit.Assertions.Assert
-        ((Question.QClass = DNS_Core_Constructs.INternet),
+        ((Question.QClass = DNSCatcher.DNS.INternet),
          "Incorrect QCLASS on decode!");
 
       AUnit.Assertions.Assert
@@ -298,7 +297,7 @@ package body Test_Packet_Parser is
       AUnit.Assertions.Assert
         (To_String (Answer.RName), "mail.casadevall.pro", "Incorrect RName!");
       AUnit.Assertions.Assert
-        ((Answer.RType = DNS_Core_Constructs.CNAME), "Incorrect RName!");
+        ((Answer.RType = DNSCatcher.DNS.CNAME), "Incorrect RName!");
       AUnit.Assertions.Assert ((Answer.TTL = 3600), "Incorrect TTL!");
       AUnit.Assertions.Assert
         (Answer.RData_To_String, "pathfinder.casadevall.pro",
@@ -328,10 +327,10 @@ package body Test_Packet_Parser is
         (To_String (Question.QName), "casadevall.pro",
          "Incorrect QNAME on decode!");
       AUnit.Assertions.Assert
-        ((Question.QType = DNS_Core_Constructs.NS),
+        ((Question.QType = DNSCatcher.DNS.NS),
          "Incorrect QTYPE on decode!");
       AUnit.Assertions.Assert
-        ((Question.QClass = DNS_Core_Constructs.INternet),
+        ((Question.QClass = DNSCatcher.DNS.INternet),
          "Incorrect QCLASS on decode!");
 
       AUnit.Assertions.Assert
@@ -342,7 +341,7 @@ package body Test_Packet_Parser is
       AUnit.Assertions.Assert
         (To_String (Answer.RName), "casadevall.pro", "Incorrect RName!");
       AUnit.Assertions.Assert
-        ((Answer.RType = DNS_Core_Constructs.NS), "Incorrect RName!");
+        ((Answer.RType = DNSCatcher.DNS.NS), "Incorrect RName!");
       AUnit.Assertions.Assert ((Answer.TTL = 3600), "Incorrect TTL!");
       AUnit.Assertions.Assert
         (Answer.RData_To_String, "ns5.linode.com", "RData is incorrect");
@@ -351,7 +350,7 @@ package body Test_Packet_Parser is
       AUnit.Assertions.Assert
         (To_String (Answer.RName), "casadevall.pro", "Incorrect RName!");
       AUnit.Assertions.Assert
-        ((Answer.RType = DNS_Core_Constructs.NS), "Incorrect RName!");
+        ((Answer.RType = DNSCatcher.DNS.NS), "Incorrect RName!");
       AUnit.Assertions.Assert ((Answer.TTL = 3600), "Incorrect TTL!");
       AUnit.Assertions.Assert
         (Answer.RData_To_String, "ns2.linode.com", "RData is incorrect");
@@ -360,7 +359,7 @@ package body Test_Packet_Parser is
       AUnit.Assertions.Assert
         (To_String (Answer.RName), "casadevall.pro", "Incorrect RName!");
       AUnit.Assertions.Assert
-        ((Answer.RType = DNS_Core_Constructs.NS), "Incorrect RName!");
+        ((Answer.RType = DNSCatcher.DNS.NS), "Incorrect RName!");
       AUnit.Assertions.Assert ((Answer.TTL = 3600), "Incorrect TTL!");
       AUnit.Assertions.Assert
         (Answer.RData_To_String, "ns1.casadevall.pro", "RData is incorrect");
@@ -369,7 +368,7 @@ package body Test_Packet_Parser is
       AUnit.Assertions.Assert
         (To_String (Answer.RName), "casadevall.pro", "Incorrect RName!");
       AUnit.Assertions.Assert
-        ((Answer.RType = DNS_Core_Constructs.NS), "Incorrect RName!");
+        ((Answer.RType = DNSCatcher.DNS.NS), "Incorrect RName!");
       AUnit.Assertions.Assert ((Answer.TTL = 3600), "Incorrect TTL!");
       AUnit.Assertions.Assert
         (Answer.RData_To_String, "ns3.linode.com", "RData is incorrect");
@@ -378,7 +377,7 @@ package body Test_Packet_Parser is
       AUnit.Assertions.Assert
         (To_String (Answer.RName), "casadevall.pro", "Incorrect RName!");
       AUnit.Assertions.Assert
-        ((Answer.RType = DNS_Core_Constructs.NS), "Incorrect RName!");
+        ((Answer.RType = DNSCatcher.DNS.NS), "Incorrect RName!");
       AUnit.Assertions.Assert ((Answer.TTL = 3600), "Incorrect TTL!");
       AUnit.Assertions.Assert
         (Answer.RData_To_String, "ns1.linode.com", "RData is incorrect");
@@ -387,7 +386,7 @@ package body Test_Packet_Parser is
       AUnit.Assertions.Assert
         (To_String (Answer.RName), "casadevall.pro", "Incorrect RName!");
       AUnit.Assertions.Assert
-        ((Answer.RType = DNS_Core_Constructs.NS), "Incorrect RName!");
+        ((Answer.RType = DNSCatcher.DNS.NS), "Incorrect RName!");
       AUnit.Assertions.Assert ((Answer.TTL = 3600), "Incorrect TTL!");
       AUnit.Assertions.Assert
         (Answer.RData_To_String, "ns4.linode.com", "RData is incorrect");
@@ -417,10 +416,10 @@ package body Test_Packet_Parser is
         (To_String (Question.QName), "193.112.33.45.in-addr.arpa",
          "Incorrect QNAME on decode!");
       AUnit.Assertions.Assert
-        ((Question.QType = DNS_Core_Constructs.PTR),
+        ((Question.QType = DNSCatcher.DNS.PTR),
          "Incorrect QTYPE on decode!");
       AUnit.Assertions.Assert
-        ((Question.QClass = DNS_Core_Constructs.INternet),
+        ((Question.QClass = DNSCatcher.DNS.INternet),
          "Incorrect QCLASS on decode!");
 
       AUnit.Assertions.Assert
@@ -432,7 +431,7 @@ package body Test_Packet_Parser is
         (To_String (Answer.RName), "193.112.33.45.in-addr.arpa",
          "Incorrect RName!");
       AUnit.Assertions.Assert
-        ((Answer.RType = DNS_Core_Constructs.PTR), "Incorrect RName!");
+        ((Answer.RType = DNSCatcher.DNS.PTR), "Incorrect RName!");
       AUnit.Assertions.Assert ((Answer.TTL = 86400), "Incorrect TTL!");
       AUnit.Assertions.Assert
         (Answer.RData_To_String, "pathfinder.casadevall.pro",
@@ -463,10 +462,10 @@ package body Test_Packet_Parser is
         (To_String (Question.QName), "",
          "Incorrect QNAME on decode!");
       AUnit.Assertions.Assert
-        ((Question.QType = DNS_Core_Constructs.DNSKEY),
+        ((Question.QType = DNSCatcher.DNS.DNSKEY),
          "Incorrect QTYPE on decode!");
       AUnit.Assertions.Assert
-        ((Question.QClass = DNS_Core_Constructs.INternet),
+        ((Question.QClass = DNSCatcher.DNS.INternet),
          "Incorrect QCLASS on decode!");
 
       Put_Line(Parsed_Packet.Header.Additional_Record_Count'Image);
@@ -480,7 +479,7 @@ package body Test_Packet_Parser is
         (To_String (Answer.RName), "",
          "Incorrect RName!");
       AUnit.Assertions.Assert
-        ((Answer.RType = DNS_Core_Constructs.OPT), "Incorrect RName!");
+        ((Answer.RType = DNSCatcher.DNS.OPT), "Incorrect RName!");
       AUnit.Assertions.Assert ((Answer.TTL = 0), "Incorrect TTL!");
 
       Free_Raw_Packet_Record_Ptr (Inbound_Packet);

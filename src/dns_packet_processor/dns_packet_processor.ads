@@ -23,10 +23,10 @@ with Ada.Strings.Unbounded;   use Ada.Strings.Unbounded;
 with Ada.Streams;             use Ada.Streams;
 with Interfaces.C.Extensions; use Interfaces.C.Extensions;
 
+with DNSCatcher.DNS; use DNSCatcher.DNS;
+with DNSCatcher.Types; use DNSCatcher.Types;
+
 with DNSCatcher.Utils.Logger; use DNSCatcher.Utils.Logger;
-with DNS_Core_Constructs.Raw_Packet_Records;
-use DNS_Core_Constructs.Raw_Packet_Records;
-with DNS_Core_Constructs; use DNS_Core_Constructs;
 with DNS_RData_Processor; use DNS_RData_Processor;
 
 package DNS_Packet_Processor is

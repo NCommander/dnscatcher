@@ -25,10 +25,10 @@ with Ada.Exceptions;      use Ada.Exceptions;
 with Ada.Integer_Text_IO; use Ada.Integer_Text_IO;
 with Ada.Strings.Hash;
 
-with DNS_Core_Constructs;        use DNS_Core_Constructs;
-with DNS_Core_Constructs.Utils;  use DNS_Core_Constructs.Utils;
 with DNS_Packet_Processor;       use DNS_Packet_Processor;
 with DNS_Packet_Processor.Utils; use DNS_Packet_Processor.Utils;
+
+with DNSCatcher.Utils;    use DNSCatcher.Utils;
 with DNSCatcher.Utils.Logger;    use DNSCatcher.Utils.Logger;
 
 package body DNSCatcher.DNS.Transaction_Manager is

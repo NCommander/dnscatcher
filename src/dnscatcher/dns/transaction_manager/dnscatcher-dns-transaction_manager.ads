@@ -23,11 +23,12 @@ with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 with Ada.Containers.Vectors; use Ada.Containers;
 with Ada.Containers.Hashed_Maps;
 
-with GNAT.Sockets;            use GNAT.Sockets;
 with Interfaces.C.Extensions; use Interfaces.C.Extensions;
 
-with DNS_Core_Constructs.Raw_Packet_Records;
-use DNS_Core_Constructs.Raw_Packet_Records;
+with GNAT.Sockets;            use GNAT.Sockets;
+
+with DNSCatcher.Datasets; use DNSCatcher.Datasets;
+with DNSCatcher.Types; use DNSCatcher.Types;
 
 package DNSCatcher.DNS.Transaction_Manager is
    package Stored_Packets_Vector is new Vectors (Natural,

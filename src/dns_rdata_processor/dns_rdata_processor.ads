@@ -22,7 +22,9 @@ with Ada.Strings.Unbounded;   use Ada.Strings.Unbounded;
 with Interfaces.C.Extensions; use Interfaces.C.Extensions;
 
 limited with DNS_Packet_Processor;
-with DNS_Core_Constructs; use DNS_Core_Constructs;
+
+with DNSCatcher.DNS; use DNSCatcher.DNS;
+with DNSCatcher.Types; use DNSCatcher.Types;
 
 package DNS_RData_Processor is
 

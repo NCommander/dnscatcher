@@ -19,23 +19,25 @@
 -- DEALINGS IN THE SOFTWARE.
 
 with Ada.Unchecked_Deallocation;
-with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
-with Ada.Streams; use Ada.Streams;
 
-with DNSCatcher.Types; use DNSCatcher.Types;
+with DNSCatcher.Utils; use DNSCatcher.Utils;
 
-package DNSCatcher.Utils is
-   type IP_Addr_Family is
-     (IPv4,
-      IPv6);
-   for IP_Addr_Family use (IPv4 => 1, IPv6 => 2);
+package body DNSCatcher.Types is
+   -------------------------
+   -- Free_Raw_DNS_Packet --
+   -------------------------
 
-   function Inet_Ntop
-     (Family   : IP_Addr_Family;
-      Raw_Data : Unbounded_String)
-      return Unbounded_String;
+   procedure Free_Raw_DNS_Packet (Packet : in out Raw_DNS_Packet) is
+   begin
+      Free_Stream_Element_Array_Ptr (Packet.Data);
+   end Free_Raw_DNS_Packet;
 
-   -- Deallocators
-   procedure Free_Stream_Element_Array_Ptr is new Ada.Unchecked_Deallocation
-     (Object => Stream_Element_Array, Name => Stream_Element_Array_Ptr);
-end DNSCatcher.Utils;
+   procedure Free_Raw_Packet_Record_Ptr (Ptr : in out Raw_Packet_Record_Ptr) is
+      procedure Free_Ptr_Record is new Ada.Unchecked_Deallocation
+        (Object => Raw_Packet_Record, Name => Raw_Packet_Record_Ptr);
+   begin
+      Free_Stream_Element_Array_Ptr (Ptr.Raw_Data.Data);
+      Free_Ptr_Record (Ptr);
+   end Free_Raw_Packet_Record_Ptr;
+
+end DNSCatcher.Types;

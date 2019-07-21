@@ -18,24 +18,22 @@
 -- FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 -- DEALINGS IN THE SOFTWARE.
 
-with Ada.Unchecked_Deallocation;
-with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
-with Ada.Streams; use Ada.Streams;
+with Ada.Containers.Vectors; use Ada.Containers;
 
 with DNSCatcher.Types; use DNSCatcher.Types;
 
-package DNSCatcher.Utils is
-   type IP_Addr_Family is
-     (IPv4,
-      IPv6);
-   for IP_Addr_Family use (IPv4 => 1, IPv6 => 2);
+package DNSCatcher.Datasets is
+   package Stored_Packets_Vector is new Vectors (Natural, Raw_Packet_Record);
+   use Stored_Packets_Vector;
 
-   function Inet_Ntop
-     (Family   : IP_Addr_Family;
-      Raw_Data : Unbounded_String)
-      return Unbounded_String;
-
-   -- Deallocators
-   procedure Free_Stream_Element_Array_Ptr is new Ada.Unchecked_Deallocation
-     (Object => Stream_Element_Array, Name => Stream_Element_Array_Ptr);
-end DNSCatcher.Utils;
+   protected type Raw_Packet_Record_Queue is
+      entry Put (Packet : in Raw_Packet_Record);
+      entry Get (Packet : out Raw_Packet_Record);
+      entry Count (Count : out Integer);
+      entry Empty;
+   private
+      Stored_Packets : Vector;
+      Packet_Count   : Integer := 0;
+   end Raw_Packet_Record_Queue;
+   type DNS_Raw_Packet_Queue_Ptr is access Raw_Packet_Record_Queue;
+end DNSCatcher.Datasets;

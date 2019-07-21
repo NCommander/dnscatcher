@@ -18,9 +18,12 @@
 -- FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 -- DEALINGS IN THE SOFTWARE.
 
+with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 with GNAT.Sockets; use GNAT.Sockets;
 
 with DNSCatcher.Config; use DNSCatcher.Config;
+with DNSCatcher.DNS; use DNSCatcher.DNS;
+
 with DNSCatcher.DNS.Transaction_Manager;
 use DNSCatcher.DNS.Transaction_Manager;
 
@@ -58,5 +61,4 @@ package DNSCatcher.Network is
 
    procedure Shutdown (This : in out Sender_Interface) is abstract;
    -- Cleanly shuts down the interface
-
 end DNSCatcher.Network;

@@ -24,18 +24,18 @@ with Ada.Exceptions;        use Ada.Exceptions;
 with Ada.Unchecked_Deallocation;
 with GNAT.Sockets;          use GNAT.Sockets;
 
+with DNSCatcher.DNS; use DNSCatcher.DNS;
 with DNSCatcher.DNS.Client;
 with DNSCatcher.Config;
 with DNSCatcher.Utils.Logger; use DNSCatcher.Utils.Logger;
-with DNS_Core_Constructs;     use DNS_Core_Constructs;
-with DNS_Core_Constructs.Raw_Packet_Records;
-use DNS_Core_Constructs.Raw_Packet_Records;
 
 with DNSCatcher.DNS.Transaction_Manager;
 use DNSCatcher.DNS.Transaction_Manager;
 
 with DNSCatcher.Network.UDP.Sender;
 with DNSCatcher.Network.UDP.Receiver;
+
+with DNSCatcher.Types; use DNSCatcher.Types;
 
 procedure DNSClient is
    DClient                 : DNSCatcher.DNS.Client.Client;

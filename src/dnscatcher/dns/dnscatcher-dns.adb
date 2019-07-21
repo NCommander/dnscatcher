@@ -18,24 +18,36 @@
 -- FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 -- DEALINGS IN THE SOFTWARE.
 
-with Ada.Unchecked_Deallocation;
-with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
-with Ada.Streams; use Ada.Streams;
+package body DNSCatcher.DNS is
+   function To_String
+     (RR_Type : RR_Types)
+      return String
+   is
+   begin
+      -- This **** is required because 'in' is a keyword and Ada is case
+      -- insensitive
+      case RR_Type is
+         when WILDCARD =>
+            return "*";
+         when others =>
+            return RR_Types'Image (RR_Type);
+      end case;
 
-with DNSCatcher.Types; use DNSCatcher.Types;
+   end To_String;
 
-package DNSCatcher.Utils is
-   type IP_Addr_Family is
-     (IPv4,
-      IPv6);
-   for IP_Addr_Family use (IPv4 => 1, IPv6 => 2);
+   function To_String
+     (DNS_Class : Classes)
+      return String
+   is
+   begin
+      -- This **** is required because 'in' is a keyword and Ada is case
+      -- insensitive
+      case DNS_Class is
+         when INternet =>
+            return "IN";
+         when others =>
+            return Classes'Image (DNS_Class);
+      end case;
 
-   function Inet_Ntop
-     (Family   : IP_Addr_Family;
-      Raw_Data : Unbounded_String)
-      return Unbounded_String;
-
-   -- Deallocators
-   procedure Free_Stream_Element_Array_Ptr is new Ada.Unchecked_Deallocation
-     (Object => Stream_Element_Array, Name => Stream_Element_Array_Ptr);
-end DNSCatcher.Utils;
+   end To_String;
+end DNSCatcher.DNS;

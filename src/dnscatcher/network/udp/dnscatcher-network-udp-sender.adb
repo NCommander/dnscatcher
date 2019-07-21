@@ -22,7 +22,8 @@ with Ada.Exceptions; use Ada.Exceptions;
 
 with Ada.Streams;           use Ada.Streams;
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
-with DNS_Core_Constructs;   use DNS_Core_Constructs;
+
+with DNSCatcher.Types; use DNSCatcher.Types;
 with DNSCatcher.Utils.Logger;     use DNSCatcher.Utils.Logger;
 
 package body DNSCatcher.Network.UDP.Sender is

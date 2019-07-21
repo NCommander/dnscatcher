@@ -18,14 +18,14 @@
 -- FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 -- DEALINGS IN THE SOFTWARE.
 
-with DNS_Core_Constructs;  use DNS_Core_Constructs;
-with DNS_Packet_Processor; use DNS_Packet_Processor;
-with DNS_Core_Constructs.Raw_Packet_Records;
-use DNS_Core_Constructs.Raw_Packet_Records;
-with DNSCatcher.Config; use DNSCatcher.Config;
 
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 with Ada.Numerics.Discrete_Random;
+
+with DNS_Packet_Processor; use DNS_Packet_Processor;
+with DNSCatcher.Config; use DNSCatcher.Config;
+with DNSCatcher.DNS; use DNSCatcher.DNS;
+with DNSCatcher.Types; use DNSCatcher.Types;
 
 with Interfaces.C.Extensions; use Interfaces.C.Extensions;
 
