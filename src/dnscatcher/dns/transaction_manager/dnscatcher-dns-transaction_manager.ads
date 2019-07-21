@@ -29,7 +29,7 @@ with Interfaces.C.Extensions; use Interfaces.C.Extensions;
 with DNS_Core_Constructs.Raw_Packet_Records;
 use DNS_Core_Constructs.Raw_Packet_Records;
 
-package DNS_Transaction_Manager is
+package DNSCatcher.DNS.Transaction_Manager is
    package Stored_Packets_Vector is new Vectors (Natural,
       Raw_Packet_Record_Ptr);
 
@@ -69,4 +69,4 @@ package DNS_Transaction_Manager is
 
    type DNS_Transaction_Manager_Task_Ptr is
      access DNS_Transaction_Manager_Task;
-end DNS_Transaction_Manager;
+end DNSCatcher.DNS.Transaction_Manager;

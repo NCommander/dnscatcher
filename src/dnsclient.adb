@@ -30,7 +30,10 @@ with DNSCatcher.Utils.Logger; use DNSCatcher.Utils.Logger;
 with DNS_Core_Constructs;     use DNS_Core_Constructs;
 with DNS_Core_Constructs.Raw_Packet_Records;
 use DNS_Core_Constructs.Raw_Packet_Records;
-with DNS_Transaction_Manager; use DNS_Transaction_Manager;
+
+with DNSCatcher.DNS.Transaction_Manager;
+use DNSCatcher.DNS.Transaction_Manager;
+
 with DNSCatcher.Network.UDP.Sender;
 with DNSCatcher.Network.UDP.Receiver;
 

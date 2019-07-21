@@ -20,7 +20,6 @@
 
 with "compiler_settings";
 with "dns_common";
-limited with "dns_transaction_manager";
 limited with "dns_packet_processor";
 
 library project DNSCatcher is

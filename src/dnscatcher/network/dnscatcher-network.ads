@@ -18,11 +18,11 @@
 -- FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 -- DEALINGS IN THE SOFTWARE.
 
-
 with GNAT.Sockets; use GNAT.Sockets;
 
-with DNSCatcher.Config;       use DNSCatcher.Config;
-with DNS_Transaction_Manager; use DNS_Transaction_Manager;
+with DNSCatcher.Config; use DNSCatcher.Config;
+with DNSCatcher.DNS.Transaction_Manager;
+use DNSCatcher.DNS.Transaction_Manager;
 
 package DNSCatcher.Network is
 
@@ -34,15 +34,14 @@ package DNSCatcher.Network is
       Config              :        Configuration_Ptr;
       Transaction_Manager :        DNS_Transaction_Manager_Task_Ptr;
       Socket              :        Socket_Type) is abstract;
-   -- Initializes a network interface and does any necessary prep work. It
-   -- MUST be called before calling any other method
+      -- Initializes a network interface and does any necessary prep work. It
+      -- MUST be called before calling any other method
 
    procedure Start (This : in out Receiver_Interface) is abstract;
    -- Starts the interface
 
    procedure Shutdown (This : in out Receiver_Interface) is abstract;
    -- Cleanly shuts down the interface
-
 
    -- Sender Interface
    type Sender_Interface is abstract tagged null record;
@@ -51,8 +50,8 @@ package DNSCatcher.Network is
      (This   : in out Sender_Interface;
       Config :        Configuration_Ptr;
       Socket :        Socket_Type) is abstract;
-   -- Initializes a network interface and does any necessary prep work. It
-   -- MUST be called before calling any other method
+      -- Initializes a network interface and does any necessary prep work. It
+      -- MUST be called before calling any other method
 
    procedure Start (This : in out Sender_Interface) is abstract;
    -- Starts the interface

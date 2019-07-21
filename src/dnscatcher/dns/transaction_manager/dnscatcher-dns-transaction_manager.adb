@@ -31,7 +31,7 @@ with DNS_Packet_Processor;       use DNS_Packet_Processor;
 with DNS_Packet_Processor.Utils; use DNS_Packet_Processor.Utils;
 with DNSCatcher.Utils.Logger;    use DNSCatcher.Utils.Logger;
 
-package body DNS_Transaction_Manager is
+package body DNSCatcher.DNS.Transaction_Manager is
    -- Handle the map for tracking transactions to/from source
    task body DNS_Transaction_Manager_Task is
       Outbound_Packet_Queue : DNS_Raw_Packet_Queue_Ptr;
@@ -277,4 +277,4 @@ package body DNS_Transaction_Manager is
    begin
       return Ada.Strings.Hash (To_String (id));
    end IP_Transaction_Key_HashID;
-end DNS_Transaction_Manager;
+end DNSCatcher.DNS.Transaction_Manager;

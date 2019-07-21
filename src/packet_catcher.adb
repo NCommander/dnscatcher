@@ -28,14 +28,16 @@ with DNSCatcher.Config;
 with DNSCatcher.Utils.Logger; use DNSCatcher.Utils.Logger;
 with DNSCatcher.Network.UDP.Receiver;
 with DNSCatcher.Network.UDP.Sender;
-with DNS_Transaction_Manager; use DNS_Transaction_Manager;
+
+with DNSCatcher.DNS.Transaction_Manager;
+use DNSCatcher.DNS.Transaction_Manager;
 
 package body Packet_Catcher is
    Shutting_Down : Boolean := False;
 
    procedure Run_Catcher is
       -- Input and Output Sockets
-      DNS_Transactions : DNS_Transaction_Manager.DNS_Transaction_Manager_Task;
+      DNS_Transactions : DNSCatcher.DNS.Transaction_Manager.DNS_Transaction_Manager_Task;
       Capture_Config     : DNSCatcher.Config.Configuration_Ptr;
       Receiver_Interface : DNSCatcher.Network.UDP.Receiver.UDP_Receiver_Interface;
       Sender_Interface : DNSCatcher.Network.UDP.Sender.UDP_Sender_Interface;
