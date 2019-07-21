@@ -18,7 +18,6 @@
 -- FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 -- DEALINGS IN THE SOFTWARE.
 
-with Ada.Strings.Unbounded;  use Ada.Strings.Unbounded;
 with Ada.Containers.Vectors; use Ada.Containers;
 
 package DNSCatcher.Utils.Logger is

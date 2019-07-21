@@ -1,5 +1,4 @@
 with "compiler_settings";
-with "dns_common";
 with "dns_core_constructs";
 with "dns_rdata_processor";
 

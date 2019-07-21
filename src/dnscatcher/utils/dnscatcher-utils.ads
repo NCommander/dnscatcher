@@ -18,6 +18,17 @@
 -- FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 -- DEALINGS IN THE SOFTWARE.
 
+with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
+
 package DNSCatcher.Utils is
+   type IP_Addr_Family is
+     (IPv4,
+      IPv6);
+   for IP_Addr_Family use (IPv4 => 1, IPv6 => 2);
+
+   function Inet_Ntop
+     (Family   : IP_Addr_Family;
+      Raw_Data : Unbounded_String)
+      return Unbounded_String;
 
 end DNSCatcher.Utils;

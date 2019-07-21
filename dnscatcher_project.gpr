@@ -19,8 +19,8 @@
 -- DEALINGS IN THE SOFTWARE.
 
 with "aunit";
+with "gnat/compiler_settings";
 with "gnat/dnscatcher";
-with "gnat/dns_common";
 with "gnat/dns_core_constructs";
 with "gnat/dns_packet_processor";
 with "gnat/dns_rdata_processor";
@@ -35,7 +35,8 @@ project DNSCatcher_Project is
 
    for Exec_Dir use "bin";
 
-   package Compiler renames DNS_Common.Compiler;
-   package Pretty_Printer renames DNS_Common.Pretty_Printer;
+   package Compiler renames Compiler_Settings.Compiler;
+   package Pretty_Printer renames Compiler_Settings.Pretty_Printer;
+   package Linker renames Compiler_Settings.Linker;
 end DNSCatcher_Project;
 

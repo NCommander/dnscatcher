@@ -18,16 +18,31 @@
 -- FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 -- DEALINGS IN THE SOFTWARE.
 
-with "compiler_settings";
-limited with "dns_packet_processor";
+with Interfaces; use Interfaces;
+with Interfaces.C;
 
-library project DNSCatcher is
-   for Languages use ("Ada", "C");
-   for Library_Name use "dnscatcher";
-   for Source_Dirs use ("../src/dnscatcher/**");
-   for Object_Dir use "../build/obj/dnscatcher";
-   for Library_Dir use "../lib";
+with System;
 
-   package Compiler renames Compiler_Settings.Compiler;
-   package Pretty_Printer renames Compiler_Settings.Pretty_Printer;
-end DNSCatcher;
+package body DNSCatcher.Utils is
+   function Inet_Ntop
+     (Family   : IP_Addr_Family;
+      Raw_Data : Unbounded_String)
+      return Unbounded_String
+   is
+      procedure Internal
+        (Family : C.int;
+         Src    : System.Address;
+         Dst    : System.Address;
+         Len    : C.int);
+      pragma Import (C, Internal, "ada_inet_ntop");
+
+      -- 16 is the max length of a v4 string + null
+      C_IP_String : C.char_array (1 .. 16);
+   begin
+      -- Call the ada helper function
+      Internal
+        (C.int (Family'Enum_Rep), To_String (Raw_Data)'Address,
+         C_IP_String'Address, 15);
+      return To_Unbounded_String (C.To_Ada (C_IP_String));
+   end Inet_Ntop;
+end DNSCatcher.Utils;
