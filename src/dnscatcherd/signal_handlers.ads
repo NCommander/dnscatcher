@@ -18,27 +18,6 @@
 -- FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 -- DEALINGS IN THE SOFTWARE.
 
-with "aunit";
-with "gnat/compiler_settings";
-with "gnat/dnsc";
-with "gnat/dnscatcher";
-with "gnat/dnscatcherd";
-with "gnat/dns_rdata_processor";
-
-project DNSCatcher_Project is
-   -- Not supported by old gprbuilds
-   for Create_Missing_Dirs use "True";
-
-   for Source_Dirs use ("src", "tests");
-   for Object_Dir use "build/obj";
-   for Main use ("src/dnscatcherd/dnscatcherd.adb",
-                 "src/dnsc/dnsc.adb",
-                 "tests/test_runner.adb");
-
-   for Exec_Dir use "bin";
-
-   package Compiler renames Compiler_Settings.Compiler;
-   package Pretty_Printer renames Compiler_Settings.Pretty_Printer;
-   package Linker renames Compiler_Settings.Linker;
-end DNSCatcher_Project;
-
+package Signal_Handlers is
+   procedure SIGINT_Handler;
+end Signal_Handlers;

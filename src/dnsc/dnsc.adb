@@ -37,7 +37,7 @@ with DNSCatcher.Network.UDP.Receiver;
 
 with DNSCatcher.Types; use DNSCatcher.Types;
 
-procedure DNSClient is
+procedure DNSC is
    DClient                 : DNSCatcher.DNS.Client.Client;
    Capture_Config          : DNSCatcher.Config.Configuration_Ptr;
    Logger_Task             : DNSCatcher.Utils.Logger.Logger;
@@ -137,4 +137,4 @@ exception
          Logger_Task.Stop;
       end;
 
-end DNSClient;
+end DNSC;

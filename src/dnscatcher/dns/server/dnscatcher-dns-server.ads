@@ -18,27 +18,11 @@
 -- FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 -- DEALINGS IN THE SOFTWARE.
 
-with "aunit";
-with "gnat/compiler_settings";
-with "gnat/dnsc";
-with "gnat/dnscatcher";
-with "gnat/dnscatcherd";
-with "gnat/dns_rdata_processor";
+package DNSCatcher.DNS.Server is
+   UDP_MAX_SIZE : constant Integer := 65535;
 
-project DNSCatcher_Project is
-   -- Not supported by old gprbuilds
-   for Create_Missing_Dirs use "True";
+   procedure Start_Server;
+   procedure Stop_Server;
 
-   for Source_Dirs use ("src", "tests");
-   for Object_Dir use "build/obj";
-   for Main use ("src/dnscatcherd/dnscatcherd.adb",
-                 "src/dnsc/dnsc.adb",
-                 "tests/test_runner.adb");
-
-   for Exec_Dir use "bin";
-
-   package Compiler renames Compiler_Settings.Compiler;
-   package Pretty_Printer renames Compiler_Settings.Pretty_Printer;
-   package Linker renames Compiler_Settings.Linker;
-end DNSCatcher_Project;
-
+   -- Protected Elements
+end DNSCatcher.DNS.Server;

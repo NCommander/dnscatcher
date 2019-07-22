@@ -32,10 +32,10 @@ with DNSCatcher.Network.UDP.Sender;
 with DNSCatcher.DNS.Transaction_Manager;
 use DNSCatcher.DNS.Transaction_Manager;
 
-package body Packet_Catcher is
+package body DNSCatcher.DNS.Server is
    Shutting_Down : Boolean := False;
 
-   procedure Run_Catcher is
+   procedure Start_Server is
       -- Input and Output Sockets
       DNS_Transactions : DNSCatcher.DNS.Transaction_Manager.DNS_Transaction_Manager_Task;
       Capture_Config     : DNSCatcher.Config.Configuration_Ptr;
@@ -124,12 +124,12 @@ package body Packet_Catcher is
       Free_Transaction_Manager (Transaction_Manager_Ptr);
       Free_DNSCatacher_Config (Capture_Config);
 
-   end Run_Catcher;
+   end Start_Server;
 
    -- And shutdown
-   procedure Stop_Catcher is
+   procedure Stop_Server is
    begin
       Shutting_Down := True;
-   end Stop_Catcher;
+   end Stop_Server;
 
-end Packet_Catcher;
+end DNSCatcher.DNS.Server;

@@ -25,38 +25,38 @@ with Ada.IO_Exceptions;
 
 with GNAT.Ctrl_C; use GNAT.Ctrl_C;
 
-with Packet_Catcher;
 with Signal_Handlers;
 
 with DNSCatcher.Config;
+with DNSCatcher.DNS.Server;
 
 procedure DNSCatcherD is
 begin
    Install_Handler (Handler => Signal_Handlers.SIGINT_Handler'Access);
-   Packet_Catcher.Run_Catcher;
+   DNSCatcher.DNS.Server.Start_Server;
 exception
    when Error : Ada.IO_Exceptions.Name_Error =>
       begin
          Put (Standard_Error, "FATAL: Unable to open config file: ");
          Put_Line (Standard_Error, Exception_Message (Error));
-         Packet_Catcher.Stop_Catcher;
+         DNSCatcher.DNS.Server.Stop_Server;
       end;
    when Error : DNSCatcher.Config.Missing_Mandatory_Config_Option =>
       begin
          Put (Standard_Error, "FATAL: Missing mandatory config line. ");
          Put_Line (Standard_Error, Exception_Message (Error));
-         Packet_Catcher.Stop_Catcher;
+         DNSCatcher.DNS.Server.Stop_Server;
       end;
    when Error : DNSCatcher.Config.Malformed_Line =>
       begin
          Put (Standard_Error, "FATAL: Unable to parse config file. ");
          Put_Line (Standard_Error, Exception_Message (Error));
-         Packet_Catcher.Stop_Catcher;
+         DNSCatcher.DNS.Server.Stop_Server;
       end;
    when Error : others =>
       begin
          Put (Standard_Error, "FATAL: Unknown error: ");
          Put_Line (Standard_Error, Exception_Information (Error));
-         Packet_Catcher.Stop_Catcher;
+         DNSCatcher.DNS.Server.Stop_Server;
       end;
 end DNSCatcherD;

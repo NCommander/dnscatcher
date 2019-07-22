@@ -18,27 +18,14 @@
 -- FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 -- DEALINGS IN THE SOFTWARE.
 
-with "aunit";
-with "gnat/compiler_settings";
-with "gnat/dnsc";
-with "gnat/dnscatcher";
-with "gnat/dnscatcherd";
-with "gnat/dns_rdata_processor";
+with Ada.Text_IO; use Ada.Text_IO;
 
-project DNSCatcher_Project is
-   -- Not supported by old gprbuilds
-   for Create_Missing_Dirs use "True";
+with DNSCatcher.DNS.Server;
 
-   for Source_Dirs use ("src", "tests");
-   for Object_Dir use "build/obj";
-   for Main use ("src/dnscatcherd/dnscatcherd.adb",
-                 "src/dnsc/dnsc.adb",
-                 "tests/test_runner.adb");
-
-   for Exec_Dir use "bin";
-
-   package Compiler renames Compiler_Settings.Compiler;
-   package Pretty_Printer renames Compiler_Settings.Pretty_Printer;
-   package Linker renames Compiler_Settings.Linker;
-end DNSCatcher_Project;
-
+package body Signal_Handlers is
+   procedure SIGINT_Handler is
+   begin
+      Put_Line ("Beginning Clean Shutdown");
+      DNSCatcher.DNS.Server.Stop_Server;
+   end SIGINT_Handler;
+end Signal_Handlers;
