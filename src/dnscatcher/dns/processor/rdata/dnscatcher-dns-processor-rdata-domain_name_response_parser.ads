@@ -23,8 +23,8 @@
 
 with DNSCatcher.DNS.Processor.Packet; use DNSCatcher.DNS.Processor.Packet;
 
-package DNS_RData_Processor.Domain_Name_Response_Parser is
-   type Parsed_DNR_RData is new DNS_RData_Processor.Parsed_RData with private;
+package DNSCatcher.DNS.Processor.RData.Domain_Name_Response_Parser is
+   type Parsed_DNR_RData is new DNSCatcher.DNS.Processor.RData.Parsed_RData with private;
    type Parsed_DNR_RData_Access is access all Parsed_DNR_RData;
 
    procedure From_Parsed_RR
@@ -43,7 +43,7 @@ package DNS_RData_Processor.Domain_Name_Response_Parser is
    procedure Delete (This : in out Parsed_DNR_RData);
 
 private
-   type Parsed_DNR_RData is new DNS_RData_Processor.Parsed_RData with record
+   type Parsed_DNR_RData is new DNSCatcher.DNS.Processor.RData.Parsed_RData with record
       Domain_Name : Unbounded_String;
    end record;
-end DNS_RData_Processor.Domain_Name_Response_Parser;
+end DNSCatcher.DNS.Processor.RData.Domain_Name_Response_Parser;

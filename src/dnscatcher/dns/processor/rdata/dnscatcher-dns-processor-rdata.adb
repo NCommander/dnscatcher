@@ -19,18 +19,27 @@
 -- DEALINGS IN THE SOFTWARE.
 
 with DNSCatcher.DNS.Processor.Packet; use DNSCatcher.DNS.Processor.Packet;
-with DNS_RData_Processor.A_Parser;   use DNS_RData_Processor.A_Parser;
-with DNS_RData_Processor.SOA_Parser; use DNS_RData_Processor.SOA_Parser;
-with DNS_RData_Processor.OPT_Parser; use DNS_RData_Processor.OPT_Parser;
-with DNS_RData_Processor.Domain_Name_Response_Parser;
-use DNS_RData_Processor.Domain_Name_Response_Parser;
-with DNS_RData_Processor.Unknown_Parser;
-use DNS_RData_Processor.Unknown_Parser;
-package body DNS_RData_Processor is
+
+with DNSCatcher.DNS.Processor.RData.A_Parser;
+use DNSCatcher.DNS.Processor.RData.A_Parser;
+
+with DNSCatcher.DNS.Processor.RData.SOA_Parser;
+use DNSCatcher.DNS.Processor.RData.SOA_Parser;
+
+with DNSCatcher.DNS.Processor.RData.OPT_Parser;
+use DNSCatcher.DNS.Processor.RData.OPT_Parser;
+
+with DNSCatcher.DNS.Processor.RData.Domain_Name_Response_Parser;
+use DNSCatcher.DNS.Processor.RData.Domain_Name_Response_Parser;
+
+with DNSCatcher.DNS.Processor.RData.Unknown_Parser;
+use DNSCatcher.DNS.Processor.RData.Unknown_Parser;
+
+package body DNSCatcher.DNS.Processor.RData is
 
    function To_Parsed_RData
      (DNS_Header : DNS_Packet_Header;
-      Parsed_RR : Parsed_DNS_Resource_Record)
+      Parsed_RR  : Parsed_DNS_Resource_Record)
       return Parsed_RData_Access
    is
       Working_Record : Parsed_RData_Access;
@@ -59,4 +68,4 @@ package body DNS_RData_Processor is
       Working_Record.From_Parsed_RR (DNS_Header, Parsed_RR);
       return Working_Record;
    end To_Parsed_RData;
-end DNS_RData_Processor;
+end DNSCatcher.DNS.Processor.RData;

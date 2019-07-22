@@ -18,29 +18,42 @@
 -- FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 -- DEALINGS IN THE SOFTWARE.
 
-with DNSCatcher.DNS.Processor.Packet; use DNSCatcher.DNS.Processor.Packet;
+with Ada.Strings.Unbounded;   use Ada.Strings.Unbounded;
+with Interfaces.C.Extensions; use Interfaces.C.Extensions;
 
-package DNS_RData_Processor.A_Parser is
-   type Parsed_A_RData is new DNS_RData_Processor.Parsed_RData with private;
-   type Parsed_A_RData_Access is access all Parsed_A_RData;
+limited with DNSCatcher.DNS.Processor.Packet;
 
-   procedure From_Parsed_RR
-     (This       : in out Parsed_A_RData;
-      DNS_Header :        DNS_Packet_Header;
-      Parsed_RR  :        Parsed_DNS_Resource_Record);
-   function RData_To_String
-     (This : in Parsed_A_RData)
-      return String;
-   function RClass_To_String
-     (This : in Parsed_A_RData)
-      return String;
-   function Print_Packet
-     (This : in Parsed_A_RData)
-      return String;
-   procedure Delete (This : in out Parsed_A_RData);
+with DNSCatcher.DNS; use DNSCatcher.DNS;
+with DNSCatcher.Types; use DNSCatcher.Types;
 
-private
-   type Parsed_A_RData is new DNS_RData_Processor.Parsed_RData with record
-      A_Record : Unbounded_String;
+package DNSCatcher.DNS.Processor.RData is
+
+   type Parsed_RData is abstract tagged record
+      RName : Unbounded_String;
+      RType : RR_Types;
+      TTL   : Unsigned_32;
    end record;
-end DNS_RData_Processor.A_Parser;
+
+   type Parsed_RData_Access is access all Parsed_RData'Class;
+
+   function To_Parsed_RData
+     (DNS_Header : DNS_Packet_Header;
+      Parsed_RR : DNSCatcher.DNS.Processor.Packet.Parsed_DNS_Resource_Record)
+      return Parsed_RData_Access;
+
+   -- Represents RData in a string like fashion
+   procedure From_Parsed_RR
+     (This      : in out Parsed_RData;
+      DNS_Header : DNS_Packet_Header;
+      Parsed_RR : DNSCatcher.DNS.Processor.Packet.Parsed_DNS_Resource_Record) is abstract;
+   function RClass_To_String
+     (This : in Parsed_RData)
+      return String is abstract;
+   function RData_To_String
+     (This : in Parsed_RData)
+      return String is abstract;
+   function Print_Packet
+     (This : in Parsed_RData)
+      return String is abstract;
+   procedure Delete (This : in out Parsed_RData) is abstract;
+end DNSCatcher.DNS.Processor.RData;

@@ -20,9 +20,9 @@
 
 with DNSCatcher.DNS.Processor.Packet; use DNSCatcher.DNS.Processor.Packet;
 
-package DNS_RData_Processor.OPT_Parser is
+package DNSCatcher.DNS.Processor.RData.OPT_Parser is
 
-   type Parsed_OPT_RData is new DNS_RData_Processor.Parsed_RData with record
+   type Parsed_OPT_RData is new DNSCatcher.DNS.Processor.RData.Parsed_RData with record
       -- Defined as CLASS in RFC6891
       Requester_UDP_Size : Unsigned_16;
 
@@ -56,4 +56,4 @@ package DNS_RData_Processor.OPT_Parser is
    procedure Delete (This : in out Parsed_OPT_RData);
 
    Unknown_EDNS_Version : exception;
-end DNS_RData_Processor.OPT_Parser;
+end DNSCatcher.DNS.Processor.RData.OPT_Parser;

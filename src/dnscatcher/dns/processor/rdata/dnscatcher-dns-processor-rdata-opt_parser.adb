@@ -20,7 +20,7 @@
 
 with Interfaces;                 use Interfaces;
 
-package body DNS_RData_Processor.OPT_Parser is
+package body DNSCatcher.DNS.Processor.RData.OPT_Parser is
 
    -- EDNS is a pretty harry beast and incorporates a lot of stuff in ways
    -- different from all other packets. As such parsing is quite a bit more
@@ -117,4 +117,4 @@ package body DNS_RData_Processor.OPT_Parser is
       null;
    end Delete;
 
-end DNS_RData_Processor.OPT_Parser;
+end DNSCatcher.DNS.Processor.RData.OPT_Parser;

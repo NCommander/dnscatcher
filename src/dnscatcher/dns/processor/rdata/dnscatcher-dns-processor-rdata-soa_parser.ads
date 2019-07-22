@@ -20,9 +20,31 @@
 
 with DNSCatcher.DNS.Processor.Packet; use DNSCatcher.DNS.Processor.Packet;
 
-package DNS_RData_Processor.Utils is
-   function Decode_DNS_IPv4_Address
-     (Parsed_RR : Parsed_DNS_Resource_Record)
-      return Unbounded_String;
+package DNSCatcher.DNS.Processor.RData.SOA_Parser is
+   type Parsed_SOA_RData is new DNSCatcher.DNS.Processor.RData.Parsed_RData with record
+      Primary_Nameserver  : Unbounded_String;
+      Responsible_Contact : Unbounded_String;
+      Serial              : Unsigned_32;
+      Refresh             : Unsigned_32;
+      Retry               : Unsigned_32;
+      Expire              : Unsigned_32;
+      Minimum             : Unsigned_32;
+   end record;
+   type Parsed_SOA_RData_Access is access all Parsed_SOA_RData;
 
-end DNS_RData_Processor.Utils;
+   procedure From_Parsed_RR
+     (This       : in out Parsed_SOA_RData;
+      DNS_Header :        DNS_Packet_Header;
+      Parsed_RR  :        Parsed_DNS_Resource_Record);
+   function RData_To_String
+     (This : in Parsed_SOA_RData)
+      return String;
+   function RClass_To_String
+     (This : in Parsed_SOA_RData)
+      return String;
+   function Print_Packet
+     (This : in Parsed_SOA_RData)
+      return String;
+   procedure Delete (This : in out Parsed_SOA_RData);
+
+end DNSCatcher.DNS.Processor.RData.SOA_Parser;

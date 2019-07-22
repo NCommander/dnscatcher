@@ -1,7 +1,7 @@
 with Ada.Unchecked_Deallocation;
 with Ada.Streams; use Ada.Streams;
 
-package body DNS_RData_Processor.Domain_Name_Response_Parser is
+package body DNSCatcher.DNS.Processor.RData.Domain_Name_Response_Parser is
 
    -- A records are simply four octlets which we need to turn into integers
    -- then decode back into an ASCII string
@@ -52,4 +52,4 @@ package body DNS_RData_Processor.Domain_Name_Response_Parser is
    begin
       Free_Parsed_DNR_Record (Ptr);
    end Delete;
-end DNS_RData_Processor.Domain_Name_Response_Parser;
+end DNSCatcher.DNS.Processor.RData.Domain_Name_Response_Parser;

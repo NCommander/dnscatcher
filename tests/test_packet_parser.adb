@@ -36,8 +36,8 @@ with DNSCatcher.Utils; use DNSCatcher.Utils;
 
 with DNSCatcher.DNS.Processor.Packet; use DNSCatcher.DNS.Processor.Packet;
 
-with DNS_RData_Processor;            use DNS_RData_Processor;
-with DNS_RData_Processor.SOA_Parser; use DNS_RData_Processor.SOA_Parser;
+with DNSCatcher.DNS.Processor.RData;            use DNSCatcher.DNS.Processor.RData;
+with DNSCatcher.DNS.Processor.RData.SOA_Parser; use DNSCatcher.DNS.Processor.RData.SOA_Parser;
 
 with Interfaces.C.Extensions; use Interfaces.C.Extensions;
 

@@ -20,56 +20,53 @@
 
 with Ada.Unchecked_Deallocation;
 
-with DNSCatcher.Utils; use DNSCatcher.Utils;
-
-package body DNS_RData_Processor.A_Parser is
+package body DNSCatcher.DNS.Processor.RData.Unknown_Parser is
 
    -- A records are simply four octlets which we need to turn into integers
    -- then decode back into an ASCII string
    pragma Warnings (Off, "formal parameter ""DNS_Header"" is not referenced");
    procedure From_Parsed_RR
-     (This       : in out Parsed_A_RData;
+     (This       : in out Parsed_Unknown_RData;
       DNS_Header :        DNS_Packet_Header;
       Parsed_RR  :        Parsed_DNS_Resource_Record)
    is
    begin
-      --This.A_Record := Decode_DNS_IPv4_Address (Parsed_RR);
-      This.A_Record := Inet_Ntop (IPv4, Parsed_RR.RData);
+      This.RData := Parsed_RR.RData;
    end From_Parsed_RR;
    pragma Warnings (On, "formal parameter ""DNS_Header"" is not referenced");
 
    pragma Warnings (Off, "formal parameter ""This"" is not referenced");
    function RClass_To_String
-     (This : in Parsed_A_RData)
+     (This : in Parsed_Unknown_RData)
       return String
    is
    begin
-      return "";
+      return "UNKNOWN";
    end RClass_To_String;
-   pragma Warnings (On, "formal parameter ""This"" is not referenced");
 
    function RData_To_String
-     (This : in Parsed_A_RData)
+     (This : in Parsed_Unknown_RData)
       return String
    is
    begin
-      return To_String (This.A_Record);
+      return "UNKNOWN";
    end RData_To_String;
 
    function Print_Packet
-     (This : in Parsed_A_RData)
+     (This : in Parsed_Unknown_RData)
       return String
    is
    begin
-      return "A " & RData_To_String (This);
+      return "UNKNOWN";
    end Print_Packet;
+   pragma Warnings (On, "formal parameter ""This"" is not referenced");
 
    -- Obliberate ourselves
-   procedure Delete (This : in out Parsed_A_RData) is
-      procedure Free_Parsed_A_Record is new Ada.Unchecked_Deallocation
-        (Object => Parsed_A_RData, Name => Parsed_A_RData_Access);
-      Ptr : aliased Parsed_A_RData_Access := This'Unchecked_Access;
+   procedure Delete (This : in out Parsed_Unknown_RData) is
+      procedure Free_Parsed_Unknown_Record is new Ada.Unchecked_Deallocation
+        (Object => Parsed_Unknown_RData, Name => Parsed_Unknown_RData_Access);
+      Ptr : aliased Parsed_Unknown_RData_Access := This'Unchecked_Access;
    begin
-      Free_Parsed_A_Record (Ptr);
+      Free_Parsed_Unknown_Record (Ptr);
    end Delete;
-end DNS_RData_Processor.A_Parser;
+end DNSCatcher.DNS.Processor.RData.Unknown_Parser;

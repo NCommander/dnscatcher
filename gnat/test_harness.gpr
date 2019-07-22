@@ -1,7 +1,7 @@
 with "aunit";
 
 with "compiler_settings";
-with "libdnscatcher";
+with "dnscatcher";
 
 project Test_Harness is
    for Create_Missing_Dirs use "True";

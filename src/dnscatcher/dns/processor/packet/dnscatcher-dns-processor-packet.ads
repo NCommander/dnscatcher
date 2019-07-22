@@ -27,7 +27,7 @@ with DNSCatcher.DNS; use DNSCatcher.DNS;
 with DNSCatcher.Types; use DNSCatcher.Types;
 
 with DNSCatcher.Utils.Logger; use DNSCatcher.Utils.Logger;
-with DNS_RData_Processor; use DNS_RData_Processor;
+with DNSCatcher.DNS.Processor.RData; use DNSCatcher.DNS.Processor.RData;
 
 package DNSCatcher.DNS.Processor.Packet is
    -- Create vector types for each type of section DNS question converted from

@@ -23,7 +23,6 @@ with "gnat/compiler_settings";
 with "gnat/dnsc";
 with "gnat/dnscatcher";
 with "gnat/dnscatcherd";
-with "gnat/dns_rdata_processor";
 
 project DNSCatcher_Project is
    -- Not supported by old gprbuilds

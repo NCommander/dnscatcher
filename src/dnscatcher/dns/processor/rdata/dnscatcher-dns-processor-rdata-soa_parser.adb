@@ -24,7 +24,7 @@ with Ada.Unchecked_Deallocation;
 
 with DNSCatcher.Utils; use DNSCatcher.Utils;
 
-package body DNS_RData_Processor.SOA_Parser is
+package body DNSCatcher.DNS.Processor.RData.SOA_Parser is
 
    -- SOA records are messy. There are two compressed domain names we need to
    -- decode, then some 32 bit ints that follow afterwards, so let's try and
@@ -87,4 +87,4 @@ package body DNS_RData_Processor.SOA_Parser is
    begin
       Free_Parsed_SOA_Record (Ptr);
    end Delete;
-end DNS_RData_Processor.SOA_Parser;
+end DNSCatcher.DNS.Processor.RData.SOA_Parser;
