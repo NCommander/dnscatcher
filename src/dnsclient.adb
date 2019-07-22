@@ -76,7 +76,7 @@ begin
          Mode   => Socket_Datagram);
       Set_Socket_Option
         (Socket => Socket,
-         Level  => IP_Protocol_For_UDP_Level,
+         Level  => IP_Protocol_For_IP_Level,
          Option => (GNAT.Sockets.Receive_Timeout, Timeout => 1.0));
       Bind_Socket
         (Socket  => Socket,

@@ -1,6 +1,5 @@
 with "compiler_settings";
 with "dnscatcher";
-limited with "dns_packet_processor";
 
 library project DNS_RData_Processor is
    for Library_Name use "dns_rdata_processor";

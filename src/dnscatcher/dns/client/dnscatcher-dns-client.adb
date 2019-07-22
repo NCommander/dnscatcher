@@ -21,7 +21,7 @@
 with Ada.Unchecked_Conversion;
 with Ada.Streams; use Ada.Streams;
 
-with DNS_Packet_Processor.Utils; use DNS_Packet_Processor.Utils;
+with DNSCatcher.Utils; use DNSCatcher.Utils;
 
 package body DNSCatcher.DNS.Client is
    -- Creates DNS Packet Header

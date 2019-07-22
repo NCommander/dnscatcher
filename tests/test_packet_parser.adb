@@ -34,8 +34,8 @@ with DNSCatcher.DNS;   use DNSCatcher.DNS;
 with DNSCatcher.Types; use DNSCatcher.Types;
 with DNSCatcher.Utils; use DNSCatcher.Utils;
 
-with DNS_Packet_Processor;           use DNS_Packet_Processor;
-with DNS_Packet_Processor.Utils;     use DNS_Packet_Processor.Utils;
+with DNSCatcher.DNS.Processor.Packet; use DNSCatcher.DNS.Processor.Packet;
+
 with DNS_RData_Processor;            use DNS_RData_Processor;
 with DNS_RData_Processor.SOA_Parser; use DNS_RData_Processor.SOA_Parser;
 

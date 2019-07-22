@@ -19,7 +19,7 @@
 -- DEALINGS IN THE SOFTWARE.
 
 with "compiler_settings";
-limited with "dns_packet_processor";
+limited with "dns_rdata_processor";
 
 library project DNSCatcher is
    for Languages use ("Ada", "C");

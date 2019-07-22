@@ -22,7 +22,7 @@
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 with Ada.Numerics.Discrete_Random;
 
-with DNS_Packet_Processor; use DNS_Packet_Processor;
+with DNSCatcher.DNS.Processor.Packet; use DNSCatcher.DNS.Processor.Packet;
 with DNSCatcher.Config; use DNSCatcher.Config;
 with DNSCatcher.DNS; use DNSCatcher.DNS;
 with DNSCatcher.Types; use DNSCatcher.Types;

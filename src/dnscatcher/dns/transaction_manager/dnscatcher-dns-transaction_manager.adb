@@ -25,11 +25,9 @@ with Ada.Exceptions;      use Ada.Exceptions;
 with Ada.Integer_Text_IO; use Ada.Integer_Text_IO;
 with Ada.Strings.Hash;
 
-with DNS_Packet_Processor;       use DNS_Packet_Processor;
-with DNS_Packet_Processor.Utils; use DNS_Packet_Processor.Utils;
-
 with DNSCatcher.Utils;    use DNSCatcher.Utils;
 with DNSCatcher.Utils.Logger;    use DNSCatcher.Utils.Logger;
+with DNSCatcher.DNS.Processor.Packet; use DNSCatcher.DNS.Processor.Packet;
 
 package body DNSCatcher.DNS.Transaction_Manager is
    -- Handle the map for tracking transactions to/from source
@@ -126,8 +124,7 @@ package body DNSCatcher.DNS.Transaction_Manager is
                   Transaction.From_Client_Resolver_Packet := Packet;
 
                   -- Try to parse the packet
-                  Parsed_Packet :=
-                    DNS_Packet_Processor.Packet_Parser (Logger_Packet, Packet);
+                  Parsed_Packet := Packet_Parser (Logger_Packet, Packet);
                   Free_Parsed_DNS_Packet (Parsed_Packet);
 
                   -- Rewrite the DNS Packet and send it on it's way
@@ -185,8 +182,7 @@ package body DNSCatcher.DNS.Transaction_Manager is
                   Transaction.From_Upstream_Resolver_Packet := Packet;
 
                   -- Try to parse the packet
-                  Parsed_Packet :=
-                    DNS_Packet_Processor.Packet_Parser (Logger_Packet, Packet);
+                  Parsed_Packet := Packet_Parser (Logger_Packet, Packet);
                   Logger_Packet.Log_Message
                     (INFO,
                      To_String (Transaction.Server_Resolver_Address) & " -> " &

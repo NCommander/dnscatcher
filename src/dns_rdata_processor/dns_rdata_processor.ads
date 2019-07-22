@@ -21,7 +21,7 @@
 with Ada.Strings.Unbounded;   use Ada.Strings.Unbounded;
 with Interfaces.C.Extensions; use Interfaces.C.Extensions;
 
-limited with DNS_Packet_Processor;
+limited with DNSCatcher.DNS.Processor.Packet;
 
 with DNSCatcher.DNS; use DNSCatcher.DNS;
 with DNSCatcher.Types; use DNSCatcher.Types;
@@ -38,14 +38,14 @@ package DNS_RData_Processor is
 
    function To_Parsed_RData
      (DNS_Header : DNS_Packet_Header;
-      Parsed_RR : DNS_Packet_Processor.Parsed_DNS_Resource_Record)
+      Parsed_RR : DNSCatcher.DNS.Processor.Packet.Parsed_DNS_Resource_Record)
       return Parsed_RData_Access;
 
    -- Represents RData in a string like fashion
    procedure From_Parsed_RR
      (This      : in out Parsed_RData;
       DNS_Header : DNS_Packet_Header;
-      Parsed_RR : DNS_Packet_Processor.Parsed_DNS_Resource_Record) is abstract;
+      Parsed_RR : DNSCatcher.DNS.Processor.Packet.Parsed_DNS_Resource_Record) is abstract;
    function RClass_To_String
      (This : in Parsed_RData)
       return String is abstract;

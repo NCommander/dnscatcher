@@ -21,7 +21,6 @@
 with "aunit";
 with "gnat/compiler_settings";
 with "gnat/dnscatcher";
-with "gnat/dns_packet_processor";
 with "gnat/dns_rdata_processor";
 
 project DNSCatcher_Project is

@@ -18,7 +18,7 @@
 -- FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 -- DEALINGS IN THE SOFTWARE.
 
-with DNS_Packet_Processor; use DNS_Packet_Processor;
+with DNSCatcher.DNS.Processor.Packet; use DNSCatcher.DNS.Processor.Packet;
 
 package DNS_RData_Processor.Unknown_Parser is
    type Parsed_Unknown_RData is

@@ -29,7 +29,7 @@ with DNSCatcher.Types; use DNSCatcher.Types;
 with DNSCatcher.Utils.Logger; use DNSCatcher.Utils.Logger;
 with DNS_RData_Processor; use DNS_RData_Processor;
 
-package DNS_Packet_Processor is
+package DNSCatcher.DNS.Processor.Packet is
    -- Create vector types for each type of section DNS question converted from
    -- wire format to human parsable format
    type Parsed_DNS_Question is record
@@ -100,4 +100,7 @@ package DNS_Packet_Processor is
    Unknown_Class              : exception;
    Unknown_Compression_Method : exception;
 
-end DNS_Packet_Processor;
+   -- Deallocators
+   procedure Free_Parsed_DNS_Packet (Packet : in out Parsed_DNS_Packet_Ptr);
+
+end DNSCatcher.DNS.Processor.Packet;
