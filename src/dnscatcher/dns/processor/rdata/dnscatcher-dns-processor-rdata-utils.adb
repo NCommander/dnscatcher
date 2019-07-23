@@ -25,7 +25,7 @@ with System;
 package body DNSCatcher.DNS.Processor.RData.Utils is
    function Decode_DNS_IPv4_Address
      (Parsed_RR : Parsed_DNS_Resource_Record)
-      return Unbounded_String
+     return Unbounded_String
    is
       type Raw_IPv4_Components is record
          A : Unsigned_8;

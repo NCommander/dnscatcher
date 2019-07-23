@@ -36,8 +36,9 @@ with DNSCatcher.Utils; use DNSCatcher.Utils;
 
 with DNSCatcher.DNS.Processor.Packet; use DNSCatcher.DNS.Processor.Packet;
 
-with DNSCatcher.DNS.Processor.RData;            use DNSCatcher.DNS.Processor.RData;
-with DNSCatcher.DNS.Processor.RData.SOA_Parser; use DNSCatcher.DNS.Processor.RData.SOA_Parser;
+with DNSCatcher.DNS.Processor.RData; use DNSCatcher.DNS.Processor.RData;
+with DNSCatcher.DNS.Processor.RData.SOA_Parser;
+use DNSCatcher.DNS.Processor.RData.SOA_Parser;
 
 with Interfaces.C.Extensions; use Interfaces.C.Extensions;
 
@@ -77,7 +78,7 @@ package body Test_Packet_Parser is
       Register_Routine (T, Test_Parse_A_Record'Access, "Parse A Record");
       Register_Routine (T, Test_Parse_SOA_Record'Access, "Parse SOA Record");
       Register_Routine
-        (T, Test_Parse_CName_Record'Access, "Parse CName Record");
+        (T, Test_Parse_CNAME_Record'Access, "Parse CName Record");
       Register_Routine (T, Test_Parse_NS_Record'Access, "Parse NS Record");
       Register_Routine (T, Test_Parse_PTR_Record'Access, "Parse PTR Record");
       Register_Routine (T, Test_Parse_OPT_Record'Access, "Parse OPT Record");
@@ -90,7 +91,7 @@ package body Test_Packet_Parser is
    pragma Warnings (Off, "formal parameter ""T"" is not referenced");
    function Name
      (T : Packet_Parser_Test)
-      return Message_String
+     return Message_String
    is
    begin
       return Format ("Packet Parser Test");
@@ -102,7 +103,7 @@ package body Test_Packet_Parser is
 
    function Load_Binary_DNS_Dump
      (File : String)
-      return Raw_Packet_Record_Ptr
+     return Raw_Packet_Record_Ptr
    is
       Input_File     : Stream_IO.File_Type;
       Input_Stream   : Stream_Access;
@@ -161,8 +162,7 @@ package body Test_Packet_Parser is
         (To_String (Question.QName), "apple.com",
          "Incorrect QNAME on decode!");
       AUnit.Assertions.Assert
-        ((Question.QType = DNSCatcher.DNS.A),
-         "Incorrect QTYPE on decode!");
+        ((Question.QType = DNSCatcher.DNS.A), "Incorrect QTYPE on decode!");
       AUnit.Assertions.Assert
         ((Question.QClass = DNSCatcher.DNS.INternet),
          "Incorrect QCLASS on decode!");
@@ -228,8 +228,7 @@ package body Test_Packet_Parser is
         (To_String (Question.QName), "casadevall.pro",
          "Incorrect QNAME on decode!");
       AUnit.Assertions.Assert
-        ((Question.QType = DNSCatcher.DNS.SOA),
-         "Incorrect QTYPE on decode!");
+        ((Question.QType = DNSCatcher.DNS.SOA), "Incorrect QTYPE on decode!");
       AUnit.Assertions.Assert
         ((Question.QClass = DNSCatcher.DNS.INternet),
          "Incorrect QCLASS on decode!");
@@ -327,8 +326,7 @@ package body Test_Packet_Parser is
         (To_String (Question.QName), "casadevall.pro",
          "Incorrect QNAME on decode!");
       AUnit.Assertions.Assert
-        ((Question.QType = DNSCatcher.DNS.NS),
-         "Incorrect QTYPE on decode!");
+        ((Question.QType = DNSCatcher.DNS.NS), "Incorrect QTYPE on decode!");
       AUnit.Assertions.Assert
         ((Question.QClass = DNSCatcher.DNS.INternet),
          "Incorrect QCLASS on decode!");
@@ -416,8 +414,7 @@ package body Test_Packet_Parser is
         (To_String (Question.QName), "193.112.33.45.in-addr.arpa",
          "Incorrect QNAME on decode!");
       AUnit.Assertions.Assert
-        ((Question.QType = DNSCatcher.DNS.PTR),
-         "Incorrect QTYPE on decode!");
+        ((Question.QType = DNSCatcher.DNS.PTR), "Incorrect QTYPE on decode!");
       AUnit.Assertions.Assert
         ((Question.QClass = DNSCatcher.DNS.INternet),
          "Incorrect QCLASS on decode!");
@@ -456,11 +453,11 @@ package body Test_Packet_Parser is
       Parsed_Packet := Packet_Parser (Logger_Packet, Inbound_Packet);
       Logger_Queue.Add_Packet (Logger_Packet);
 
-      -- Verify the question section (this was a request for a DNSKEY on the root)
+      -- Verify the question section (this was a request for a DNSKEY on the
+      -- root)
       Question := Parsed_Packet.Questions (1);
       AUnit.Assertions.Assert
-        (To_String (Question.QName), "",
-         "Incorrect QNAME on decode!");
+        (To_String (Question.QName), "", "Incorrect QNAME on decode!");
       AUnit.Assertions.Assert
         ((Question.QType = DNSCatcher.DNS.DNSKEY),
          "Incorrect QTYPE on decode!");
@@ -468,16 +465,15 @@ package body Test_Packet_Parser is
         ((Question.QClass = DNSCatcher.DNS.INternet),
          "Incorrect QCLASS on decode!");
 
-      Put_Line(Parsed_Packet.Header.Additional_Record_Count'Image);
-      Put_Line(Parsed_Packet.Additional.Length'Image);
+      Put_Line (Parsed_Packet.Header.Additional_Record_Count'Image);
+      Put_Line (Parsed_Packet.Additional.Length'Image);
       AUnit.Assertions.Assert
         ((Integer (Parsed_Packet.Header.Additional_Record_Count) =
           Integer (Parsed_Packet.Additional.Length)),
          "Additional Count Mismatch!");
       Answer := Parsed_Packet.Additional.Element (1);
       AUnit.Assertions.Assert
-        (To_String (Answer.RName), "",
-         "Incorrect RName!");
+        (To_String (Answer.RName), "", "Incorrect RName!");
       AUnit.Assertions.Assert
         ((Answer.RType = DNSCatcher.DNS.OPT), "Incorrect RName!");
       AUnit.Assertions.Assert ((Answer.TTL = 0), "Incorrect TTL!");

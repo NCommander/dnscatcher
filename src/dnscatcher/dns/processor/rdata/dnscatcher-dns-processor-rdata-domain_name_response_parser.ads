@@ -24,7 +24,8 @@
 with DNSCatcher.DNS.Processor.Packet; use DNSCatcher.DNS.Processor.Packet;
 
 package DNSCatcher.DNS.Processor.RData.Domain_Name_Response_Parser is
-   type Parsed_DNR_RData is new DNSCatcher.DNS.Processor.RData.Parsed_RData with private;
+   type Parsed_DNR_RData is
+     new DNSCatcher.DNS.Processor.RData.Parsed_RData with private;
    type Parsed_DNR_RData_Access is access all Parsed_DNR_RData;
 
    procedure From_Parsed_RR
@@ -33,17 +34,19 @@ package DNSCatcher.DNS.Processor.RData.Domain_Name_Response_Parser is
       Parsed_RR  :        Parsed_DNS_Resource_Record);
    function RData_To_String
      (This : in Parsed_DNR_RData)
-      return String;
+     return String;
    function RClass_To_String
      (This : in Parsed_DNR_RData)
-      return String;
+     return String;
    function Print_Packet
      (This : in Parsed_DNR_RData)
-      return String;
+     return String;
    procedure Delete (This : in out Parsed_DNR_RData);
 
 private
-   type Parsed_DNR_RData is new DNSCatcher.DNS.Processor.RData.Parsed_RData with record
+   type Parsed_DNR_RData is new DNSCatcher.DNS.Processor.RData
+     .Parsed_RData with
+   record
       Domain_Name : Unbounded_String;
    end record;
 end DNSCatcher.DNS.Processor.RData.Domain_Name_Response_Parser;

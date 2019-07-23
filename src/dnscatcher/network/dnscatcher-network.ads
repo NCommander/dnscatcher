@@ -19,10 +19,10 @@
 -- DEALINGS IN THE SOFTWARE.
 
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
-with GNAT.Sockets; use GNAT.Sockets;
+with GNAT.Sockets;          use GNAT.Sockets;
 
 with DNSCatcher.Config; use DNSCatcher.Config;
-with DNSCatcher.DNS; use DNSCatcher.DNS;
+with DNSCatcher.DNS;    use DNSCatcher.DNS;
 
 with DNSCatcher.DNS.Transaction_Manager;
 use DNSCatcher.DNS.Transaction_Manager;

@@ -21,7 +21,9 @@
 with DNSCatcher.DNS.Processor.Packet; use DNSCatcher.DNS.Processor.Packet;
 
 package DNSCatcher.DNS.Processor.RData.SOA_Parser is
-   type Parsed_SOA_RData is new DNSCatcher.DNS.Processor.RData.Parsed_RData with record
+   type Parsed_SOA_RData is new DNSCatcher.DNS.Processor.RData
+     .Parsed_RData with
+   record
       Primary_Nameserver  : Unbounded_String;
       Responsible_Contact : Unbounded_String;
       Serial              : Unsigned_32;
@@ -38,13 +40,13 @@ package DNSCatcher.DNS.Processor.RData.SOA_Parser is
       Parsed_RR  :        Parsed_DNS_Resource_Record);
    function RData_To_String
      (This : in Parsed_SOA_RData)
-      return String;
+     return String;
    function RClass_To_String
      (This : in Parsed_SOA_RData)
-      return String;
+     return String;
    function Print_Packet
      (This : in Parsed_SOA_RData)
-      return String;
+     return String;
    procedure Delete (This : in out Parsed_SOA_RData);
 
 end DNSCatcher.DNS.Processor.RData.SOA_Parser;

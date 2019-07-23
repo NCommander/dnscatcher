@@ -18,14 +18,13 @@
 -- FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 -- DEALINGS IN THE SOFTWARE.
 
-
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 with Ada.Numerics.Discrete_Random;
 
 with DNSCatcher.DNS.Processor.Packet; use DNSCatcher.DNS.Processor.Packet;
-with DNSCatcher.Config; use DNSCatcher.Config;
-with DNSCatcher.DNS; use DNSCatcher.DNS;
-with DNSCatcher.Types; use DNSCatcher.Types;
+with DNSCatcher.Config;               use DNSCatcher.Config;
+with DNSCatcher.DNS;                  use DNSCatcher.DNS;
+with DNSCatcher.Types;                use DNSCatcher.Types;
 
 with Interfaces.C.Extensions; use Interfaces.C.Extensions;
 
@@ -58,9 +57,9 @@ package DNSCatcher.DNS.Client is
    function Create_Packet
      (This   : in out Client;
       Config :        Configuration_Ptr)
-      return Raw_Packet_Record_Ptr;
+     return Raw_Packet_Record_Ptr;
    -- Utility functions;
    function Create_DNS_Packet_Name_Record
      (Question : Parsed_DNS_Question)
-      return Unbounded_String;
+     return Unbounded_String;
 end DNSCatcher.DNS.Client;

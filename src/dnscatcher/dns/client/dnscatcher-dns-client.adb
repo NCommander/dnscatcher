@@ -73,7 +73,7 @@ package body DNSCatcher.DNS.Client is
    -- Convert a DNS Name Record (this probably belongs somewhere else)
    function Create_DNS_Packet_Name_Record
      (Question : Parsed_DNS_Question)
-      return Unbounded_String
+     return Unbounded_String
    is
       subtype QAttributes is String (1 .. 2);
       DNS_Name_Record     : Unbounded_String;
@@ -89,7 +89,7 @@ package body DNSCatcher.DNS.Client is
       -- Actually does the dirty work of creating a question
       function Create_QName_Record
         (Domain_Section : String)
-         return String
+        return String
       is
          Label : String (1 .. Domain_Section'Length + 1);
       begin
@@ -163,7 +163,7 @@ package body DNSCatcher.DNS.Client is
    function Create_Packet
      (This   : in out Client;
       Config :        Configuration_Ptr)
-      return Raw_Packet_Record_Ptr
+     return Raw_Packet_Record_Ptr
    is
       DNS_Packet_Names : Unbounded_String;
       Outbound_Packet  : constant Raw_Packet_Record_Ptr :=

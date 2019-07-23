@@ -107,7 +107,7 @@ package DNSCatcher.DNS is
       TA,
       DLV);
 
-   --!pp off
+      --!pp off
    for RR_Types use (A => 1,
                      NS => 2,
                      MD => 3,
@@ -197,7 +197,7 @@ package DNSCatcher.DNS is
 
    function To_String
      (RR_Type : RR_Types)
-      return String;
+     return String;
 
    type Classes is
      (INternet, -- IN (IN is an Ada keyword, we'll have to handle this specially)
@@ -206,7 +206,7 @@ package DNSCatcher.DNS is
       QCLASS_NONE,
       QCLASS_ANY);
 
-   --!pp off
+      --!pp off
    for Classes use (INternet => 1,
                     CH => 3,
                     HS => 4,
@@ -216,7 +216,7 @@ package DNSCatcher.DNS is
 
    function To_String
      (DNS_Class : Classes)
-      return String;
+     return String;
 
    type RCodes is
      (NoError,
@@ -240,7 +240,7 @@ package DNSCatcher.DNS is
       BADTRUNC,
       BADCOOKIE);
 
-   --!pp off
+      --!pp off
    for RCodes use (NoError => 0,
                    FormErr => 1,
                    ServFail => 2,
@@ -281,7 +281,7 @@ package DNSCatcher.DNS is
       EDNS_Server_Tag,
       DeviceID);
 
-   --!pp off
+      --!pp off
    for EDNS0_Option_Codes use (LLQ => 1,
                                UL => 2,
                                NSID => 3,

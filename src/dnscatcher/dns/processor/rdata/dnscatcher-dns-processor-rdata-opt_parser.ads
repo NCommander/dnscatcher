@@ -22,7 +22,9 @@ with DNSCatcher.DNS.Processor.Packet; use DNSCatcher.DNS.Processor.Packet;
 
 package DNSCatcher.DNS.Processor.RData.OPT_Parser is
 
-   type Parsed_OPT_RData is new DNSCatcher.DNS.Processor.RData.Parsed_RData with record
+   type Parsed_OPT_RData is new DNSCatcher.DNS.Processor.RData
+     .Parsed_RData with
+   record
       -- Defined as CLASS in RFC6891
       Requester_UDP_Size : Unsigned_16;
 
@@ -46,13 +48,13 @@ package DNSCatcher.DNS.Processor.RData.OPT_Parser is
       Parsed_RR  :        Parsed_DNS_Resource_Record);
    function RData_To_String
      (This : in Parsed_OPT_RData)
-      return String;
+     return String;
    function RClass_To_String
      (This : in Parsed_OPT_RData)
-      return String;
+     return String;
    function Print_Packet
      (This : in Parsed_OPT_RData)
-      return String;
+     return String;
    procedure Delete (This : in out Parsed_OPT_RData);
 
    Unknown_EDNS_Version : exception;

@@ -31,7 +31,7 @@ package body DNSCatcher.Utils.Logger is
    function Format_Log_Level
      (Use_Color : Boolean;
       Log_Level : Log_Levels)
-      return Unbounded_String
+     return Unbounded_String
    is
       Color_Prefix  : Unbounded_String;
       Log_Level_Str : Unbounded_String;
@@ -72,7 +72,7 @@ package body DNSCatcher.Utils.Logger is
 
    function Create_String_From_Components
      (Components : Component_Vector.Vector)
-      return Unbounded_String
+     return Unbounded_String
    is
       Components_String : Unbounded_String;
       procedure Component_To_String (c : Component_Vector.Cursor) is

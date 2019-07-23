@@ -20,7 +20,7 @@
 
 with Ada.Unchecked_Deallocation;
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
-with Ada.Streams; use Ada.Streams;
+with Ada.Streams;           use Ada.Streams;
 
 with Interfaces.C.Extensions; use Interfaces.C.Extensions;
 
@@ -29,25 +29,25 @@ with DNSCatcher.Types; use DNSCatcher.Types;
 package DNSCatcher.Utils is
    function Ntohs
      (Network_Short : Unsigned_16)
-      return Unsigned_16;
+     return Unsigned_16;
    function Ntohl
      (Network_Long : Unsigned_32)
-      return Unsigned_32;
+     return Unsigned_32;
    function Htons
      (Host_Short : Unsigned_16)
-      return Unsigned_16;
+     return Unsigned_16;
    function Htonl
      (Host_Long : Unsigned_32)
-      return Unsigned_32;
+     return Unsigned_32;
 
    function Read_Unsigned_16
      (Raw_Data :        Stream_Element_Array_Ptr;
       Offset   : in out Stream_Element_Offset)
-      return Unsigned_16;
+     return Unsigned_16;
    function Read_Unsigned_32
      (Raw_Data :        Stream_Element_Array_Ptr;
       Offset   : in out Stream_Element_Offset)
-      return Unsigned_32;
+     return Unsigned_32;
 
    type IP_Addr_Family is
      (IPv4,
@@ -57,7 +57,7 @@ package DNSCatcher.Utils is
    function Inet_Ntop
      (Family   : IP_Addr_Family;
       Raw_Data : Unbounded_String)
-      return Unbounded_String;
+     return Unbounded_String;
 
    -- Deallocators
    procedure Free_Stream_Element_Array_Ptr is new Ada.Unchecked_Deallocation

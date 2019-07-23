@@ -22,7 +22,7 @@ with Ada.Unchecked_Conversion;
 
 with Ada.Unchecked_Deallocation;
 with Ada.Exceptions; use Ada.Exceptions;
-with GNAT.Sockets;          use GNAT.Sockets;
+with GNAT.Sockets;   use GNAT.Sockets;
 
 with DNSCatcher.Config;
 with DNSCatcher.Utils.Logger; use DNSCatcher.Utils.Logger;
@@ -37,14 +37,16 @@ package body DNSCatcher.DNS.Server is
 
    procedure Start_Server is
       -- Input and Output Sockets
-      DNS_Transactions : DNSCatcher.DNS.Transaction_Manager.DNS_Transaction_Manager_Task;
+      DNS_Transactions : DNSCatcher.DNS.Transaction_Manager
+        .DNS_Transaction_Manager_Task;
       Capture_Config     : DNSCatcher.Config.Configuration_Ptr;
-      Receiver_Interface : DNSCatcher.Network.UDP.Receiver.UDP_Receiver_Interface;
+      Receiver_Interface : DNSCatcher.Network.UDP.Receiver
+        .UDP_Receiver_Interface;
       Sender_Interface : DNSCatcher.Network.UDP.Sender.UDP_Sender_Interface;
       Logger_Task             : DNSCatcher.Utils.Logger.Logger;
       Transaction_Manager_Ptr : DNS_Transaction_Manager_Task_Ptr;
       Socket                  : Socket_Type;
-      Logger_Packet           : DNSCatcher.Utils.Logger.Logger_Message_Packet_Ptr;
+      Logger_Packet : DNSCatcher.Utils.Logger.Logger_Message_Packet_Ptr;
 
       procedure Free_Transaction_Manager is new Ada.Unchecked_Deallocation
         (Object => DNS_Transaction_Manager_Task,
@@ -55,7 +57,7 @@ package body DNSCatcher.DNS.Server is
    begin
       -- Load the config file from disk
       Capture_Config :=
-        DNSCatcher.Config.Parse_Config_File("conf/dnscatcherd.conf");
+        DNSCatcher.Config.Parse_Config_File ("conf/dnscatcherd.conf");
 
       -- Configure the logger
       Capture_Config.Logger_Config.Log_Level := DEBUG;
@@ -88,7 +90,8 @@ package body DNSCatcher.DNS.Server is
       exception
          when Exp_Error : GNAT.Sockets.Socket_Error =>
             begin
-               Logger_Packet := new DNSCatcher.Utils.Logger.Logger_Message_Packet;
+               Logger_Packet :=
+                 new DNSCatcher.Utils.Logger.Logger_Message_Packet;
                Logger_Packet.Log_Message
                  (ERROR, "Socket error: " & Exception_Information (Exp_Error));
                Logger_Packet.Log_Message (ERROR, "Refusing to start!");

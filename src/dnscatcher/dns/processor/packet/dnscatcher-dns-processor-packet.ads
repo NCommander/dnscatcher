@@ -23,10 +23,10 @@ with Ada.Strings.Unbounded;   use Ada.Strings.Unbounded;
 with Ada.Streams;             use Ada.Streams;
 with Interfaces.C.Extensions; use Interfaces.C.Extensions;
 
-with DNSCatcher.DNS; use DNSCatcher.DNS;
+with DNSCatcher.DNS;   use DNSCatcher.DNS;
 with DNSCatcher.Types; use DNSCatcher.Types;
 
-with DNSCatcher.Utils.Logger; use DNSCatcher.Utils.Logger;
+with DNSCatcher.Utils.Logger;        use DNSCatcher.Utils.Logger;
 with DNSCatcher.DNS.Processor.RData; use DNSCatcher.DNS.Processor.RData;
 
 package DNSCatcher.DNS.Processor.Packet is
@@ -65,35 +65,35 @@ package DNSCatcher.DNS.Processor.Packet is
    function Packet_Parser
      (Logger : Logger_Message_Packet_Ptr;
       Packet : Raw_Packet_Record_Ptr)
-      return Parsed_DNS_Packet_Ptr;
+     return Parsed_DNS_Packet_Ptr;
    pragma Test_Case (Name => "Packet_Parser", Mode => Robustness);
 
    function Parse_DNS_Packet_Name_Records
      (Raw_Data :        Raw_DNS_Packet_Data;
       Offset   : in out Stream_Element_Offset)
-      return Unbounded_String;
+     return Unbounded_String;
 
    function Parse_DNS_RR_Type
      (Raw_Data :        Raw_DNS_Packet_Data;
       Offset   : in out Stream_Element_Offset)
-      return RR_Types;
+     return RR_Types;
 
    function Parse_DNS_Class
      (Raw_Data :        Raw_DNS_Packet_Data;
       Offset   : in out Stream_Element_Offset)
-      return Classes;
+     return Classes;
 
    function Parse_Question_Record
      (Logger   :        Logger_Message_Packet_Ptr;
       Raw_Data :        Raw_DNS_Packet_Data;
       Offset   : in out Stream_Element_Offset)
-      return Parsed_DNS_Question;
+     return Parsed_DNS_Question;
 
    function Parse_Resource_Record_Response
-     (Logger   :        Logger_Message_Packet_Ptr;
-      Packet   :        Raw_DNS_Packet;
-      Offset   : in out Stream_Element_Offset)
-      return Parsed_RData_Access;
+     (Logger :        Logger_Message_Packet_Ptr;
+      Packet :        Raw_DNS_Packet;
+      Offset : in out Stream_Element_Offset)
+     return Parsed_RData_Access;
 
    Unknown_RCode              : exception;
    Unknown_RR_Type            : exception;

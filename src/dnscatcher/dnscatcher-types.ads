@@ -19,7 +19,7 @@
 -- DEALINGS IN THE SOFTWARE.
 
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
-with Ada.Streams; use Ada.Streams;
+with Ada.Streams;           use Ada.Streams;
 with Ada.Unchecked_Conversion;
 
 with GNAT.Sockets; use GNAT.Sockets;
@@ -82,7 +82,7 @@ package DNSCatcher.Types is
    end record;
    for Raw_DNS_Packet_Question'Bit_Order use System.High_Order_First;
    for Raw_DNS_Packet_Question'Scalar_Storage_Order use System
-     .High_Order_First;
+       .High_Order_First;
    pragma Pack (Raw_DNS_Packet_Question);
 
    -- For the remaining sections, they share a common data format

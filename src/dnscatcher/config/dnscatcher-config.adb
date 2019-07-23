@@ -68,7 +68,7 @@ package body DNSCatcher.Config is
 
    function Parse_Config_File
      (Config_File_Path : String)
-      return Configuration_Ptr
+     return Configuration_Ptr
    is
       Parsed_Config     : Configuration_Ptr;
       Config_File       : Ada.Text_IO.File_Type;
@@ -127,13 +127,13 @@ package body DNSCatcher.Config is
 
                -- Determine length of the key
                --
-               -- This is a little non-obvious at first glance. We subtract
-               -- 2 here to remove the character we want, and the previous char
+               -- This is a little non-obvious at first glance. We subtract 2
+               -- here to remove the character we want, and the previous char
                -- because a 17 char string will be 1..18 in the array.
 
-               if (Is_Whitespace or Current_Line (I) = '=') and
-                 Key_End_Loc = 0 then
-                  Key_End_Loc := I-2;
+               if (Is_Whitespace or Current_Line (I) = '=') and Key_End_Loc = 0
+               then
+                  Key_End_Loc := I - 2;
                end if;
 
                exit when Is_Whitespace and Equals_Loc /= 0;
@@ -166,7 +166,7 @@ package body DNSCatcher.Config is
                if Key_End_Loc = Key (C)'Length
                then
                   if Key (C) = To_Upper (Current_Line
-                                         (1 .. Key (C)'Length))
+                         (1 .. Key (C)'Length))
                   then
                      -- Determine the starting character of the value
                      for I in Current_Line

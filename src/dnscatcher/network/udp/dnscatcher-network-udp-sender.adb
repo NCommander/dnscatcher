@@ -23,8 +23,8 @@ with Ada.Exceptions; use Ada.Exceptions;
 with Ada.Streams;           use Ada.Streams;
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 
-with DNSCatcher.Types; use DNSCatcher.Types;
-with DNSCatcher.Utils.Logger;     use DNSCatcher.Utils.Logger;
+with DNSCatcher.Types;        use DNSCatcher.Types;
+with DNSCatcher.Utils.Logger; use DNSCatcher.Utils.Logger;
 
 package body DNSCatcher.Network.UDP.Sender is
 
@@ -169,7 +169,7 @@ package body DNSCatcher.Network.UDP.Sender is
 
    function Get_Packet_Queue_Ptr
      (This : in out UDP_Sender_Interface)
-      return DNS_Raw_Packet_Queue_Ptr
+     return DNS_Raw_Packet_Queue_Ptr
    is
    begin
       return This.Packet_Queue;

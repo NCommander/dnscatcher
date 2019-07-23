@@ -40,7 +40,7 @@ package body DNSCatcher.DNS.Processor.RData is
    function To_Parsed_RData
      (DNS_Header : DNS_Packet_Header;
       Parsed_RR  : Parsed_DNS_Resource_Record)
-      return Parsed_RData_Access
+     return Parsed_RData_Access
    is
       Working_Record : Parsed_RData_Access;
    begin

@@ -25,10 +25,10 @@ with Ada.Containers.Hashed_Maps;
 
 with Interfaces.C.Extensions; use Interfaces.C.Extensions;
 
-with GNAT.Sockets;            use GNAT.Sockets;
+with GNAT.Sockets; use GNAT.Sockets;
 
 with DNSCatcher.Datasets; use DNSCatcher.Datasets;
-with DNSCatcher.Types; use DNSCatcher.Types;
+with DNSCatcher.Types;    use DNSCatcher.Types;
 
 package DNSCatcher.DNS.Transaction_Manager is
    package Stored_Packets_Vector is new Vectors (Natural,
@@ -50,7 +50,7 @@ package DNSCatcher.DNS.Transaction_Manager is
 
    function IP_Transaction_Key_HashID
      (id : IP_Transaction_Key)
-      return Hash_Type;
+     return Hash_Type;
 
    package DNS_Transaction_Maps is new Hashed_Maps
      (Key_Type => IP_Transaction_Key, Element_Type => DNS_Transaction_Ptr,

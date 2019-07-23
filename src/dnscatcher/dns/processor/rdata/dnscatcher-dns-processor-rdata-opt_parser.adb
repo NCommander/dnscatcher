@@ -18,7 +18,7 @@
 -- FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 -- DEALINGS IN THE SOFTWARE.
 
-with Interfaces;                 use Interfaces;
+with Interfaces; use Interfaces;
 
 package body DNSCatcher.DNS.Processor.RData.OPT_Parser is
 
@@ -60,10 +60,12 @@ package body DNSCatcher.DNS.Processor.RData.OPT_Parser is
       -- To get the full RCode, we need to take the 4-bit "normal" RCode, then
       -- tack on the EDNS ones at the top for 12 bits total
 
-      -- Since we're network byte order, load the high half first from the bottom
-      -- bits
-      Top_Half_TTL := Interfaces.Unsigned_16(Shift_Right(Interfaces.Unsigned_32(Parsed_RR.TTL), 16));
-      Bottom_Half_TTL := Interfaces.Unsigned_16(Parsed_RR.TTL and 16#ffff#);
+      -- Since we're network byte order, load the high half first from the
+      -- bottom bits
+      Top_Half_TTL :=
+        Interfaces.Unsigned_16
+          (Shift_Right (Interfaces.Unsigned_32 (Parsed_RR.TTL), 16));
+      Bottom_Half_TTL := Interfaces.Unsigned_16 (Parsed_RR.TTL and 16#ffff#);
 
       -- 0..7 MSB is our RCode
       Full_RCode := Top_Half_TTL and 16#ff00#;
@@ -73,12 +75,12 @@ package body DNSCatcher.DNS.Processor.RData.OPT_Parser is
       This.Extended_RCode := RCodes'Enum_Val (Full_RCode);
 
       -- Grab the EDNS version. It should be zero
-      This.EDNS_Version := Interfaces.C.Extensions.Unsigned_8(Top_Half_TTL and 16#ff#);
-      
+      This.EDNS_Version :=
+        Interfaces.C.Extensions.Unsigned_8 (Top_Half_TTL and 16#ff#);
+
       -- Easiest way to fish out these bits is doing ANDs
       This.DNSSEC_OK := (Bottom_Half_TTL and 16#8000#) /= 0;
-      This.Z_Section :=
-        Unsigned_15(Bottom_Half_TTL and 16#7FF#);
+      This.Z_Section := Unsigned_15 (Bottom_Half_TTL and 16#7FF#);
 
       -- Mask off top bits
    end From_Parsed_RR;
@@ -86,7 +88,7 @@ package body DNSCatcher.DNS.Processor.RData.OPT_Parser is
    pragma Warnings (Off, "formal parameter ""This"" is not referenced");
    function RClass_To_String
      (This : in Parsed_OPT_RData)
-      return String
+     return String
    is
    begin
       return "";
@@ -95,7 +97,7 @@ package body DNSCatcher.DNS.Processor.RData.OPT_Parser is
 
    function RData_To_String
      (This : in Parsed_OPT_RData)
-      return String
+     return String
    is
    begin
       return "RCode: " & This.Extended_RCode'Image & " Version: " &
@@ -105,7 +107,7 @@ package body DNSCatcher.DNS.Processor.RData.OPT_Parser is
 
    function Print_Packet
      (This : in Parsed_OPT_RData)
-      return String
+     return String
    is
    begin
       return "OPT " & RData_To_String (This);

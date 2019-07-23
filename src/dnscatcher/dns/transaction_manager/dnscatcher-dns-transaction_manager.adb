@@ -25,8 +25,8 @@ with Ada.Exceptions;      use Ada.Exceptions;
 with Ada.Integer_Text_IO; use Ada.Integer_Text_IO;
 with Ada.Strings.Hash;
 
-with DNSCatcher.Utils;    use DNSCatcher.Utils;
-with DNSCatcher.Utils.Logger;    use DNSCatcher.Utils.Logger;
+with DNSCatcher.Utils;                use DNSCatcher.Utils;
+with DNSCatcher.Utils.Logger;         use DNSCatcher.Utils.Logger;
 with DNSCatcher.DNS.Processor.Packet; use DNSCatcher.DNS.Processor.Packet;
 
 package body DNSCatcher.DNS.Transaction_Manager is
@@ -268,7 +268,7 @@ package body DNSCatcher.DNS.Transaction_Manager is
 
    function IP_Transaction_Key_HashID
      (id : IP_Transaction_Key)
-      return Hash_Type
+     return Hash_Type
    is
    begin
       return Ada.Strings.Hash (To_String (id));

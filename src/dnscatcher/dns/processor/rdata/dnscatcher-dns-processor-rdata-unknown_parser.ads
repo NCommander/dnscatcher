@@ -31,17 +31,18 @@ package DNSCatcher.DNS.Processor.RData.Unknown_Parser is
       Parsed_RR  :        Parsed_DNS_Resource_Record);
    function RData_To_String
      (This : in Parsed_Unknown_RData)
-      return String;
+     return String;
    function RClass_To_String
      (This : in Parsed_Unknown_RData)
-      return String;
+     return String;
    function Print_Packet
      (This : in Parsed_Unknown_RData)
-      return String;
+     return String;
    procedure Delete (This : in out Parsed_Unknown_RData);
 
 private
-   type Parsed_Unknown_RData is new DNSCatcher.DNS.Processor.RData.Parsed_RData with
+   type Parsed_Unknown_RData is new DNSCatcher.DNS.Processor.RData
+     .Parsed_RData with
    record
       RData : Unbounded_String;
    end record;

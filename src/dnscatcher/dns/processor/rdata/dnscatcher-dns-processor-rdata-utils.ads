@@ -23,6 +23,6 @@ with DNSCatcher.DNS.Processor.Packet; use DNSCatcher.DNS.Processor.Packet;
 package DNSCatcher.DNS.Processor.RData.Utils is
    function Decode_DNS_IPv4_Address
      (Parsed_RR : Parsed_DNS_Resource_Record)
-      return Unbounded_String;
+     return Unbounded_String;
 
 end DNSCatcher.DNS.Processor.RData.Utils;

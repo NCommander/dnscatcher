@@ -33,8 +33,7 @@ package DNSCatcher.Network.UDP.Sender is
    end Send_Packet_Task;
    type Send_Packet_Task_Ptr is access Send_Packet_Task;
 
-   type UDP_Sender_Interface is
-     new DNSCatcher.Network.Sender_Interface with
+   type UDP_Sender_Interface is new DNSCatcher.Network.Sender_Interface with
    record
       Config        : Configuration_Ptr;
       Sender_Socket : Socket_Type;
@@ -58,7 +57,7 @@ package DNSCatcher.Network.UDP.Sender is
 
    function Get_Packet_Queue_Ptr
      (This : in out UDP_Sender_Interface)
-      return DNS_Raw_Packet_Queue_Ptr;
+     return DNS_Raw_Packet_Queue_Ptr;
    -- Returns a pointer to the packet queue
 
 end DNSCatcher.Network.UDP.Sender;

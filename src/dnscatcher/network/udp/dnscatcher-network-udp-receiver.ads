@@ -32,8 +32,8 @@ package DNSCatcher.Network.UDP.Receiver is
    end Receive_Packet_Task;
    type Receive_Packet_Task_Ptr is access Receive_Packet_Task;
 
-   type UDP_Receiver_Interface is
-     new DNSCatcher.Network.Receiver_Interface with
+   type UDP_Receiver_Interface is new DNSCatcher.Network
+     .Receiver_Interface with
    record
       Config              : Configuration_Ptr;
       Receiver_Socket     : Socket_Type;

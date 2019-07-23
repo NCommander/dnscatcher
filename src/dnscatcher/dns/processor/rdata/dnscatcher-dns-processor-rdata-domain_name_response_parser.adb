@@ -7,9 +7,9 @@ package body DNSCatcher.DNS.Processor.RData.Domain_Name_Response_Parser is
    -- then decode back into an ASCII string
    pragma Warnings (Off, "formal parameter ""DNS_Header"" is not referenced");
    procedure From_Parsed_RR
-     (This      : in out Parsed_DNR_RData;
+     (This       : in out Parsed_DNR_RData;
       DNS_Header :        DNS_Packet_Header;
-      Parsed_RR :        Parsed_DNS_Resource_Record)
+      Parsed_RR  :        Parsed_DNS_Resource_Record)
    is
       Offset : Stream_Element_Offset := Parsed_RR.RData_Offset;
    begin
@@ -21,7 +21,7 @@ package body DNSCatcher.DNS.Processor.RData.Domain_Name_Response_Parser is
    pragma Warnings (Off, "formal parameter ""This"" is not referenced");
    function RClass_To_String
      (This : in Parsed_DNR_RData)
-      return String
+     return String
    is
    begin
       return "";
@@ -30,7 +30,7 @@ package body DNSCatcher.DNS.Processor.RData.Domain_Name_Response_Parser is
 
    function RData_To_String
      (This : in Parsed_DNR_RData)
-      return String
+     return String
    is
    begin
       return To_String (This.Domain_Name);
@@ -38,7 +38,7 @@ package body DNSCatcher.DNS.Processor.RData.Domain_Name_Response_Parser is
 
    function Print_Packet
      (This : in Parsed_DNR_RData)
-      return String
+     return String
    is
    begin
       return This.RType'Image & " " & RData_To_String (This);

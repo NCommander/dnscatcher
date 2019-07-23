@@ -27,11 +27,11 @@ with Interfaces.C;
 package body DNSCatcher.Utils is
    function Ntohs
      (Network_Short : Unsigned_16)
-      return Unsigned_16
+     return Unsigned_16
    is
       function Internal
         (Network_Short : Unsigned_16)
-         return Unsigned_16;
+        return Unsigned_16;
       pragma Import (C, Internal, "ntohs");
    begin
       return Internal (Network_Short);
@@ -39,11 +39,11 @@ package body DNSCatcher.Utils is
 
    function Ntohl
      (Network_Long : Unsigned_32)
-      return Unsigned_32
+     return Unsigned_32
    is
       function Internal
         (Network_Long : Unsigned_32)
-         return Unsigned_32;
+        return Unsigned_32;
       pragma Import (C, Internal, "ntohl");
    begin
       return Internal (Network_Long);
@@ -51,11 +51,11 @@ package body DNSCatcher.Utils is
 
    function Htons
      (Host_Short : Unsigned_16)
-      return Unsigned_16
+     return Unsigned_16
    is
       function Internal
         (Host_Short : Unsigned_16)
-         return Unsigned_16;
+        return Unsigned_16;
       pragma Import (C, Internal, "htons");
    begin
       return Internal (Host_Short);
@@ -63,11 +63,11 @@ package body DNSCatcher.Utils is
 
    function Htonl
      (Host_Long : Unsigned_32)
-      return Unsigned_32
+     return Unsigned_32
    is
       function Internal
         (Host_Long : Unsigned_32)
-         return Unsigned_32;
+        return Unsigned_32;
       pragma Import (C, Internal, "htonl");
    begin
       return Internal (Host_Long);
@@ -77,7 +77,7 @@ package body DNSCatcher.Utils is
    function Read_Unsigned_16
      (Raw_Data :        Stream_Element_Array_Ptr;
       Offset   : in out Stream_Element_Offset)
-      return Unsigned_16
+     return Unsigned_16
    is
       Network_Short : Unsigned_16;
       function From_Network_Value is new Ada.Unchecked_Conversion
@@ -85,7 +85,7 @@ package body DNSCatcher.Utils is
 
    begin
       Network_Short := Ntohs (From_Network_Value (Raw_Data
-                              (Offset .. Offset + 1)));
+                (Offset .. Offset + 1)));
       Offset := Offset + 2;
       return Network_Short;
    end Read_Unsigned_16;
@@ -94,7 +94,7 @@ package body DNSCatcher.Utils is
    function Read_Unsigned_32
      (Raw_Data :        Stream_Element_Array_Ptr;
       Offset   : in out Stream_Element_Offset)
-      return Unsigned_32
+     return Unsigned_32
    is
       Network_Long : Unsigned_32;
       function From_Network_Value is new Ada.Unchecked_Conversion
@@ -102,16 +102,15 @@ package body DNSCatcher.Utils is
 
    begin
       Network_Long := Ntohl (From_Network_Value (Raw_Data
-                             (Offset .. Offset + 3)));
+                (Offset .. Offset + 3)));
       Offset := Offset + 4;
       return Network_Long;
    end Read_Unsigned_32;
 
-
    function Inet_Ntop
      (Family   : IP_Addr_Family;
       Raw_Data : Unbounded_String)
-      return Unbounded_String
+     return Unbounded_String
    is
       procedure Internal
         (Family : Interfaces.C.int;

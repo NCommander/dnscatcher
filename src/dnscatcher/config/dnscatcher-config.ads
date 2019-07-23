@@ -21,7 +21,7 @@
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 with Ada.Containers.Indefinite_Ordered_Maps;
 
-with GNAT.Sockets;      use GNAT.Sockets;
+with GNAT.Sockets;            use GNAT.Sockets;
 with DNSCatcher.Utils.Logger; use DNSCatcher.Utils.Logger;
 
 package DNSCatcher.Config is
@@ -43,7 +43,7 @@ package DNSCatcher.Config is
    procedure Initialize_Config_Parse;
    function Parse_Config_File
      (Config_File_Path : String)
-      return Configuration_Ptr;
+     return Configuration_Ptr;
 
    type Parse_Procedure is access procedure
      (Config    : Configuration_Ptr;
@@ -66,6 +66,6 @@ package DNSCatcher.Config is
    GCP_Map : GCP_Management.Map;
 
    -- Defined Exceptions
-   Malformed_Line : exception;
+   Malformed_Line                  : exception;
    Missing_Mandatory_Config_Option : exception;
 end DNSCatcher.Config;

@@ -24,7 +24,7 @@ with Ada.Exceptions;        use Ada.Exceptions;
 with Ada.Unchecked_Deallocation;
 with GNAT.Sockets;          use GNAT.Sockets;
 
-with DNSCatcher.DNS; use DNSCatcher.DNS;
+with DNSCatcher.DNS;          use DNSCatcher.DNS;
 with DNSCatcher.DNS.Client;
 with DNSCatcher.Config;
 with DNSCatcher.Utils.Logger; use DNSCatcher.Utils.Logger;

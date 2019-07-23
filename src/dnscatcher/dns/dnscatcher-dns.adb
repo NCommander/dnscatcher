@@ -21,7 +21,7 @@
 package body DNSCatcher.DNS is
    function To_String
      (RR_Type : RR_Types)
-      return String
+     return String
    is
    begin
       -- This **** is required because 'in' is a keyword and Ada is case
@@ -37,7 +37,7 @@ package body DNSCatcher.DNS is
 
    function To_String
      (DNS_Class : Classes)
-      return String
+     return String
    is
    begin
       -- This **** is required because 'in' is a keyword and Ada is case
