@@ -2,16 +2,11 @@
 
 BASE_DIR=$(shell pwd)
 
-all: build_release
-
-build_release:
-	gprbuild -Pdnscatcher_project.gpr -XBUILD=RELEASE -j0
-
 pretty_print:
 	find . -name *.adb | xargs \
-		gnat pretty -rnb -Pgnat/compiler_settings.gpr
+		gnat pretty -rnb -P/home/mcasadevall/src/dnscatcher/dnscatcher_project.gpr
 	find . -name *.ads | xargs \
-		gnat pretty -rnb -Pgnat/compiler_settings.gpr
+		gnat pretty -rnb -P/home/mcasadevall/src/dnscatcher/dnscatcher_project.gpr
 
 coverage:
 	gprbuild -XBUILD=RELEASE -XCOVERAGE_ENABLED=TRUE -Pgnat/test_harness
