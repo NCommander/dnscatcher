@@ -19,47 +19,52 @@
 -- DEALINGS IN THE SOFTWARE.
 
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
-with Ada.Numerics.Discrete_Random;
 
 with DNSCatcher.DNS.Processor.Packet; use DNSCatcher.DNS.Processor.Packet;
 with DNSCatcher.Config;               use DNSCatcher.Config;
 with DNSCatcher.DNS;                  use DNSCatcher.DNS;
 with DNSCatcher.Types;                use DNSCatcher.Types;
 
-with Interfaces.C.Extensions; use Interfaces.C.Extensions;
-
 -- Creates and handles making DNS client requests
 package DNSCatcher.DNS.Client is
-   -- Subtypes for handing transaction generation
-   subtype DNS_Transaction_ID is Unsigned_16;
-   package Random_Transaction_ID is new Ada.Numerics.Discrete_Random
-     (DNS_Transaction_ID);
-
-   type Client is tagged record
-      Header    : DNS_Packet_Header;
-      Questions : Question_Vector.Vector;
-   end record;
+   -- DNS Client object
+   type Client is tagged private;
    type Client_Access is access all Client'Class;
 
-   -- Populates the header field on the fly
+   -- Populates the header field for a given DNS request
+   --
+   -- @value This the DNS Client object
    procedure Create_Header (This : in out Client);
 
+   --!pp off
    -- Adds a question to the DNS request
+   --
+   -- @value This the DNS Client object
+   -- @value QName DNS name to query
+   -- @value QType The RRType to query
+   -- @value QClass DNS Class to query
+   --!pp on
    procedure Add_Query
      (This   : in out Client;
       QName  :        Unbounded_String;
       QType  :        RR_Types;
       QClass :        Classes);
 
-      -- Placeholder for now until we figure out what this is supposed to
-      -- actually look like
-
+   --!pp off
+   -- Creates a DNS packet out of a client request (should be private)
+   --
+   -- @value This the DNS Client object
+   -- @value Config to the DNSCatcher configuration
+   --!pp on
    function Create_Packet
      (This   : in out Client;
       Config :        Configuration_Ptr)
-     return Raw_Packet_Record_Ptr;
-   -- Utility functions;
-   function Create_DNS_Packet_Name_Record
-     (Question : Parsed_DNS_Question)
-     return Unbounded_String;
+      return Raw_Packet_Record_Ptr;
+
+private
+   type Client is tagged record
+      Header    : DNS_Packet_Header;
+      Questions : Question_Vector.Vector;
+   end record;
+
 end DNSCatcher.DNS.Client;
