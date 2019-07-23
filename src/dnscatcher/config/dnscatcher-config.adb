@@ -21,17 +21,41 @@
 with Ada.Characters.Latin_1;
 with Ada.Text_IO;             use Ada.Text_IO;
 with Ada.Characters.Handling; use Ada.Characters.Handling;
+with Ada.Containers.Indefinite_Ordered_Maps;
 
 package body DNSCatcher.Config is
-   procedure Initialize_Config_Parse is
-   begin
-      -- Load String to Type Mapping
-      GCP_Map.Insert ("LOCAL_LISTEN_PORT", Parse_Local_Listen_Port'Access);
-      GCP_Map.Insert ("UPSTREAM_DNS_SERVER", Parse_Upstream_DNS_Server'Access);
-      GCP_Map.Insert
-        ("UPSTREAM_DNS_SERVER_PORT", Parse_Upstream_DNS_Server_Port'Access);
-   end Initialize_Config_Parse;
+   -- Parse_Procedure prototype
+   --
+   -- Parse_Procedure is an access procedure that is used as a common prototype
+   -- for all parsing functionality dispatched from GCP_Management and other
+   -- vectors.
+   --
+   -- @value Config
+   -- Configuration struct to update
+   --
+   -- @value Value_Str
+   -- Pure text version of the configuration argument
+   --
+   type Parse_Procedure is access procedure
+     (Config    : Configuration_Ptr;
+      Value_Str : String);
 
+      -- GCP_Management is a vector that handles dynamic dispatch to the
+      -- parsing parameters above; it is used to match key/values from the
+      -- config file to
+   package GCP_Management is new Ada.Containers.Indefinite_Ordered_Maps
+     (String, Parse_Procedure);
+
+   GCP_Map : GCP_Management.Map;
+
+   -- Loads the load listen value and sets it in the config record
+   --
+   -- @value Config
+   -- Configuration struct to update
+   --
+   -- @value Value_Str
+   -- Pure text version of the configuration argument
+   --
    procedure Parse_Local_Listen_Port
      (Config    : Configuration_Ptr;
       Value_Str : String)
@@ -43,6 +67,14 @@ package body DNSCatcher.Config is
          raise Malformed_Line with "Local_Listen_Port not a valid port number";
    end Parse_Local_Listen_Port;
 
+   -- Loads the upstream DNS Server from the config file
+   --
+   -- @value Config
+   -- Configuration struct to update
+   --
+   -- @value Value_Str
+   -- Pure text version of the configuration argument
+   --
    procedure Parse_Upstream_DNS_Server
      (Config    : Configuration_Ptr;
       Value_Str : String)
@@ -54,6 +86,14 @@ package body DNSCatcher.Config is
          raise Malformed_Line with "Invalid upstrema DNS Server";
    end Parse_Upstream_DNS_Server;
 
+   -- Loads the upstream DNS Server port from the config file
+   --
+   -- @value Config
+   -- Configuration struct to update
+   --
+   -- @value Value_Str
+   -- Pure text version of the configuration argument
+   --
    procedure Parse_Upstream_DNS_Server_Port
      (Config    : Configuration_Ptr;
       Value_Str : String)
@@ -66,9 +106,18 @@ package body DNSCatcher.Config is
            with "Upstream_DNS_Server_Port not a valid port number";
    end Parse_Upstream_DNS_Server_Port;
 
+   procedure Initialize_Config_Parse is
+   begin
+      -- Load String to Type Mapping
+      GCP_Map.Insert ("LOCAL_LISTEN_PORT", Parse_Local_Listen_Port'Access);
+      GCP_Map.Insert ("UPSTREAM_DNS_SERVER", Parse_Upstream_DNS_Server'Access);
+      GCP_Map.Insert
+        ("UPSTREAM_DNS_SERVER_PORT", Parse_Upstream_DNS_Server_Port'Access);
+   end Initialize_Config_Parse;
+
    function Parse_Config_File
      (Config_File_Path : String)
-     return Configuration_Ptr
+      return Configuration_Ptr
    is
       Parsed_Config     : Configuration_Ptr;
       Config_File       : Ada.Text_IO.File_Type;

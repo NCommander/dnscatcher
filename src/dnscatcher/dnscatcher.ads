@@ -18,6 +18,29 @@
 -- FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 -- DEALINGS IN THE SOFTWARE.
 
+-- @summary
+-- DNSCatcher is a complete implementation of the DNS cross-check protocol and
+-- DNS Server designed to allow for exhaustive testing of recursive resolver
+-- behavior and datasets..
+--
+-- @description
+-- DNSCatcher is the codename of the reference implementation of the DNS
+-- Cross-check protocol. It was implemented as a new DNS server instead
+-- of recycling existing code to allow ease of processing of discrete data
+-- that often isn't exposed within client or server implementaitons short
+-- of extensively patching them.
+--
+-- Catcher is coded with Ada with some components in C to ensure high
+-- performance, reliability, and quality. It is intended for parts of the
+-- codebase to be rewritten to the SPARK subset for formal validation to
+-- help ensure that DNSCatcher is written correctly.
+--
+-- For use with other programming languages, APIs will be defined for
+-- interacting with C which all modern programming languages can bind to.
+--
+-- This package represents the primary DNSCatcher implementation as a library.
+-- For the actual daemon, see the DNSCatcherD package
+--
 package DNSCatcher is
 
 end DNSCatcher;
