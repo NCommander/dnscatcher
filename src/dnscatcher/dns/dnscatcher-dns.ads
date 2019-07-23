@@ -18,94 +18,110 @@
 -- FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 -- DEALINGS IN THE SOFTWARE.
 
-package DNSCatcher.DNS is
-   -- IANA Registered RRTypes
+-- @summary
+-- The DNS subpackage covers all basic functionality in regards to handling the
+-- DNS wire protocol.
+--
+-- @description
+-- Included in this package are the following bits of information:
+--
+-- - Mapping of RRTypes and Classes to/from Integers - DNS client
+-- implementation - DNS server implementation - RData processor and encoder -
+-- Packet processor (including handling DNS compression) - Other constants and
+-- constraints included by DNS
+--
+   package DNSCatcher.DNS is
+
+   -- IANA defined RRTypes.
    type RR_Types is
-     (A,
-      NS,
-      MD,
-      MF,
-      CNAME,
-      SOA,
-      MB,
-      MG,
-      MR,
-      DNS_NULL,
-      WKS,
-      PTR,
-      HINFO,
-      MINFO,
-      MX,
-      TXT,
-      RP,
-      AFSDB,
-      X25,
-      ISDN,
-      RT,
-      NSAP,
-      NSAP_PTR,
-      SIG,
-      KEY,
-      PX,
-      GPOS,
-      AAAA,
-      LOC,
-      NXT,
-      EID,
-      NIMLOC,
-      SRV,
-      ATMA,
-      NAPTR,
-      KX,
-      CERT,
-      A6,
-      DNAME,
-      SINK,
-      OPT,
-      APL,
-      DS,
-      SSHFP,
-      IPSECKEY,
-      RRSIG,
-      NSEC,
-      DNSKEY,
-      DHCID,
-      NSEC3,
-      NSEC3PARAM,
-      TLSA,
-      SMIMEA,
-      HIP,
-      NINFO,
-      RKEY,
-      TALINK,
-      CDS,
-      CDNSKEY,
-      OPENPGPKEY,
-      CSYNC,
-      SPF,
-      UINFO,
-      UID,
-      GID,
-      UNSPEC,
-      NID,
-      L32,
-      L64,
-      LP,
-      EUI48,
-      EUI64,
-      TKEY,
-      TSIG,
-      IXFR,
-      AXFR,
-      MAILB,
-      MAILA,
-      WILDCARD,
-      URI,
-      CAA,
-      AVC,
-      DOA,
-      TA,
-      DLV);
+     (A, -- An IPv4 Address
+      NS, -- Reference to another nameserver (encoded as a domain name)
+      MD, -- Mail Destination - Obsolete (RFC 973)
+      MF, -- Mail Forwarder - Obsolete
+      CNAME, -- Canonical Name Record - Alias of of domain name to another
+      SOA, -- Start of Authority - Defines the authoritative information of a DNS zone
+      MB, -- Mailbox Domain Name - Obsolete (RFC883)
+      MG, -- Mail Group Member - Obsolete (RFC883)
+      MR, -- Mail Rename Domain - Obsolete (RFC883)
+      DNS_NULL, -- NULL RRType - Called DNS_NULL due to keyword conflict in Ada
+      WKS, -- Well Known Service - Obsolete
+      PTR, -- Reverse lookup Information for a zone
+      HINFO, -- Host Information
+      MINFO, -- Mailbox or Mailing List Information
+      MX, -- Mail eXchange
+      TXT, -- Text Record
+      RP, -- Responsible Person - RFC1183
+      AFSDB, -- AFS Database Location
+      X25, -- X.25 PSDN address
+      ISDN, -- ISDN address
+      RT, -- Route Through (RFC1183)
+      NSAP, -- for NSAP address, NSAP style A record
+      NSAP_PTR, -- for domain name pointer, NSAP style
+      SIG, -- security signature
+      KEY, -- security key
+      PX, -- X.400 mail mapping information
+      GPOS, -- Geographical Position
+      AAAA, -- IPv6 location
+      LOC, -- Location Information
+      NXT, -- Next Domain (Obsolete)
+      EID, -- Endpoint Identifier
+      NIMLOC, -- Nimrod Locator
+      SRV, -- Server/Service Selection
+      ATMA, -- ATM Address
+      NAPTR, -- Naming Authority Pointer
+      KX, -- Kex Exchanger
+      CERT, -- Certificate Record
+      A6, -- Old-style IPv6 Record
+      DNAME, -- DNAME
+      SINK, -- Kitchen Sink
+      OPT, -- EDNS Special Record
+      APL, -- APL
+      DS, -- Delegation Signer
+      SSHFP, -- SSH Key Fingerprint
+      IPSECKEY, -- IPSEC Key
+      RRSIG, -- Resource Record SIGnature
+      NSEC, -- Next SECure
+      DNSKEY, -- DNSSEC Public Key
+      DHCID, -- DHCID
+      NSEC3, -- Next SECure Version 3
+      NSEC3PARAM, -- NSEC3 Parameters
+      TLSA, -- DANE Record Implementation
+      SMIMEA, -- S/MIME Certificate Assoication
+      HIP, -- Host Identity Protocol
+      NINFO, -- NINFO
+      RKEY, -- RKEY
+      TALINK, -- Trust Anchor Link
+      CDS, -- Child DS
+      CDNSKEY, -- DNSKEY(s) child wants in parent DS
+      OPENPGPKEY, -- OpenPGP Key
+      CSYNC, -- Child-To-Parent Sync
+      ZONEMD, -- Message Digest for DNS Zone
+      SPF, -- SPF (RFC7208)
+      UINFO, -- User Info (Reserved)
+      UID, -- User Identifier (Reversed)
+      GID, -- Group Info (Reserved)
+      UNSPEC, -- Reversed
+      NID, -- RFC6742
+      L32, -- RFC6742
+      L64, -- RFC6742
+      LP, -- RFC6742
+      EUI48, -- EUI-48 Address
+      EUI64, -- EUI-64 Address
+      TKEY, -- Transaction Key
+      TSIG, -- Transaction Signature
+      IXFR, -- Incremental Zone Transfer
+      AXFR, -- Zone Transfer
+      MAILB, -- Request for mailbox related records (MB/MG/MR)
+      MAILA, -- Request for mail agent RRs (MD/MF)
+      WILDCARD, -- Request for all records ("*")
+      URI, -- URI
+      CAA, -- Certificate Authority Restriction
+      AVC, -- Application Visibility and Control
+      DOA, -- Digital Object Architecture
+      AMTRELAY, -- Automatic Multicast Tunneling Relay
+      TA, -- DNSSEC Trust Authorities
+      DLV -- DNSSEC Lookaside Validation
+      );
 
       --!pp off
    for RR_Types use (A => 1,
@@ -169,6 +185,7 @@ package DNSCatcher.DNS is
                      CDNSKEY => 60,
                      OPENPGPKEY => 61,
                      CSYNC => 62,
+                     ZONEMD => 63,
                      SPF => 99,
                      UINFO => 100,
                      UID => 101,
@@ -191,54 +208,66 @@ package DNSCatcher.DNS is
                      CAA => 257,
                      AVC => 258,
                      DOA => 259,
+                     AMTRELAY => 260,
                      TA => 32768,
                      DLV => 32769);
    --!pp on
 
+   -- Helper function to convert RR_Type to string
+   --
+   -- @value RR_Type RR_Type to convert
    function To_String
      (RR_Type : RR_Types)
-     return String;
+      return String;
 
    type Classes is
-     (INternet, -- IN (IN is an Ada keyword, we'll have to handle this specially)
-      CH,
-      HS,
-      QCLASS_NONE,
-      QCLASS_ANY);
+     (INternet, -- INternet Class
+      CS, -- CSNet Class
+      CH, -- ChaosNet Class
+      HS, -- Hesiod
+      QCLASS_NONE, -- QCLASS None
+      QCLASS_ANY -- QClass (Any)
+      );
 
       --!pp off
    for Classes use (INternet => 1,
+                    CS => 2,
                     CH => 3,
                     HS => 4,
                     QCLASS_NONE => 254,
                     QCLASS_ANY => 255);
    --!pp on
 
+   -- Helper function to convert DNS_Classes to String
+   --
+   -- @value DNS_Class Class to convert
    function To_String
      (DNS_Class : Classes)
-     return String;
+      return String;
 
+   -- DNS Return Codes
    type RCodes is
-     (NoError,
-      FormErr,
-      ServFail,
-      NXDomain,
-      NotImp,
-      Refused,
-      YXDomain,
-      YXRRSet,
-      NXRRSet,
-      NotAuth,
-      NotZone,
-      BADVERS,
+     (NoError, -- No Error
+      FormErr, -- Format Error
+      ServFail, -- Server Failure
+      NXDomain, -- Non-Existent Domain
+      NotImp, -- Not Implemented
+      Refused, -- Query Refused
+      YXDomain, -- Name Exists when it shouldn't
+      YXRRSet, -- RRSet Exists when it shouldn't
+      NXRRSet, -- RRSet doesn't exist and it should
+      NotAuth, -- Server is not authoritive for zone
+      NotZone, -- Not authorized
+      BADVERS, -- Bad OPT version
       -- 16 can also be BADSIG but that's not trivial to represent
-      BADKEY,
-      BADTIME,
-      BADMODE,
-      BADNAME,
-      BADALG,
-      BADTRUNC,
-      BADCOOKIE);
+      BADKEY, -- Key not recognized
+      BADTIME, -- Signature out of time window
+      BADMODE, -- Bad TKEY Mode
+      BADNAME, -- Duplicate key name
+      BADALG, -- Algorithm not supported
+      BADTRUNC, -- Bad truncation
+      BADCOOKIE -- Bad/missing server cookie
+      );
 
       --!pp off
    for RCodes use (NoError => 0,
@@ -264,22 +293,23 @@ package DNSCatcher.DNS is
 
    -- Casing and spelling comes directly from IANA reserved list
    type EDNS0_Option_Codes is
-     (LLQ,
-      UL,
-      NSID,
-      DAU,
-      DHU,
-      N3U,
-      edns_client_subnet,
-      EDNS_EXPIRE,
-      COOKIE,
-      edns_tcp_keepalive,
-      Padding,
-      CHAIN,
-      edns_key_tag,
-      EDNS_Client_Tag,
-      EDNS_Server_Tag,
-      DeviceID);
+     (LLQ, -- Reserved (on hold)
+      UL, -- Reserved (on hold)
+      NSID, -- Standard (RFC5001)
+      DAU, -- Standard (RFC6975)
+      DHU, -- Standard (RFC6975)
+      N3U, -- Standard (RFC6975)
+      edns_client_subnet, -- Optional (RFC7314)
+      EDNS_EXPIRE, -- Optional (RFC7314)
+      COOKIE, -- Standard (RFC7873)
+      edns_tcp_keepalive, -- Standard (RFC7828)
+      Padding, -- Standard (RFC7830)
+      CHAIN, -- Standard (RFC7901)
+      edns_key_tag, -- Optional (RFC8145)
+      EDNS_Client_Tag, -- Optional (draft)
+      EDNS_Server_Tag, -- Optional (draft)
+      DeviceID -- Optional (draft)
+      );
 
       --!pp off
    for EDNS0_Option_Codes use (LLQ => 1,
