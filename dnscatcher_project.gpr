@@ -39,5 +39,13 @@ project DNSCatcher_Project is
    package Compiler renames Compiler_Settings.Compiler;
    package Pretty_Printer renames Compiler_Settings.Pretty_Printer;
    package Linker renames Compiler_Settings.Linker;
+   package Documentation is
+      for Ignored_Subprojects use (
+         "aunit",
+         "gnat/compiler_settings"
+      );
+      for Documentation_Dir use "gnatdoc";
+   end Documentation;
+
 end DNSCatcher_Project;
 

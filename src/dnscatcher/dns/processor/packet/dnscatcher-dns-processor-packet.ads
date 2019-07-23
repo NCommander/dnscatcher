@@ -65,35 +65,35 @@ package DNSCatcher.DNS.Processor.Packet is
    function Packet_Parser
      (Logger : Logger_Message_Packet_Ptr;
       Packet : Raw_Packet_Record_Ptr)
-     return Parsed_DNS_Packet_Ptr;
+      return Parsed_DNS_Packet_Ptr;
    pragma Test_Case (Name => "Packet_Parser", Mode => Robustness);
 
    function Parse_DNS_Packet_Name_Records
-     (Raw_Data :        Raw_DNS_Packet_Data;
+     (Raw_Data :        Raw_DNS_Packet_Data_Ptr;
       Offset   : in out Stream_Element_Offset)
-     return Unbounded_String;
+      return Unbounded_String;
 
    function Parse_DNS_RR_Type
-     (Raw_Data :        Raw_DNS_Packet_Data;
+     (Raw_Data :        Raw_DNS_Packet_Data_Ptr;
       Offset   : in out Stream_Element_Offset)
-     return RR_Types;
+      return RR_Types;
 
    function Parse_DNS_Class
-     (Raw_Data :        Raw_DNS_Packet_Data;
+     (Raw_Data :        Raw_DNS_Packet_Data_Ptr;
       Offset   : in out Stream_Element_Offset)
-     return Classes;
+      return Classes;
 
    function Parse_Question_Record
      (Logger   :        Logger_Message_Packet_Ptr;
-      Raw_Data :        Raw_DNS_Packet_Data;
+      Raw_Data :        Raw_DNS_Packet_Data_Ptr;
       Offset   : in out Stream_Element_Offset)
-     return Parsed_DNS_Question;
+      return Parsed_DNS_Question;
 
    function Parse_Resource_Record_Response
      (Logger :        Logger_Message_Packet_Ptr;
       Packet :        Raw_DNS_Packet;
       Offset : in out Stream_Element_Offset)
-     return Parsed_RData_Access;
+      return Parsed_RData_Access;
 
    Unknown_RCode              : exception;
    Unknown_RR_Type            : exception;

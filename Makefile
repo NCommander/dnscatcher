@@ -1,12 +1,20 @@
-.PHONY: coverage
+.PHONY: coverage doc build_release
 
 BASE_DIR=$(shell pwd)
 
+all: build_release doc
+
+doc:
+	gnatdoc -w -P dnscatcher_project.gpr
+
+build_release:
+	gprbuild -XBUILD=RELEASE -Pdnscatcher_project.gpr -j0
+
 pretty_print:
 	find . -name *.adb | xargs \
-		gnat pretty -rnb -P/home/mcasadevall/src/dnscatcher/dnscatcher_project.gpr
+		gnat pretty -rnb -Pdnscatcher_project.gpr
 	find . -name *.ads | xargs \
-		gnat pretty -rnb -P/home/mcasadevall/src/dnscatcher/dnscatcher_project.gpr
+		gnat pretty -rnb -Pdnscatcher_project.gpr
 
 coverage:
 	gprbuild -XBUILD=RELEASE -XCOVERAGE_ENABLED=TRUE -Pgnat/test_harness

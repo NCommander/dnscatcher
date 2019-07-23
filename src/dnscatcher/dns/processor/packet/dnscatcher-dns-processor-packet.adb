@@ -31,7 +31,7 @@ package body DNSCatcher.DNS.Processor.Packet is
    function Packet_Parser
      (Logger : Logger_Message_Packet_Ptr;
       Packet : Raw_Packet_Record_Ptr)
-     return Parsed_DNS_Packet_Ptr
+      return Parsed_DNS_Packet_Ptr
    is
       Parsed_Packet  : Parsed_DNS_Packet_Ptr;
       Current_Offset : Stream_Element_Offset := 1;
@@ -123,9 +123,9 @@ package body DNSCatcher.DNS.Processor.Packet is
 
    -- I apologize in advance, this function is a real mindfuck.
    function Parse_DNS_Packet_Name_Records
-     (Raw_Data :        Raw_DNS_Packet_Data;
+     (Raw_Data :        Raw_DNS_Packet_Data_Ptr;
       Offset   : in out Stream_Element_Offset)
-     return Unbounded_String
+      return Unbounded_String
    is
       Domain_Name    : Unbounded_String;
       Section_Length : Unsigned_8;
@@ -232,9 +232,9 @@ package body DNSCatcher.DNS.Processor.Packet is
    end Parse_DNS_Packet_Name_Records;
 
    function Parse_DNS_RR_Type
-     (Raw_Data :        Raw_DNS_Packet_Data;
+     (Raw_Data :        Raw_DNS_Packet_Data_Ptr;
       Offset   : in out Stream_Element_Offset)
-     return RR_Types
+      return RR_Types
    is
       Found_RRType : RR_Types;
       RR_Type_Raw  : Unsigned_16;
@@ -262,9 +262,9 @@ package body DNSCatcher.DNS.Processor.Packet is
    end Parse_DNS_RR_Type;
 
    function Parse_DNS_Class
-     (Raw_Data :        Raw_DNS_Packet_Data;
+     (Raw_Data :        Raw_DNS_Packet_Data_Ptr;
       Offset   : in out Stream_Element_Offset)
-     return Classes
+      return Classes
    is
       Found_Class : Classes;
       Raw_Class   : Unsigned_16;
@@ -295,9 +295,9 @@ package body DNSCatcher.DNS.Processor.Packet is
    -- Parses the questions asked in a DNS record
    function Parse_Question_Record
      (Logger   :        Logger_Message_Packet_Ptr;
-      Raw_Data :        Raw_DNS_Packet_Data;
+      Raw_Data :        Raw_DNS_Packet_Data_Ptr;
       Offset   : in out Stream_Element_Offset)
-     return Parsed_DNS_Question
+      return Parsed_DNS_Question
    is
       Parsed_Question : Parsed_DNS_Question;
    begin
@@ -326,10 +326,10 @@ package body DNSCatcher.DNS.Processor.Packet is
      (Logger :        Logger_Message_Packet_Ptr;
       Packet :        Raw_DNS_Packet;
       Offset : in out Stream_Element_Offset)
-     return Parsed_RData_Access
+      return Parsed_RData_Access
    is
       Parsed_Response : Parsed_DNS_Resource_Record;
-      Raw_Data        : Raw_DNS_Packet_Data;
+      Raw_Data        : Raw_DNS_Packet_Data_Ptr;
 
       RData_Length          : Unsigned_16;
       Parsed_RData_Response : Parsed_RData_Access;

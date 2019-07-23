@@ -4,3 +4,6 @@ bin
 gcov
 build
 *.npp
+gnatdoc
+gnatinspect*
+dnscatcher_project-loc.xml
