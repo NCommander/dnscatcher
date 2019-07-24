@@ -18,6 +18,16 @@
 -- FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 -- DEALINGS IN THE SOFTWARE.
 
+-- @summary
+-- The DNSCatcher.DNS.Processor contains all data manipulation routines
+--
+-- @description
+-- This package hierarchy handles wire transformations (both to and from) for
+-- parsing DNS requests and creating DNS requests
+--
+-- This top level package is currently empty, but defines the submodules
+-- required for processing
+--
 package DNSCatcher.DNS.Processor is
 
 end DNSCatcher.DNS.Processor;
