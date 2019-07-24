@@ -64,15 +64,16 @@ abstract project Compiler_Settings is
 
    package Pretty_Printer is
       for Default_Switches ("ada") use (
-      "-rnb",
-      "-c4",
-      "--call_threshold=1",
-      "--par_threshold=1",
-      "--separate-stmt-name",
-      "--vertical-enum-types",
-      "--vertical-array-types",
-      "--vertical-case-alternatives",
-      "--separate-loop-then");
+                                        "-w",
+                                        "-rnb",
+                                        "-c4",
+                                        "--call_threshold=1",
+                                        "--par_threshold=1",
+                                        "--separate-stmt-name",
+                                        "--vertical-enum-types",
+                                        "--vertical-array-types",
+                                        "--vertical-case-alternatives",
+                                        "--separate-loop-then");
    end Pretty_Printer;
 end Compiler_Settings;
 

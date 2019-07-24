@@ -38,19 +38,9 @@ package body DNSCatcher.DNS.Processor.RData.A_Parser is
    end From_Parsed_RR;
    pragma Warnings (On, "formal parameter ""DNS_Header"" is not referenced");
 
-   pragma Warnings (Off, "formal parameter ""This"" is not referenced");
-   function RClass_To_String
-     (This : in Parsed_A_RData)
-     return String
-   is
-   begin
-      return "";
-   end RClass_To_String;
-   pragma Warnings (On, "formal parameter ""This"" is not referenced");
-
    function RData_To_String
      (This : in Parsed_A_RData)
-     return String
+      return String
    is
    begin
       return To_String (This.A_Record);
@@ -58,7 +48,7 @@ package body DNSCatcher.DNS.Processor.RData.A_Parser is
 
    function Print_Packet
      (This : in Parsed_A_RData)
-     return String
+      return String
    is
    begin
       return "A " & RData_To_String (This);

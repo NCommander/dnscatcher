@@ -20,9 +20,24 @@
 
 with DNSCatcher.DNS.Processor.Packet; use DNSCatcher.DNS.Processor.Packet;
 
+-- @summary
+-- Utility functions used by the RData processor to derieve correct information
+-- seperate from the main utilities class as they're unused anywhere else
+--
 package DNSCatcher.DNS.Processor.RData.Utils is
+   -- Helper function to help decode IPv4 addresses into actual numeric
+   -- representation. Required due to bite ordering issues within Ada.
+   --
+   -- See comment in DNSCatcher.DNS and DNSCatcher.Utils on this.
+   --
+   -- @value Parsed_RR
+   -- A Parsed Resource Record, should be of the A type
+   --
+   -- @returns
+   -- An IPv4 address encoded as an unbound string
+   --
    function Decode_DNS_IPv4_Address
      (Parsed_RR : Parsed_DNS_Resource_Record)
-     return Unbounded_String;
+      return Unbounded_String;
 
 end DNSCatcher.DNS.Processor.RData.Utils;

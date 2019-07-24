@@ -36,17 +36,9 @@ package body DNSCatcher.DNS.Processor.RData.Unknown_Parser is
    pragma Warnings (On, "formal parameter ""DNS_Header"" is not referenced");
 
    pragma Warnings (Off, "formal parameter ""This"" is not referenced");
-   function RClass_To_String
-     (This : in Parsed_Unknown_RData)
-     return String
-   is
-   begin
-      return "UNKNOWN";
-   end RClass_To_String;
-
    function RData_To_String
      (This : in Parsed_Unknown_RData)
-     return String
+      return String
    is
    begin
       return "UNKNOWN";
@@ -54,7 +46,7 @@ package body DNSCatcher.DNS.Processor.RData.Unknown_Parser is
 
    function Print_Packet
      (This : in Parsed_Unknown_RData)
-     return String
+      return String
    is
    begin
       return "UNKNOWN";

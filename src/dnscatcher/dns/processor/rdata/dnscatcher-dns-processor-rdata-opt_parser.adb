@@ -85,19 +85,9 @@ package body DNSCatcher.DNS.Processor.RData.OPT_Parser is
       -- Mask off top bits
    end From_Parsed_RR;
 
-   pragma Warnings (Off, "formal parameter ""This"" is not referenced");
-   function RClass_To_String
-     (This : in Parsed_OPT_RData)
-     return String
-   is
-   begin
-      return "";
-   end RClass_To_String;
-   pragma Warnings (On, "formal parameter ""This"" is not referenced");
-
    function RData_To_String
      (This : in Parsed_OPT_RData)
-     return String
+      return String
    is
    begin
       return "RCode: " & This.Extended_RCode'Image & " Version: " &
@@ -107,7 +97,7 @@ package body DNSCatcher.DNS.Processor.RData.OPT_Parser is
 
    function Print_Packet
      (This : in Parsed_OPT_RData)
-     return String
+      return String
    is
    begin
       return "OPT " & RData_To_String (This);
