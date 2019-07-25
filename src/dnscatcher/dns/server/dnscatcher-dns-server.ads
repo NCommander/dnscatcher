@@ -18,11 +18,23 @@
 -- FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 -- DEALINGS IN THE SOFTWARE.
 
-package DNSCatcher.DNS.Server is
+-- @summary
+-- Implements the DNSCatcher internal DNS Server
+--
+-- @description
+-- To support most of it's operations, DNSCatcher needs an intergrated DNS
+-- server that can support unusual operations and dynamic record updating.
+-- While it may have been possible to build out of an existing DNS server
+-- product, the forks and effort required was deemed too high, hence DNSCatcher
+-- implements it's own internal DNS server to work with cross-check and
+-- validation
+--
+   package DNSCatcher.DNS.Server is
    UDP_MAX_SIZE : constant Integer := 65535;
 
+   -- Starts the internal DNS Server
    procedure Start_Server;
-   procedure Stop_Server;
 
-   -- Protected Elements
+   -- Stops the internal server
+   procedure Stop_Server;
 end DNSCatcher.DNS.Server;

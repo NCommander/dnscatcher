@@ -27,38 +27,85 @@ with DNSCatcher.DNS;    use DNSCatcher.DNS;
 with DNSCatcher.DNS.Transaction_Manager;
 use DNSCatcher.DNS.Transaction_Manager;
 
+-- @summary
+-- Abstraction and implementation of DNSCatcher's network protocols, including
+-- UDP, TCP, DNS-over-TLS, and DNS-over-HTTPS
+--
+-- @description
+-- As defined, the DNS protocol can be spoken over quite a few mediums, and
+-- over IPv4 and IPv6. In general, there are two wire formats for DNS, UDP
+-- and TCP, which only differ by sending a prefix length in the case of TCP.
+--
+-- As such, to seemlessly support DNS over various protocols, the Network
+-- package provides a simple abstraction layer that handles most of the
+-- nitty gritty of setting up and configuring the network for DNS traffic
+--
 package DNSCatcher.Network is
 
    -- Receiver Interface
    type Receiver_Interface is abstract tagged null record;
 
+   -- Initiaizes the reader interface of a given connection method
+   --
+   -- @value This
+   -- Class object
+   --
+   -- @value Config
+   -- Configuration pointer
+   --
+   -- @value Transaction_Manager
+   -- Transaction Manager instance
+   --
+   -- @value Socket
+   -- Initialized socket from GNAT.Sockets
    procedure Initialize
      (This                : in out Receiver_Interface;
       Config              :        Configuration_Ptr;
       Transaction_Manager :        DNS_Transaction_Manager_Task_Ptr;
       Socket              :        Socket_Type) is abstract;
-      -- Initializes a network interface and does any necessary prep work. It
-      -- MUST be called before calling any other method
 
+      -- Starts a given receiver interface
+      --
+      -- @value This
+      -- Class object
+      --
    procedure Start (This : in out Receiver_Interface) is abstract;
-   -- Starts the interface
 
+   -- Cleanly shuts down a receiver interface
+   --
+   -- @value This
+   -- Class object
+   --
    procedure Shutdown (This : in out Receiver_Interface) is abstract;
-   -- Cleanly shuts down the interface
 
    -- Sender Interface
    type Sender_Interface is abstract tagged null record;
 
+   -- Initiaizes the reader interface of a given connection method
+   --
+   -- @value This
+   -- Class object
+   --
+   -- @value Config
+   -- Configuration pointer
+   --
+   -- @value Socket
+   -- Initialized socket from GNAT.Sockets
+   --
    procedure Initialize
      (This   : in out Sender_Interface;
       Config :        Configuration_Ptr;
       Socket :        Socket_Type) is abstract;
-      -- Initializes a network interface and does any necessary prep work. It
-      -- MUST be called before calling any other method
 
+      -- Starts the interface
+      --
+      -- @value This
+      -- Class object
    procedure Start (This : in out Sender_Interface) is abstract;
-   -- Starts the interface
 
+   -- Stops the interface
+   --
+   -- @value This
+   -- Class object
    procedure Shutdown (This : in out Sender_Interface) is abstract;
-   -- Cleanly shuts down the interface
 end DNSCatcher.Network;

@@ -20,18 +20,55 @@
 
 with DNSCatcher.Network;
 
+-- @summary
+--
+-- Implements the receiving front-end for UDP packets sent to the DNSCatcher
+-- server
+--
+-- @description
+--
+-- This package implements one half of the UDP implementation for DNSCatcher,
+-- and defacto handles requests from client receivers.
+--
 package DNSCatcher.Network.UDP.Receiver is
-   -- Tasks Definition
+   -- Packet receiving task
    task type Receive_Packet_Task is
+      -- Initializes the receiver task
+      --
+      -- @value Config
+      -- Pointer to configuration object
+      --
+      -- @value Socket
+      -- GNAT.Sockets socket
+      --
+      -- @value Transaction_Manager
+      -- Pointer to Transaction Manager Task
       entry Initialize
         (Config              : Configuration_Ptr;
          Socket              : Socket_Type;
          Transaction_Manager : DNS_Transaction_Manager_Task_Ptr);
+
+         -- Start UDP receiver
       entry Start;
+
+      -- Stop UDP receiver
       entry Stop;
    end Receive_Packet_Task;
    type Receive_Packet_Task_Ptr is access Receive_Packet_Task;
 
+   --- Implementation of Network Receiver Interface
+   --
+   -- @value Config
+   -- Holds pointer to configuration object
+   --
+   -- @value Receiver_Socket
+   -- Holds GNAT.Socket pre-initialized
+   --
+   -- @value Transaction_Manager
+   -- Pointer to Transaction Manager Task
+   --
+   -- @value Receiver_Task
+   -- Receiver task held by the class object
    type UDP_Receiver_Interface is new DNSCatcher.Network
      .Receiver_Interface with
    record
@@ -42,17 +79,37 @@ package DNSCatcher.Network.UDP.Receiver is
    end record;
    type IPv4_UDP_Receiver_Interface_Ptr is access UDP_Receiver_Interface;
 
+   -- Constructor for UDP receiver interface
+   --
+   -- @value This
+   -- Class object
+   --
+   -- @value Config
+   -- Holds pointer to configuration object
+   --
+   -- @value Transaction_Manager
+   -- Pointer to Transaction Manager Task
+   --
+   -- @value Socket
+   -- Holds GNAT.Socket pre-initialized
+   --
    procedure Initialize
      (This                : in out UDP_Receiver_Interface;
       Config              :        Configuration_Ptr;
       Transaction_Manager :        DNS_Transaction_Manager_Task_Ptr;
       Socket              :        Socket_Type);
-      -- Initializes a network interface and does any necessary prep work. It
-      -- MUST be called before calling any other method
 
+      -- Start the internal receiver task
+      --
+      -- @value This
+      -- Class object
+      --
    procedure Start (This : in out UDP_Receiver_Interface);
-   -- Starts the interface
 
+   -- Shutdown the internal receiver task
+   --
+   -- @value This
+   -- Class object
+   --
    procedure Shutdown (This : in out UDP_Receiver_Interface);
-   -- Cleanly shuts down the interface
 end DNSCatcher.Network.UDP.Receiver;
