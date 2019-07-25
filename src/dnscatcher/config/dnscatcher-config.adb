@@ -37,8 +37,8 @@ package body DNSCatcher.Config is
    -- Pure text version of the configuration argument
    --
    type Parse_Procedure is access procedure
-     (Config    : Configuration_Ptr;
-      Value_Str : String);
+     (Config    : in out Configuration;
+      Value_Str :        String);
 
       -- GCP_Management is a vector that handles dynamic dispatch to the
       -- parsing parameters above; it is used to match key/values from the
@@ -47,6 +47,17 @@ package body DNSCatcher.Config is
      (String, Parse_Procedure);
 
    GCP_Map : GCP_Management.Map;
+
+   -- Configuration constructor
+   procedure Initialize (Config : in out Configuration) is
+   begin
+      -- We initialize the ports to 53 by default
+      Config.Local_Listen_Port        := 53;
+      Config.Upstream_DNS_Server_Port := 53;
+
+      -- No upstream server is set
+      Config.Upstream_DNS_Server := To_Unbounded_String ("");
+   end Initialize;
 
    -- Loads the load listen value and sets it in the config record
    --
@@ -57,8 +68,8 @@ package body DNSCatcher.Config is
    -- Pure text version of the configuration argument
    --
    procedure Parse_Local_Listen_Port
-     (Config    : Configuration_Ptr;
-      Value_Str : String)
+     (Config    : in out Configuration;
+      Value_Str :        String)
    is
    begin
       Config.Local_Listen_Port := Port_Type'Value (Value_Str);
@@ -76,8 +87,8 @@ package body DNSCatcher.Config is
    -- Pure text version of the configuration argument
    --
    procedure Parse_Upstream_DNS_Server
-     (Config    : Configuration_Ptr;
-      Value_Str : String)
+     (Config    : in out Configuration;
+      Value_Str :        String)
    is
    begin
       Config.Upstream_DNS_Server := To_Unbounded_String (Value_Str);
@@ -95,8 +106,8 @@ package body DNSCatcher.Config is
    -- Pure text version of the configuration argument
    --
    procedure Parse_Upstream_DNS_Server_Port
-     (Config    : Configuration_Ptr;
-      Value_Str : String)
+     (Config    : in out Configuration;
+      Value_Str :        String)
    is
    begin
       Config.Upstream_DNS_Server_Port := Port_Type'Value (Value_Str);
@@ -115,23 +126,16 @@ package body DNSCatcher.Config is
         ("UPSTREAM_DNS_SERVER_PORT", Parse_Upstream_DNS_Server_Port'Access);
    end Initialize_Config_Parse;
 
-   function Parse_Config_File
-     (Config_File_Path : String)
-      return Configuration_Ptr
+   procedure Read_Cfg_File
+     (Config           : in out Configuration;
+      Config_File_Path :        String)
    is
-      Parsed_Config     : Configuration_Ptr;
       Config_File       : Ada.Text_IO.File_Type;
       Line_Count        : Integer := 1;
       Exception_Message : Unbounded_String;
       use GCP_Management;
    begin
-      Parsed_Config := new Configuration;
-
       Initialize_Config_Parse;
-
-      -- Set sane defaults
-      Parsed_Config.Local_Listen_Port        := 53;
-      Parsed_Config.Upstream_DNS_Server_Port := 53;
 
       -- Try to open the configuration file
       Open
@@ -232,9 +236,9 @@ package body DNSCatcher.Config is
                      -- If Value_Loc is zero, pass an empty string in
                      if Value_Loc = 0
                      then
-                        Element (C).all (Parsed_Config, "");
+                        Element (C).all (Config, "");
                      else
-                        Element (C).all (Parsed_Config, Current_Line
+                        Element (C).all (Config, Current_Line
                              (Value_Loc .. Current_Line'Length));
                      end if;
                   end if;
@@ -250,13 +254,11 @@ package body DNSCatcher.Config is
       Close (Config_File);
 
       -- Confirm mandatory values are set
-      if Parsed_Config.Upstream_DNS_Server = ""
+      if Config.Upstream_DNS_Server = ""
       then
          raise Missing_Mandatory_Config_Option
            with "Upstream_DNS_Server must be set";
       end if;
-
-      return Parsed_Config;
-   end Parse_Config_File;
+   end Read_Cfg_File;
 
 end DNSCatcher.Config;

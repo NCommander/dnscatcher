@@ -42,7 +42,7 @@ package Test_Packet_Parser is
    -- @value Logger_Task
    -- Local instance of the loger
    type Packet_Parser_Test is new Test_Cases.Test_Case with record
-      Capture_Config : DNSCatcher.Config.Configuration_Ptr;
+      Capture_Config : DNSCatcher.Config.Configuration;
       Logger_Task    : DNSCatcher.Utils.Logger.Logger;
    end record;
 

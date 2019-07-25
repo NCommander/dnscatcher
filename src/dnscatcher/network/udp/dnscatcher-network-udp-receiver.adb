@@ -28,7 +28,11 @@ with DNSCatcher.Utils.Logger; use DNSCatcher.Utils.Logger;
 
 package body DNSCatcher.Network.UDP.Receiver is
    task body Receive_Packet_Task is
-      DNS_Config              : Configuration_Ptr;
+      --DNS_Config              : Configuration;
+      -- Local config variables
+      Upstream_DNS_Server      : Unbounded_String;
+      Upstream_DNS_Server_Port : Port_Type;
+
       DNS_Socket              : Socket_Type;
       DNS_Transaction_Manager : DNS_Transaction_Manager_Task_Ptr;
       Buffer : Stream_Element_Array (1 .. Stream_Element_Offset (1500));
@@ -47,10 +51,12 @@ package body DNSCatcher.Network.UDP.Receiver is
          loop
             select
                accept Initialize
-                 (Config              : Configuration_Ptr;
+                 (Config              : Configuration;
                   Socket              : Socket_Type;
                   Transaction_Manager : DNS_Transaction_Manager_Task_Ptr) do
-                  DNS_Config              := Config;
+                  Upstream_DNS_Server      := Config.Upstream_DNS_Server;
+                  Upstream_DNS_Server_Port := Config.Upstream_DNS_Server_Port;
+
                   DNS_Socket              := Socket;
                   DNS_Transaction_Manager := Transaction_Manager;
                end Initialize;
@@ -110,8 +116,8 @@ package body DNSCatcher.Network.UDP.Receiver is
                   DNS_Packet.From_Address :=
                     To_Unbounded_String (Image (Incoming_Address.Addr));
                   DNS_Packet.From_Port  := Incoming_Address.Port;
-                  DNS_Packet.To_Address := DNS_Config.Upstream_DNS_Server;
-                  DNS_Packet.To_Port    := DNS_Config.Upstream_DNS_Server_Port;
+                  DNS_Packet.To_Address := Upstream_DNS_Server;
+                  DNS_Packet.To_Port    := Upstream_DNS_Server_Port;
 
                   -- Create a new buffer of the right length and copy
                   -- the data in See comment on the Header Length BS
@@ -127,8 +133,7 @@ package body DNSCatcher.Network.UDP.Receiver is
                   DNS_Packet.Raw_Data_Length := Offset;
 
                   -- Was this a server response, or client response?
-                  if DNS_Config.Upstream_DNS_Server /=
-                    (Image (Incoming_Address.Addr))
+                  if Upstream_DNS_Server /= (Image (Incoming_Address.Addr))
                   then
                      DNS_Transaction_Manager.From_Client_Resolver_Packet
                        (Packet => DNS_Packet,
@@ -166,13 +171,12 @@ package body DNSCatcher.Network.UDP.Receiver is
 
    procedure Initialize
      (This                : in out UDP_Receiver_Interface;
-      Config              :        Configuration_Ptr;
+      Config              :        Configuration;
       Transaction_Manager :        DNS_Transaction_Manager_Task_Ptr;
       Socket              :        Socket_Type)
    is
    begin
       -- Save our config for good measure
-      This.Config              := Config;
       This.Receiver_Socket     := Socket;
       This.Transaction_Manager := Transaction_Manager;
       This.Receiver_Task       := new Receive_Packet_Task;

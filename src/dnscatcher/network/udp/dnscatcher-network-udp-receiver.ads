@@ -44,7 +44,7 @@ package DNSCatcher.Network.UDP.Receiver is
       -- @value Transaction_Manager
       -- Pointer to Transaction Manager Task
       entry Initialize
-        (Config              : Configuration_Ptr;
+        (Config              : Configuration;
          Socket              : Socket_Type;
          Transaction_Manager : DNS_Transaction_Manager_Task_Ptr);
 
@@ -72,7 +72,7 @@ package DNSCatcher.Network.UDP.Receiver is
    type UDP_Receiver_Interface is new DNSCatcher.Network
      .Receiver_Interface with
    record
-      Config              : Configuration_Ptr;
+      Config              : Configuration;
       Receiver_Socket     : Socket_Type;
       Transaction_Manager : DNS_Transaction_Manager_Task_Ptr;
       Receiver_Task       : Receive_Packet_Task_Ptr;
@@ -95,7 +95,7 @@ package DNSCatcher.Network.UDP.Receiver is
    --
    procedure Initialize
      (This                : in out UDP_Receiver_Interface;
-      Config              :        Configuration_Ptr;
+      Config              :        Configuration;
       Transaction_Manager :        DNS_Transaction_Manager_Task_Ptr;
       Socket              :        Socket_Type);
 

@@ -169,7 +169,7 @@ package body DNSCatcher.DNS.Client is
 
    function Create_Packet
      (This   : in out Client;
-      Config :        Configuration_Ptr)
+      Config :        Configuration)
       return Raw_Packet_Record_Ptr
    is
       DNS_Packet_Names : Unbounded_String;

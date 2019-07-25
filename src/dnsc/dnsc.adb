@@ -21,7 +21,6 @@
 with Ada.Text_IO;           use Ada.Text_IO;
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 with Ada.Exceptions;        use Ada.Exceptions;
-with Ada.Unchecked_Deallocation;
 with GNAT.Sockets;          use GNAT.Sockets;
 
 with DNSCatcher.DNS;          use DNSCatcher.DNS;
@@ -39,7 +38,7 @@ with DNSCatcher.Types; use DNSCatcher.Types;
 
 procedure DNSC is
    DClient                 : DNSCatcher.DNS.Client.Client;
-   Capture_Config          : DNSCatcher.Config.Configuration_Ptr;
+   Capture_Config          : DNSCatcher.Config.Configuration;
    Logger_Task             : DNSCatcher.Utils.Logger.Logger;
    Transaction_Manager_Ptr : DNS_Transaction_Manager_Task_Ptr;
    Sender_Interface : DNSCatcher.Network.UDP.Sender.UDP_Sender_Interface;
@@ -48,12 +47,7 @@ procedure DNSC is
    Logger_Packet           : DNSCatcher.Utils.Logger.Logger_Message_Packet_Ptr;
    Socket                  : Socket_Type;
 
-   procedure Free_DNSCatacher_Config is new Ada.Unchecked_Deallocation
-     (Object => DNSCatcher.Config.Configuration,
-      Name   => DNSCatcher.Config.Configuration_Ptr);
-
 begin
-   Capture_Config := new DNSCatcher.Config.Configuration;
    Capture_Config.Local_Listen_Port        := 41231;
    Capture_Config.Upstream_DNS_Server      := To_Unbounded_String ("4.2.2.2");
    Capture_Config.Upstream_DNS_Server_Port := 53;
@@ -96,9 +90,7 @@ begin
    end;
 
    -- Start up all tasks
-   Sender_Interface.Initialize
-     (Config => Capture_Config,
-      Socket => Socket);
+   Sender_Interface.Initialize (Socket => Socket);
    Sender_Interface.Start;
 
    Receiver_Interface.Initialize
@@ -128,7 +120,6 @@ begin
    Receiver_Interface.Shutdown;
 
    Logger_Task.Stop;
-   Free_DNSCatacher_Config (Capture_Config);
 exception
    when Error : others =>
       begin

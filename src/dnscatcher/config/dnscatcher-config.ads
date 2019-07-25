@@ -54,13 +54,13 @@ package DNSCatcher.Config is
    --
    -- @field Logger_Config
    -- Global configuration of the Logger object
-   type Configuration is record
+   type Configuration is limited record
       Local_Listen_Port        : Port_Type;
       Upstream_DNS_Server      : Unbounded_String;
       Upstream_DNS_Server_Port : Port_Type;
       Logger_Config            : Logger_Configuration;
    end record;
-   type Configuration_Ptr is access Configuration;
+   --type Configuration_Ptr is access Configuration;
 
    -- Functions
 
@@ -68,10 +68,17 @@ package DNSCatcher.Config is
    -- values and storage. Must be called before calling Parse_Config_File
    procedure Initialize_Config_Parse;
 
+   -- Initializes a configuration object and returns it with default values set
+   -- ready for further config
+   procedure Initialize (Config : in out Configuration);
+
    -- Handles parsing the configuration file
    --
    -- It is the caller's responsibility to deallocate the pointer after all
    -- DNSCatcher services have shutdown.
+   --
+   -- @value Config
+   -- Configuration object
    --
    -- @value Config_File_Path
    -- Path to the configuration file
@@ -82,11 +89,11 @@ package DNSCatcher.Config is
    -- @exception Missing_Mandatory_Config_Option Raised when a mandatory option
    -- in the config file is not present
    --
-   function Parse_Config_File
-     (Config_File_Path : String)
-      return Configuration_Ptr;
+   procedure Read_Cfg_File
+     (Config           : in out Configuration;
+      Config_File_Path :        String);
 
-   -- Defined Exceptions
+      -- Defined Exceptions
    Malformed_Line                  : exception;
    Missing_Mandatory_Config_Option : exception;
 end DNSCatcher.Config;

@@ -37,9 +37,10 @@ package body DNSCatcher.DNS.Server is
 
    procedure Start_Server is
       -- Input and Output Sockets
+      Capture_Config : DNSCatcher.Config.Configuration;
+
       DNS_Transactions : DNSCatcher.DNS.Transaction_Manager
         .DNS_Transaction_Manager_Task;
-      Capture_Config     : DNSCatcher.Config.Configuration_Ptr;
       Receiver_Interface : DNSCatcher.Network.UDP.Receiver
         .UDP_Receiver_Interface;
       Sender_Interface : DNSCatcher.Network.UDP.Sender.UDP_Sender_Interface;
@@ -51,13 +52,11 @@ package body DNSCatcher.DNS.Server is
       procedure Free_Transaction_Manager is new Ada.Unchecked_Deallocation
         (Object => DNS_Transaction_Manager_Task,
          Name   => DNS_Transaction_Manager_Task_Ptr);
-      procedure Free_DNSCatacher_Config is new Ada.Unchecked_Deallocation
-        (Object => DNSCatcher.Config.Configuration,
-         Name   => DNSCatcher.Config.Configuration_Ptr);
    begin
       -- Load the config file from disk
-      Capture_Config :=
-        DNSCatcher.Config.Parse_Config_File ("conf/dnscatcherd.conf");
+      DNSCatcher.Config.Initialize (Capture_Config);
+      DNSCatcher.Config.Read_Cfg_File
+        (Capture_Config, "conf/dnscatcherd.conf");
 
       -- Configure the logger
       Capture_Config.Logger_Config.Log_Level := DEBUG;
@@ -102,7 +101,7 @@ package body DNSCatcher.DNS.Server is
 
       Receiver_Interface.Initialize
         (Capture_Config, Transaction_Manager_Ptr, Socket);
-      Sender_Interface.Initialize (Capture_Config, Socket);
+      Sender_Interface.Initialize (Socket);
 
       Transaction_Manager_Ptr.Set_Packet_Queue
         (Sender_Interface.Get_Packet_Queue_Ptr);
@@ -125,7 +124,6 @@ package body DNSCatcher.DNS.Server is
       Transaction_Manager_Ptr.Stop;
       Logger_Task.Stop;
       Free_Transaction_Manager (Transaction_Manager_Ptr);
-      Free_DNSCatacher_Config (Capture_Config);
 
    end Start_Server;
 

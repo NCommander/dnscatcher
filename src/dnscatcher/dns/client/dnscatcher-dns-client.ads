@@ -58,7 +58,7 @@ package DNSCatcher.DNS.Client is
    --!pp on
    function Create_Packet
      (This   : in out Client;
-      Config :        Configuration_Ptr)
+      Config :        Configuration)
       return Raw_Packet_Record_Ptr;
 
 private

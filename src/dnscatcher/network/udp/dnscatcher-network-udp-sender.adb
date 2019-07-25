@@ -139,13 +139,10 @@ package body DNSCatcher.Network.UDP.Sender is
 
    procedure Initialize
      (This   : in out UDP_Sender_Interface;
-      Config :        Configuration_Ptr;
       Socket :        Socket_Type)
    is
    begin
       -- Save our config for good measure
-      This.Config := Config;
-
       This.Sender_Socket := Socket;
       This.Sender_Task   := new Send_Packet_Task;
       This.Packet_Queue  := new Raw_Packet_Record_Queue;
@@ -169,7 +166,7 @@ package body DNSCatcher.Network.UDP.Sender is
 
    function Get_Packet_Queue_Ptr
      (This : in out UDP_Sender_Interface)
-     return DNS_Raw_Packet_Queue_Ptr
+      return DNS_Raw_Packet_Queue_Ptr
    is
    begin
       return This.Packet_Queue;

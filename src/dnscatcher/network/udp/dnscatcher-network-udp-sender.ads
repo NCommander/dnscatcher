@@ -67,7 +67,6 @@ package DNSCatcher.Network.UDP.Sender is
    --
    type UDP_Sender_Interface is new DNSCatcher.Network.Sender_Interface with
    record
-      Config        : Configuration_Ptr;
       Sender_Socket : Socket_Type;
       Sender_Task   : Send_Packet_Task_Ptr;
       Packet_Queue  : DNS_Raw_Packet_Queue_Ptr;
@@ -86,7 +85,6 @@ package DNSCatcher.Network.UDP.Sender is
    -- GNAT.Socket to use for UDP connections
    procedure Initialize
      (This   : in out UDP_Sender_Interface;
-      Config :        Configuration_Ptr;
       Socket :        Socket_Type);
 
       -- Starts the interface

@@ -43,7 +43,7 @@ use DNSCatcher.DNS.Transaction_Manager;
 package DNSCatcher.Network is
 
    -- Receiver Interface
-   type Receiver_Interface is abstract tagged null record;
+   type Receiver_Interface is abstract tagged limited null record;
 
    -- Initiaizes the reader interface of a given connection method
    --
@@ -60,7 +60,7 @@ package DNSCatcher.Network is
    -- Initialized socket from GNAT.Sockets
    procedure Initialize
      (This                : in out Receiver_Interface;
-      Config              :        Configuration_Ptr;
+      Config              :        Configuration;
       Transaction_Manager :        DNS_Transaction_Manager_Task_Ptr;
       Socket              :        Socket_Type) is abstract;
 
@@ -79,7 +79,7 @@ package DNSCatcher.Network is
    procedure Shutdown (This : in out Receiver_Interface) is abstract;
 
    -- Sender Interface
-   type Sender_Interface is abstract tagged null record;
+   type Sender_Interface is abstract tagged limited null record;
 
    -- Initiaizes the reader interface of a given connection method
    --
@@ -94,7 +94,6 @@ package DNSCatcher.Network is
    --
    procedure Initialize
      (This   : in out Sender_Interface;
-      Config :        Configuration_Ptr;
       Socket :        Socket_Type) is abstract;
 
       -- Starts the interface

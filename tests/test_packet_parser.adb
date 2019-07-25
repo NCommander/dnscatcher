@@ -27,7 +27,6 @@ with Ada.Directories;       use Ada.Directories;
 with Ada.Streams;           use Ada.Streams;
 with Ada.Streams.Stream_IO; use Ada.Streams.Stream_IO;
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
-with Ada.Unchecked_Deallocation;
 with Ada.Unchecked_Conversion;
 
 with DNSCatcher.DNS;   use DNSCatcher.DNS;
@@ -43,13 +42,8 @@ use DNSCatcher.DNS.Processor.RData.SOA_Parser;
 with Interfaces.C.Extensions; use Interfaces.C.Extensions;
 
 package body Test_Packet_Parser is
-   procedure Free_DNSCatacher_Config is new Ada.Unchecked_Deallocation
-     (Object => DNSCatcher.Config.Configuration,
-      Name   => DNSCatcher.Config.Configuration_Ptr);
-
    procedure Set_Up_Case (T : in out Packet_Parser_Test) is
    begin
-      T.Capture_Config := new DNSCatcher.Config.Configuration;
       T.Capture_Config.Local_Listen_Port        := 53;
       T.Capture_Config.Upstream_DNS_Server := To_Unbounded_String ("4.2.2.2");
       T.Capture_Config.Upstream_DNS_Server_Port := 53;
@@ -65,7 +59,6 @@ package body Test_Packet_Parser is
    procedure Tear_Down_Case (T : in out Packet_Parser_Test) is
    begin
       T.Logger_Task.Stop;
-      Free_DNSCatacher_Config (T.Capture_Config);
    end Tear_Down_Case;
 
    --------------------
@@ -91,7 +84,7 @@ package body Test_Packet_Parser is
    pragma Warnings (Off, "formal parameter ""T"" is not referenced");
    function Name
      (T : Packet_Parser_Test)
-     return Message_String
+      return Message_String
    is
    begin
       return Format ("Packet Parser Test");
@@ -103,7 +96,7 @@ package body Test_Packet_Parser is
 
    function Load_Binary_DNS_Dump
      (File : String)
-     return Raw_Packet_Record_Ptr
+      return Raw_Packet_Record_Ptr
    is
       Input_File     : Stream_IO.File_Type;
       Input_Stream   : Stream_Access;
