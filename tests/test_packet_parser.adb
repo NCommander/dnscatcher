@@ -29,6 +29,8 @@ with Ada.Streams.Stream_IO; use Ada.Streams.Stream_IO;
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 with Ada.Unchecked_Conversion;
 
+with DNSCatcher.Utils.Logger; use DNSCatcher.Utils.Logger;
+
 with DNSCatcher.DNS;   use DNSCatcher.DNS;
 with DNSCatcher.Types; use DNSCatcher.Types;
 with DNSCatcher.Utils; use DNSCatcher.Utils;
@@ -42,24 +44,6 @@ use DNSCatcher.DNS.Processor.RData.SOA_Parser;
 with Interfaces.C.Extensions; use Interfaces.C.Extensions;
 
 package body Test_Packet_Parser is
-   procedure Set_Up_Case (T : in out Packet_Parser_Test) is
-   begin
-      T.Capture_Config.Local_Listen_Port        := 53;
-      T.Capture_Config.Upstream_DNS_Server := To_Unbounded_String ("4.2.2.2");
-      T.Capture_Config.Upstream_DNS_Server_Port := 53;
-
-      -- Configure the logger
-      T.Capture_Config.Logger_Config.Log_Level := DEBUG;
-      T.Capture_Config.Logger_Config.Use_Color := True;
-
-      T.Logger_Task.Initialize (T.Capture_Config.Logger_Config);
-      T.Logger_Task.Start;
-   end Set_Up_Case;
-
-   procedure Tear_Down_Case (T : in out Packet_Parser_Test) is
-   begin
-      T.Logger_Task.Stop;
-   end Tear_Down_Case;
 
    --------------------
    -- Register_Tests --
@@ -76,19 +60,6 @@ package body Test_Packet_Parser is
       Register_Routine (T, Test_Parse_PTR_Record'Access, "Parse PTR Record");
       Register_Routine (T, Test_Parse_OPT_Record'Access, "Parse OPT Record");
    end Register_Tests;
-
-   ----------
-   -- Name --
-   ----------
-
-   pragma Warnings (Off, "formal parameter ""T"" is not referenced");
-   function Name
-     (T : Packet_Parser_Test)
-      return Message_String
-   is
-   begin
-      return Format ("Packet Parser Test");
-   end Name;
 
    ---------------------
    -- Test_Simple_Add --
@@ -130,6 +101,7 @@ package body Test_Packet_Parser is
       return Inbound_Packet;
    end Load_Binary_DNS_Dump;
 
+   pragma Warnings (Off, "formal parameter ""T"" is not referenced");
    procedure Test_Parse_A_Record (T : in out Test_Cases.Test_Case'Class) is
       Logger_Packet  : DNSCatcher.Utils.Logger.Logger_Message_Packet_Ptr;
       Parsed_Packet  : Parsed_DNS_Packet_Ptr;

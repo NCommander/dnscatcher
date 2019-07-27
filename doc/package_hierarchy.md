@@ -182,6 +182,12 @@ For creating local control interfaces, or injection of DNS traffic from third-pa
 
 In certain cases, DNSCatcher is better run as a passive tap, with no responses being sent out. That functionality is handled via `DNSCatcher.Network.PCap`, and wraps `libpcap`.
 
+### DNSCatcher.Network.Connection_Manager
+
+The connection manager is an abstraction that handles differing types of DNS connections to a common API.
+
+Inbound connections to the Catcher server are registered here for processing, and outbound connections are created here. All connections have a unique tracking number attached to them so that responses can be generated (or processed depending on the caller), providing a de-facto async API for handling requests to and from the system.
+
 ### DNSCatcher.Utils
 
 Top level package for utility functionality that doesn't fit anywhere else.

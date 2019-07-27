@@ -21,60 +21,56 @@
 with AUnit;            use AUnit;
 with AUnit.Test_Cases; use AUnit.Test_Cases;
 
-with DNSCatcher_Test_Case; use DNSCatcher_Test_Case;
+with DNSCatcher.Config;
+with DNSCatcher.Utils.Logger; use DNSCatcher.Utils.Logger;
 
 -- @summary
--- Handles testing the Packet Parser as a whole and RData types indirectly
+-- A base class used for testing functionality of DNSCatcher with common
+-- initialize and teardown code shared between modules
 --
--- @description
--- This is essentially an intergration test for handling DNS packet parsing and
--- it's behaviors.
-package Test_Packet_Parser is
+-- @details
+-- All DNSCatcher tests descend from this test case as a method of simplifying
+-- code handling. Some lesser versions may be needed for testing more basic
+-- functionality
+package DNSCatcher_Test_Case is
+   -- DNSCatcher Test Type
+   -- It handles the global state of the test such as config variables and the
+   -- Logger
+   --
+   -- @value Capture_Config
+   -- Configuration of the DNSCatcher Library
+   --
+   -- @value Logger_Task
+   -- Local instance of the loger
+   type DNSCatcher_Test_Type is abstract new Test_Cases.Test_Case with record
+      Capture_Config : DNSCatcher.Config.Configuration;
+      Logger_Task    : DNSCatcher.Utils.Logger.Logger;
+   end record;
 
-   type Packet_Parser_Test is new DNSCatcher_Test_Type with null record;
-
-   -- Registers each test function to be run
+   -- Register tests for this individual test case
    --
    -- @value T
    -- Global config for test case
-   procedure Register_Tests (T : in out Packet_Parser_Test);
+   procedure Register_Tests (T : in out DNSCatcher_Test_Type) is abstract;
 
-   -- Test Routines:
-
-   -- Tests parsing of an A record
+   -- Setup the DNS Catcher library for each test case
    --
    -- @value T
    -- Global config for test case
-   procedure Test_Parse_A_Record (T : in out Test_Cases.Test_Case'Class);
+   procedure Set_Up_Case (T : in out DNSCatcher_Test_Type);
 
-   -- Tests parsing of an SOA record
+   -- Teardown each test case
    --
    -- @value T
    -- Global config for test case
-   procedure Test_Parse_SOA_Record (T : in out Test_Cases.Test_Case'Class);
+   procedure Tear_Down_Case (T : in out DNSCatcher_Test_Type);
 
-   -- Tests parsing of an CNAME record
+   -- Provide name identifying the test case
    --
    -- @value T
    -- Global config for test case
-   procedure Test_Parse_CNAME_Record (T : in out Test_Cases.Test_Case'Class);
+   function Name
+     (T : DNSCatcher_Test_Type)
+      return Message_String;
 
-   -- Tests parsing of an NS record
-   --
-   -- @value T
-   -- Global config for test case
-   procedure Test_Parse_NS_Record (T : in out Test_Cases.Test_Case'Class);
-
-   -- Tests parsing of an PTR record
-   --
-   -- @value T
-   -- Global config for test case
-   procedure Test_Parse_PTR_Record (T : in out Test_Cases.Test_Case'Class);
-
-   -- Tests parsing of an OPT record (EDNS)
-   --
-   -- @value T
-   -- Global config for test case
-   procedure Test_Parse_OPT_Record (T : in out Test_Cases.Test_Case'Class);
-
-end Test_Packet_Parser;
+end DNSCatcher_Test_Case;

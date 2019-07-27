@@ -18,23 +18,39 @@
 -- FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 -- DEALINGS IN THE SOFTWARE.
 
-pragma Ada_2012;
+with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 
-with Test_Packet_Parser;
-
-package body Packet_Processor_Test_Suite is
-   use AUnit.Test_Suites;
-
-   -- Statically allocate test suite;
-   Result : aliased Test_Suite;
-
-   -- And the test cases
-   Test_Packet_Parser_Ptr : aliased Test_Packet_Parser.Packet_Parser_Test;
-
-   function Suite return AUnit.Test_Suites.Access_Test_Suite is
+package body DNSCatcher_Test_Case is
+   procedure Set_Up_Case (T : in out DNSCatcher_Test_Type) is
    begin
-      Add_Test (Result'Access, Test_Packet_Parser_Ptr'Access);
-      return (Result'Access);
-   end Suite;
+      T.Capture_Config.Local_Listen_Port        := 53;
+      T.Capture_Config.Upstream_DNS_Server := To_Unbounded_String ("4.2.2.2");
+      T.Capture_Config.Upstream_DNS_Server_Port := 53;
 
-end Packet_Processor_Test_Suite;
+      -- Configure the logger
+      T.Capture_Config.Logger_Config.Log_Level := DEBUG;
+      T.Capture_Config.Logger_Config.Use_Color := True;
+
+      T.Logger_Task.Initialize (T.Capture_Config.Logger_Config);
+      T.Logger_Task.Start;
+   end Set_Up_Case;
+
+   procedure Tear_Down_Case (T : in out DNSCatcher_Test_Type) is
+   begin
+      T.Logger_Task.Stop;
+   end Tear_Down_Case;
+
+   ----------
+   -- Name --
+   ----------
+
+   pragma Warnings (Off, "formal parameter ""T"" is not referenced");
+   function Name
+     (T : DNSCatcher_Test_Type)
+      return Message_String
+   is
+   begin
+      return Format ("Packet Parser Test");
+   end Name;
+
+end DNSCatcher_Test_Case;

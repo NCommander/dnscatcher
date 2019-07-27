@@ -18,13 +18,23 @@
 -- FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 -- DEALINGS IN THE SOFTWARE.
 
-with DNSCatcher_Test_Suite;
-with AUnit.Run;
-with AUnit.Reporter.Text;
+pragma Ada_2012;
 
-procedure Test_Runner is
-   procedure Run is new AUnit.Run.Test_Runner (DNSCatcher_Test_Suite.Suite);
-   Reporter : AUnit.Reporter.Text.Text_Reporter;
-begin
-   Run (Reporter);
-end Test_Runner;
+with Test_Packet_Parser;
+
+package body DNSCatcher_Test_Suite is
+   use AUnit.Test_Suites;
+
+   -- Statically allocate test suite;
+   Result : aliased Test_Suite;
+
+   -- And the test cases
+   Test_Packet_Parser_Ptr : aliased Test_Packet_Parser.Packet_Parser_Test;
+
+   function Suite return AUnit.Test_Suites.Access_Test_Suite is
+   begin
+      Add_Test (Result'Access, Test_Packet_Parser_Ptr'Access);
+      return (Result'Access);
+   end Suite;
+
+end DNSCatcher_Test_Suite;

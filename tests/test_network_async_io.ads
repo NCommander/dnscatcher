@@ -18,13 +18,25 @@
 -- FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 -- DEALINGS IN THE SOFTWARE.
 
-with DNSCatcher_Test_Suite;
-with AUnit.Run;
-with AUnit.Reporter.Text;
+with AUnit;            use AUnit;
+with AUnit.Test_Cases; use AUnit.Test_Cases;
 
-procedure Test_Runner is
-   procedure Run is new AUnit.Run.Test_Runner (DNSCatcher_Test_Suite.Suite);
-   Reporter : AUnit.Reporter.Text.Text_Reporter;
-begin
-   Run (Reporter);
-end Test_Runner;
+-- @summary
+-- Handles testing the async io basic functionality, and libuv intergrate
+--
+-- @description
+-- Handling of network sockets is primarily coded in C to wrap around libuv
+-- and OpenSSL with Ada handlers to handle callbacks and other similar
+-- functionality. The expectation is libuv packets will be punted into
+-- a protected object which worker tasks can pick up from.
+--
+-- This code tests the libuv initialization bits, network configuration, and
+-- handling of queued data to/from libuv
+--
+package Test_Network_ASync_IO is
+
+   type Network_ASync_IO_Test is new Test_Cases.Test_Case with record
+      null;
+   end record;
+
+end Test_Network_ASync_IO;

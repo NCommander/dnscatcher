@@ -18,13 +18,22 @@
 -- FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 -- DEALINGS IN THE SOFTWARE.
 
-with DNSCatcher_Test_Suite;
-with AUnit.Run;
-with AUnit.Reporter.Text;
+-- @summary
+-- Ada module for handling Async IO network operations.
+--
+-- @description
+-- This is a de-facto wrapper around libuv that handles all network
+-- transactions in an asynchronous manner which network packets are
+-- offloaded and onloaded.
+--
+-- This is to allow surpassing the c10k problem of handling multiple tasks.
+-- Unfortunately there is no Ada native abstraction layer for libuv so this
+-- is primarily implemented in C and punts code to and from Ada callbacks.
 
-procedure Test_Runner is
-   procedure Run is new AUnit.Run.Test_Runner (DNSCatcher_Test_Suite.Suite);
-   Reporter : AUnit.Reporter.Text.Text_Reporter;
-begin
-   Run (Reporter);
-end Test_Runner;
+package DNSCatcher.Network.ASync_IO is
+   -- Task for containing libuv backend code
+   task Async_IO_Task;
+
+   -- Starts the main UV event loop
+   procedure Start_UV_Event_Loop;
+end DNSCatcher.Network.ASync_IO;

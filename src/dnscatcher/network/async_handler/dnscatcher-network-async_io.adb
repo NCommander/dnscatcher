@@ -18,13 +18,22 @@
 -- FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 -- DEALINGS IN THE SOFTWARE.
 
-with DNSCatcher_Test_Suite;
-with AUnit.Run;
-with AUnit.Reporter.Text;
+package body DNSCatcher.Network.ASync_IO is
 
-procedure Test_Runner is
-   procedure Run is new AUnit.Run.Test_Runner (DNSCatcher_Test_Suite.Suite);
-   Reporter : AUnit.Reporter.Text.Text_Reporter;
-begin
-   Run (Reporter);
-end Test_Runner;
+   -- Async_IO task body, starts the libuv event loop
+   task body Async_IO_Task is
+   begin
+      loop
+         null;
+      end loop;
+   end Async_IO_Task;
+
+   -- C handler to start libuv main loop
+   procedure Start_UV_Event_Loop is
+      procedure Internal;
+      pragma Import (C, Internal, "dnscatcher_async_event_loop");
+   begin
+      Internal;
+   end Start_UV_Event_Loop;
+
+end DNSCatcher.Network.ASync_IO;

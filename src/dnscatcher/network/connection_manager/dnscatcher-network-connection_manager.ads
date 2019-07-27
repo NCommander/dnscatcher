@@ -18,7 +18,16 @@
 -- FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 -- DEALINGS IN THE SOFTWARE.
 
-with AUnit.Test_Suites;
-package Packet_Processor_Test_Suite is
-   function Suite return AUnit.Test_Suites.Access_Test_Suite;
-end Packet_Processor_Test_Suite;
+-- @summary
+-- The connection manager handles raw network connections and creates a
+-- tracking table of connections in vs. connections out.
+--
+-- @description
+-- Connection_Manager is a basic abstraction layer over all network connections
+-- used by the DNSCatcher library. This is to allow responses to be generated
+-- in a connection neutral format and not require special handling elsewhere
+-- through out the code base.
+--
+package DNSCatcher.Network.Connection_Manager is
+
+end DNSCatcher.Network.Connection_Manager;

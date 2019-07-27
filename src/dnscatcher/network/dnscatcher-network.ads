@@ -40,8 +40,8 @@ use DNSCatcher.DNS.Transaction_Manager;
 -- package provides a simple abstraction layer that handles most of the
 -- nitty gritty of setting up and configuring the network for DNS traffic
 --
-package DNSCatcher.Network is
 
+package DNSCatcher.Network is
    -- Receiver Interface
    type Receiver_Interface is abstract tagged limited null record;
 

@@ -18,13 +18,7 @@
 -- FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 -- DEALINGS IN THE SOFTWARE.
 
-with DNSCatcher_Test_Suite;
-with AUnit.Run;
-with AUnit.Reporter.Text;
-
-procedure Test_Runner is
-   procedure Run is new AUnit.Run.Test_Runner (DNSCatcher_Test_Suite.Suite);
-   Reporter : AUnit.Reporter.Text.Text_Reporter;
-begin
-   Run (Reporter);
-end Test_Runner;
+with AUnit.Test_Suites;
+package DNSCatcher_Test_Suite is
+   function Suite return AUnit.Test_Suites.Access_Test_Suite;
+end DNSCatcher_Test_Suite;
