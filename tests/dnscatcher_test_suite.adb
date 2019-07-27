@@ -21,6 +21,7 @@
 pragma Ada_2012;
 
 with Test_Packet_Parser;
+with Test_Network_ASync_IO;
 
 package body DNSCatcher_Test_Suite is
    use AUnit.Test_Suites;
@@ -29,11 +30,14 @@ package body DNSCatcher_Test_Suite is
    Result : aliased Test_Suite;
 
    -- And the test cases
-   Test_Packet_Parser_Ptr : aliased Test_Packet_Parser.Packet_Parser_Test;
+   Test_Packet_Parser_Ptr    : aliased Test_Packet_Parser.Packet_Parser_Test;
+   Test_Network_Async_IO_Ptr : aliased Test_Network_ASync_IO
+     .Network_ASync_IO_Test;
 
    function Suite return AUnit.Test_Suites.Access_Test_Suite is
    begin
       Add_Test (Result'Access, Test_Packet_Parser_Ptr'Access);
+      Add_Test (Result'Access, Test_Network_Async_IO_Ptr'Access);
       return (Result'Access);
    end Suite;
 

@@ -18,25 +18,28 @@
 -- FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 -- DEALINGS IN THE SOFTWARE.
 
-with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
+pragma Ada_2012;
+package body Test_Network_ASync_IO is
 
-package body DNSCatcher_Test_Case is
-   procedure Set_Up_Case (T : in out DNSCatcher_Test_Type) is
+   procedure Register_Tests (T : in out Network_ASync_IO_Test) is
+      use AUnit.Test_Cases.Registration;
    begin
-      T.Capture_Config.Local_Listen_Port        := 53;
-      T.Capture_Config.Upstream_DNS_Server := To_Unbounded_String ("4.2.2.2");
-      T.Capture_Config.Upstream_DNS_Server_Port := 53;
+      Register_Routine
+        (T, Test_Setup_And_Teardown'Access, "Test Async IO Setup/Teardown");
+   end Register_Tests;
 
-      -- Configure the logger
-      T.Capture_Config.Logger_Config.Log_Level := DEBUG;
-      T.Capture_Config.Logger_Config.Use_Color := True;
-
-      T.Logger_Task.Initialize (T.Capture_Config.Logger_Config);
-      T.Logger_Task.Start;
-   end Set_Up_Case;
-
-   procedure Tear_Down_Case (T : in out DNSCatcher_Test_Type) is
+   pragma Warnings (Off, "formal parameter ""T"" is not referenced");
+   function Name
+     (T : Network_ASync_IO_Test)
+      return Message_String
+   is
    begin
-      T.Logger_Task.Stop;
-   end Tear_Down_Case;
-end DNSCatcher_Test_Case;
+      return Format ("Network ASync_IO");
+   end Name;
+
+   procedure Test_Setup_And_Teardown (T : in out Test_Cases.Test_Case'Class) is
+   begin
+      null;
+   end Test_Setup_And_Teardown;
+
+end Test_Network_ASync_IO;

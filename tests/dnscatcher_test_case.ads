@@ -71,6 +71,6 @@ package DNSCatcher_Test_Case is
    -- Global config for test case
    function Name
      (T : DNSCatcher_Test_Type)
-      return Message_String;
+      return Message_String is abstract;
 
 end DNSCatcher_Test_Case;

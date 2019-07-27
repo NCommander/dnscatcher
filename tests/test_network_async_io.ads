@@ -21,6 +21,8 @@
 with AUnit;            use AUnit;
 with AUnit.Test_Cases; use AUnit.Test_Cases;
 
+with DNSCatcher_Test_Case; use DNSCatcher_Test_Case;
+
 -- @summary
 -- Handles testing the async io basic functionality, and libuv intergrate
 --
@@ -35,8 +37,29 @@ with AUnit.Test_Cases; use AUnit.Test_Cases;
 --
 package Test_Network_ASync_IO is
 
-   type Network_ASync_IO_Test is new Test_Cases.Test_Case with record
+   -- Global config object for Network ASync Tests
+   type Network_ASync_IO_Test is new DNSCatcher_Test_Type with record
       null;
    end record;
+
+   -- Registers each test function to be run
+   --
+   -- @value T
+   -- Global config for test case
+   procedure Register_Tests (T : in out Network_ASync_IO_Test);
+
+   -- Provide name identifying the test case
+   --
+   -- @value T
+   -- Global config for test case
+   function Name
+     (T : Network_ASync_IO_Test)
+      return Message_String;
+
+   -- Test setup and teardown of async loop
+   --
+   -- @value T
+   -- Global config for test case
+   procedure Test_Setup_And_Teardown (T : in out Test_Cases.Test_Case'Class);
 
 end Test_Network_ASync_IO;

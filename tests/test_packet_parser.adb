@@ -102,6 +102,14 @@ package body Test_Packet_Parser is
    end Load_Binary_DNS_Dump;
 
    pragma Warnings (Off, "formal parameter ""T"" is not referenced");
+   function Name
+     (T : Packet_Parser_Test)
+      return Message_String
+   is
+   begin
+      return Format ("Packet Parser Test");
+   end Name;
+
    procedure Test_Parse_A_Record (T : in out Test_Cases.Test_Case'Class) is
       Logger_Packet  : DNSCatcher.Utils.Logger.Logger_Message_Packet_Ptr;
       Parsed_Packet  : Parsed_DNS_Packet_Ptr;

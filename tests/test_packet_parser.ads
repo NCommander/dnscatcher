@@ -39,6 +39,14 @@ package Test_Packet_Parser is
    -- Global config for test case
    procedure Register_Tests (T : in out Packet_Parser_Test);
 
+   -- Provide name identifying the test case
+   --
+   -- @value T
+   -- Global config for test case
+   function Name
+     (T : Packet_Parser_Test)
+      return Message_String;
+
    -- Test Routines:
 
    -- Tests parsing of an A record
