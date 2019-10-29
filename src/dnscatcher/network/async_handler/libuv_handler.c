@@ -36,6 +36,7 @@
 uv_loop_t *loop;
 uv_udp_t udp_send_socket;
 uv_udp_t udp_recv_socket;
+uv_async_t pending_data_handle;
 struct sockaddr_in recv_addr;
 
 void alloc_buffer(uv_handle_t *handle, size_t suggested_size, uv_buf_t *buf) {
@@ -46,7 +47,8 @@ void alloc_buffer(uv_handle_t *handle, size_t suggested_size, uv_buf_t *buf) {
 /* Ada functions */
 extern void dc_internal_handle_inbound_packet(void * packet,
 					      size_t length,
-					      char * ip_addr);
+					      char * ip_addr,
+					      int port);
 
 /**
  * UDP received handler; handles loading UDP requests in from the network and loading them
@@ -54,6 +56,7 @@ extern void dc_internal_handle_inbound_packet(void * packet,
  */
 
 void on_udp_read(uv_udp_t *req, ssize_t nread, const uv_buf_t *buf, const struct sockaddr *addr, unsigned flags) {
+  struct sockaddr_storage incoming_addr;
   if (nread < 0) {
     fprintf(stderr, "Read error %s\n", uv_err_name(nread));
     uv_close((uv_handle_t*) req, NULL);
@@ -61,15 +64,16 @@ void on_udp_read(uv_udp_t *req, ssize_t nread, const uv_buf_t *buf, const struct
     return;
   }
 
-//  printf("on_udp_read buf=%d addr=%d\n", buf, addr);
-  char sender[255] = { 0 };
-  if (addr != NULL) {
-    uv_ip4_name((const struct sockaddr_in*) addr, sender, 16);
-    fprintf(stderr, "Recv from %s\n", sender);
-  }
-
   if (nread > 0) {
-    dc_internal_handle_inbound_packet(buf->base, nread, sender);
+
+    //printf("on_udp_read buf=%d addr=%d\n", buf, addr);
+    char sender[255] = { 0 };
+    if (addr != NULL) {
+      uv_ip4_name((const struct sockaddr_in*) addr, sender, 16);
+      //fprintf(stderr, "Recv from %s\n", sender);
+    }
+
+      dc_internal_handle_inbound_packet(buf->base, nread, sender, ntohs(((struct sockaddr_in*)addr)->sin_port));
   }
   free(buf->base);
 }
@@ -85,11 +89,24 @@ void on_send(uv_udp_send_t *req, int status) {
     }
 }
 
+/**
+ * Async event handler denoting that data is ready to be send
+ */
+
+void pending_data_present(uv_async_t *req) {
+  printf("In async handler");
+}
+
+void raise_pending_data() {
+  uv_async_send(&pending_data_handle);
+}
 
 int dnscatcher_async_event_loop(void) {
   /* Load default loop to handle events */
-  printf("Here\n");
   loop = uv_default_loop();
+
+  // Create pending data notifier
+  uv_async_init(loop, &pending_data_handle, pending_data_present);
 
   // Setup UDP sockets
   // FIXME: Load this in from config properly

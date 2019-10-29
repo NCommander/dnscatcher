@@ -24,6 +24,7 @@ with Ada.Unchecked_Conversion;
 
 with GNAT.Sockets; use GNAT.Sockets;
 
+with Interfaces.C;
 with Interfaces.C.Extensions; use Interfaces.C.Extensions;
 
 with System;
@@ -253,6 +254,17 @@ package DNSCatcher.Types is
    end record;
    type Raw_Packet_Record_Ptr is access Raw_Packet_Record;
 
+   -- C version of Raw_Packet_Record
+   type Raw_Packet_Record_C is record
+      From_Address : Interfaces.C.char_array(1..40);
+      From_Port : Interfaces.C.int;
+      To_Address : Interfaces.C.char_array(1..40);
+      To_Port : Interfaces.C.int;
+      Raw_Data : Raw_DNS_Packet;
+      Raw_Data_Length : Interfaces.C.size_t;
+   end record;
+   type Raw_Packet_Record_C_Ptr is access Raw_Packet_Record_C;
+
    -- Deallocation function for Raw_DNS_Packet
    --
    -- Due to the fact that raw DNS packet data is returned as an access type
@@ -271,4 +283,7 @@ package DNSCatcher.Types is
    -- The raw packet to be freed.
    --
    procedure Free_Raw_Packet_Record_Ptr (Ptr : in out Raw_Packet_Record_Ptr);
+
+   -- Conversion function to C for Raw_Packet_Record
+   function To_C(RPP : Raw_Packet_Record) return Raw_Packet_Record_C;
 end DNSCatcher.Types;

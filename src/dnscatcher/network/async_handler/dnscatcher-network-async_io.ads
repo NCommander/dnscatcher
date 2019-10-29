@@ -32,6 +32,7 @@
 
 with System;
 with Interfaces.C;
+with Interfaces.C.Strings;
 
 package DNSCatcher.Network.ASync_IO is
    -- Task for containing libuv backend code
@@ -46,7 +47,7 @@ package DNSCatcher.Network.ASync_IO is
       Origin_Address : Interfaces.C.char_array;
       Origin_Port    : Interfaces.C.int);
 
-   --!pp off
+      --!pp off
    pragma Export (Convention => C,
                   Entity => Handle_Inbound_Packet,
                   External_Name          => "dc_internal_handle_inbound_packet");

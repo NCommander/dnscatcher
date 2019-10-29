@@ -3,6 +3,5 @@ library project UV is
    for Library_Dir  use "../lib";
    for Library_Kind use "dynamic";
    for Library_Name use "uv";
-   for Externally_Built use "true";  --  <<<<
+   for Externally_Built use "true";
 end UV;
-

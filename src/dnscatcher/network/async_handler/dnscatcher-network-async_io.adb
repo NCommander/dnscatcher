@@ -33,10 +33,22 @@ with DNSCatcher.Utils.Logger; use DNSCatcher.Utils.Logger;
 package body DNSCatcher.Network.ASync_IO is
    DNS_Transaction_Manager : DNS_Transaction_Manager_Task;
    Outbound_Packet_Queue   : DNS_Raw_Packet_Queue_Ptr;
+
+   -- Notification procedure to tell libuv there's outbound data to be
+   -- processed
+   procedure Async_Notify is
+      procedure UV_Async_Notify;
+      pragma Import (C, UV_Async_Notify, "raise_pending_data");
+   begin
+      UV_Async_Notify;
+   end Async_Notify;
+
    -- Async_IO task body, starts the libuv event loop
    task body Async_IO_Task is
    begin
       Outbound_Packet_Queue := new DNSCatcher.Datasets.Raw_Packet_Record_Queue;
+      Outbound_Packet_Queue.Set_Callback_Function (Async_Notify'Access);
+
       DNS_Transaction_Manager.Set_Packet_Queue (Outbound_Packet_Queue);
       DNS_Transaction_Manager.Start;
       Start_UV_Event_Loop;
@@ -60,10 +72,13 @@ package body DNSCatcher.Network.ASync_IO is
       Upstream_DNS_Server_Port : Port_Type;
 
       Logger_Packet    : Logger_Message_Packet_Ptr;
-      Incoming_Address : Unbounded_String;
-      Incoming_Port    : constant Port_Type := Port_Type (Origin_Port);
-      Buffer : Stream_Element_Array (1 .. Stream_Element_Offset (1500));
-      Length           : constant Stream_Element_Offset :=
+      Incoming_Address : constant Unbounded_String :=
+        To_Unbounded_String (Interfaces.C.To_Ada
+             (Origin_Address,
+              Trim_Nul => True));
+      Incoming_Port : constant Port_Type := Port_Type (Origin_Port);
+      Buffer        : Stream_Element_Array (1 .. Stream_Element_Offset (1500));
+      Length        : constant Stream_Element_Offset :=
         Stream_Element_Offset (C_Length);
       DNS_Packet : Raw_Packet_Record_Ptr;
 
@@ -78,7 +93,7 @@ package body DNSCatcher.Network.ASync_IO is
 
       Logger_Packet := new Logger_Message_Packet;
       Logger_Packet.Push_Component ("UDP Receiver");
-      Ada.Text_IO.Put_Line (Length'Image);
+      Ada.Text_IO.Put_Line ("Test");
       Buffer (1 .. Length) := As_SEA_Pointer (Packet).all (1 .. Length);
       Logger_Packet.Log_Message
         (INFO,

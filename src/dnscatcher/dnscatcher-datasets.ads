@@ -36,6 +36,16 @@ package DNSCatcher.Datasets is
    package Stored_Packets_Vector is new Vectors (Natural, Raw_Packet_Record);
    use Stored_Packets_Vector;
 
+   -- Forward decleration
+   type Raw_Packet_Record_Queue;
+   type DNS_Raw_Packet_Queue_Ptr;
+
+   -- Meta-type used to hold access references
+   type Raw_Packet_Record_Queue_Holder (Reference : access Raw_Packet_Record_Queue) is limited null record;
+
+   -- Callback function used by Raw_Packet_Record_Queue
+   type Raw_Packet_Record_Queue_Callback is access procedure;
+
    -- Raw_Packet_Record_Queue is a protected type intended to form queues for
    -- network workers as a consumer interface. A raw queue is used for sending
    -- outbound UDP packets for instance.
@@ -54,7 +64,7 @@ package DNSCatcher.Datasets is
       -- @param Packet
       -- Output parameter for the packet
       --
-      entry Get (Packet : out Raw_Packet_Record);
+      entry Get (Packet : out Raw_Packet_Record_Ptr);
 
       -- Gets count of number of packets in queue
       --
@@ -66,12 +76,22 @@ package DNSCatcher.Datasets is
       -- Deletes all stored packets
       --
       entry Empty;
+
+      -- Callback function to call when packets are added
+      --
+      -- Each callback may be called with one or multiple packets enqueued, or
+      -- emptied depending on call order. The callback function should be expected
+      -- to handle this.
+      entry Set_Callback_Function ( Callback_Function : in Raw_Packet_Record_Queue_Callback );
    private
       -- Internal storage vector for packets
       Stored_Packets : Vector;
 
       -- Current packet store count
       Packet_Count : Integer := 0;
+
+      -- Assigned callback function (if any)
+      Callback_Func : Raw_Packet_Record_Queue_Callback := null;
    end Raw_Packet_Record_Queue;
    type DNS_Raw_Packet_Queue_Ptr is access Raw_Packet_Record_Queue;
 end DNSCatcher.Datasets;

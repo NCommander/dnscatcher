@@ -28,12 +28,21 @@ package body DNSCatcher.Datasets is
       begin
          Stored_Packets.Append (Packet);
          Packet_Count := Packet_Count + 1;
+         if Callback_Func /= null then
+            Callback_Func.all;
+         end if;
       end Put;
-      entry Get (Packet : out Raw_Packet_Record) when Packet_Count > 0 is
+      entry Get (Packet : out Raw_Packet_Record_Ptr) when True is
+         Alloced_Packet : constant Raw_Packet_Record_Ptr := new Raw_Packet_Record;
       begin
-         Packet := Stored_Packets.First_Element;
-         Stored_Packets.Delete_First;
-         Packet_Count := Packet_Count - 1;
+         if Packet_Count > 0 then
+            Alloced_Packet.all := Stored_Packets.First_Element;
+            Stored_Packets.Delete_First;
+            Packet_Count := Packet_Count - 1;
+            Packet := Alloced_Packet;
+         else
+            Packet := null;
+         end if;
       end Get;
       entry Count (Count : out Integer) when True is
       begin
@@ -52,5 +61,9 @@ package body DNSCatcher.Datasets is
             Stored_Packets.Iterate (Dump_Vector_Data'access);
          end;
       end Empty;
+      entry Set_Callback_Function ( Callback_Function : in Raw_Packet_Record_Queue_Callback ) when True is
+      begin
+         Callback_Func := Callback_Function;
+      end Set_Callback_Function;
    end Raw_Packet_Record_Queue;
 end DNSCatcher.Datasets;

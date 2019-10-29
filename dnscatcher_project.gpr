@@ -26,24 +26,21 @@ with "gnat/dnscatcherd";
 
 project DNSCatcher_Project is
    -- Not supported by old gprbuilds
-   for Create_Missing_Dirs use "True";
 
+   for Create_Missing_Dirs use "True";
    for Source_Dirs use ("src", "tests");
    for Object_Dir use "build/obj";
-   for Main use ("src/dnscatcherd/dnscatcherd.adb",
-                 "src/dnsc/dnsc.adb",
-                 "tests/test_runner.adb");
-
+   for Main use ("dnsc.adb", "dnscatcherd.adb", "test_runner.adb");
    for Exec_Dir use "bin";
 
    package Compiler renames Compiler_Settings.Compiler;
+
    package Pretty_Printer renames Compiler_Settings.Pretty_Printer;
+
    package Linker renames Compiler_Settings.Linker;
+
    package Documentation is
-      for Ignored_Subprojects use (
-         "aunit",
-         "gnat/compiler_settings"
-      );
+      for Ignored_Subprojects use ("aunit", "gnat/compiler_settings");
       for Documentation_Dir use "gnatdoc";
    end Documentation;
 
