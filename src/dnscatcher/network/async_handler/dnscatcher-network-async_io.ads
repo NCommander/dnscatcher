@@ -30,10 +30,25 @@
 -- Unfortunately there is no Ada native abstraction layer for libuv so this
 -- is primarily implemented in C and punts code to and from Ada callbacks.
 
+with System;
+with Interfaces.C;
+
 package DNSCatcher.Network.ASync_IO is
    -- Task for containing libuv backend code
    task Async_IO_Task;
 
    -- Starts the main UV event loop
    procedure Start_UV_Event_Loop;
+
+   procedure Handle_Inbound_Packet
+     (Packet         : System.Address;
+      C_Length       : Interfaces.C.size_t;
+      Origin_Address : Interfaces.C.char_array;
+      Origin_Port    : Interfaces.C.int);
+
+   --!pp off
+   pragma Export (Convention => C,
+                  Entity => Handle_Inbound_Packet,
+                  External_Name          => "dc_internal_handle_inbound_packet");
+   --!pp on
 end DNSCatcher.Network.ASync_IO;

@@ -7,3 +7,4 @@ build
 gnatdoc
 gnatinspect*
 dnscatcher_project-loc.xml
+*.swp
