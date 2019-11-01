@@ -30,9 +30,10 @@
 -- Unfortunately there is no Ada native abstraction layer for libuv so this
 -- is primarily implemented in C and punts code to and from Ada callbacks.
 
+with DNSCatcher.Types; use DNSCatcher.Types;
+
 with System;
 with Interfaces.C;
-with Interfaces.C.Strings;
 
 package DNSCatcher.Network.ASync_IO is
    -- Task for containing libuv backend code
@@ -48,8 +49,21 @@ package DNSCatcher.Network.ASync_IO is
       Origin_Port    : Interfaces.C.int);
 
       --!pp off
-   pragma Export (Convention => C,
-                  Entity => Handle_Inbound_Packet,
-                  External_Name          => "dc_internal_handle_inbound_packet");
+   pragma Export (Convention     => C,
+                  Entity         => Handle_Inbound_Packet,
+                  External_Name  => "dc_internal_handle_inbound_packet");
    --!pp on
+
+   -- Copies a packet from the pending queue to UV for transmission
+   function Spool_Packets_To_UV return Raw_Packet_Record_C_Ptr;
+
+      --!pp off
+   pragma Export (Convention    => C,
+                  Entity        => Spool_Packets_To_UV,
+                  External_Name => "dc_internal_spool_packet_to_uv");
+   --!pp on
+
+   procedure UV_SIGINT_Handler;
+   pragma Import (C, UV_SIGINT_Handler, "dc_uv_sigint_handler");
+
 end DNSCatcher.Network.ASync_IO;

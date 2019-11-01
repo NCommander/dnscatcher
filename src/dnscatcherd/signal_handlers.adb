@@ -21,11 +21,13 @@
 with Ada.Text_IO; use Ada.Text_IO;
 
 with DNSCatcher.DNS.Server;
+with DNSCatcher.Network.ASync_IO;
 
 package body Signal_Handlers is
    procedure SIGINT_Handler is
    begin
       Put_Line ("Beginning Clean Shutdown");
       DNSCatcher.DNS.Server.Stop_Server;
+      DNSCatcher.Network.ASync_IO.UV_SIGINT_Handler;
    end SIGINT_Handler;
 end Signal_Handlers;

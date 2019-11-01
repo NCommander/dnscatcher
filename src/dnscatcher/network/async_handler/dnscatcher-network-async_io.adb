@@ -18,16 +18,16 @@
 -- FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 -- DEALINGS IN THE SOFTWARE.
 
-with Ada.Text_IO;
+with Ada.Text_IO; use ada.Text_IO;
 with Ada.Streams;           use Ada.Streams;
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
+with Ada.Exceptions; use Ada.Exceptions;
 with Ada.Unchecked_Conversion;
 
 with DNSCatcher.DNS.Transaction_Manager;
 use DNSCatcher.DNS.Transaction_Manager;
 
 with DNSCatcher.Datasets;     use DNSCatcher.Datasets;
-with DNSCatcher.Types;        use DNSCatcher.Types;
 with DNSCatcher.Utils.Logger; use DNSCatcher.Utils.Logger;
 
 package body DNSCatcher.Network.ASync_IO is
@@ -52,6 +52,15 @@ package body DNSCatcher.Network.ASync_IO is
       DNS_Transaction_Manager.Set_Packet_Queue (Outbound_Packet_Queue);
       DNS_Transaction_Manager.Start;
       Start_UV_Event_Loop;
+      DNS_Transaction_Manager.Stop;
+
+   exception
+      when Error : others =>
+         begin
+            Put (Standard_Error, "FATAL: Unknown error: ");
+            Put_Line (Standard_Error, Exception_Information (Error));
+         end;
+
    end Async_IO_Task;
 
    -- C handler to start libuv main loop
@@ -93,7 +102,6 @@ package body DNSCatcher.Network.ASync_IO is
 
       Logger_Packet := new Logger_Message_Packet;
       Logger_Packet.Push_Component ("UDP Receiver");
-      Ada.Text_IO.Put_Line ("Test");
       Buffer (1 .. Length) := As_SEA_Pointer (Packet).all (1 .. Length);
       Logger_Packet.Log_Message
         (INFO,
@@ -133,4 +141,19 @@ package body DNSCatcher.Network.ASync_IO is
 
       Logger_Queue.Add_Packet (Logger_Packet);
    end Handle_Inbound_Packet;
+
+   function Spool_Packets_To_UV return Raw_Packet_Record_C_Ptr is
+      Packet_Record : Raw_Packet_Record_Ptr;
+   begin
+      Outbound_Packet_Queue.Get(Packet_Record);
+
+      -- If the packet queue is empty, return a NULL pointer
+      if Packet_Record = null then
+         return null;
+      end if;
+
+      -- Otherwise, convert the packet to something C can handle.
+      Put_Line("Spooled packet");
+      return To_C(Packet_Record);
+   end Spool_Packets_To_UV;
 end DNSCatcher.Network.ASync_IO;

@@ -35,9 +35,12 @@
 /* Global variables */
 uv_loop_t *loop;
 uv_udp_t udp_send_socket;
+uv_idle_t idle_handle;
 uv_udp_t udp_recv_socket;
 uv_async_t pending_data_handle;
 struct sockaddr_in recv_addr;
+
+int shutting_down = 0;
 
 void alloc_buffer(uv_handle_t *handle, size_t suggested_size, uv_buf_t *buf) {
   buf->base = malloc(suggested_size);
@@ -45,10 +48,21 @@ void alloc_buffer(uv_handle_t *handle, size_t suggested_size, uv_buf_t *buf) {
 }
 
 /* Ada functions */
+struct raw_packet_record {
+  char from_address[40];
+  int from_port;
+  char to_address[40];
+  int to_port;
+  void * raw_data;
+  size_t raw_data_len;
+};
+
 extern void dc_internal_handle_inbound_packet(void * packet,
 					      size_t length,
 					      char * ip_addr,
 					      int port);
+
+extern struct raw_packet_record * dc_internal_spool_packet_to_uv();
 
 /**
  * UDP received handler; handles loading UDP requests in from the network and loading them
@@ -93,17 +107,59 @@ void on_send(uv_udp_send_t *req, int status) {
  * Async event handler denoting that data is ready to be send
  */
 
-void pending_data_present(uv_async_t *req) {
-  printf("In async handler");
+void raise_pending_data() {
+  printf("raised pending data\n");
+  uv_async_send(&pending_data_handle);
 }
 
-void raise_pending_data() {
-  uv_async_send(&pending_data_handle);
+/**
+ * Pull the data from the Ada side
+ */
+
+void pending_data_present(uv_async_t *req) {
+  struct raw_packet_record * rpp;
+
+  printf("pending_data_present()\n");
+  /* Process packets until we get a NULL indicated we've pumped the queue clean */
+  for ( ; ; ) {
+    rpp = dc_internal_spool_packet_to_uv();
+    if (rpp == NULL) {
+      break;
+    }
+
+    printf("outbound packet record:\n");
+    printf("\tremote ip: %s\n", rpp->from_address);
+  }
+}
+
+/**
+ * Clean up on controlled shutdown
+ */
+
+void dc_uv_sigint_handler(void) {
+  uv_stop(uv_default_loop());
+  shutting_down = 1;
+};
+
+
+/**
+ * Idle loop handler
+ */
+
+void idle_handler(uv_idle_t * req) {
+
 }
 
 int dnscatcher_async_event_loop(void) {
   /* Load default loop to handle events */
   loop = uv_default_loop();
+
+  // Create the idle loop notifier
+  // This is required because it causes the loop to not block and allow for clean
+  // exit
+
+  uv_idle_init(loop, &idle_handle);
+  uv_idle_start(&idle_handle, idle_handler);
 
   // Create pending data notifier
   uv_async_init(loop, &pending_data_handle, pending_data_present);
@@ -117,6 +173,8 @@ int dnscatcher_async_event_loop(void) {
   uv_udp_recv_start(&udp_recv_socket, alloc_buffer, on_udp_read);
 
   uv_run(loop, UV_RUN_DEFAULT);
-  printf("libuv unexpected returned!");
+  if (shutting_down == 0) {
+    printf("libuv unexpected returned!");
+  }
   return 0;
 }

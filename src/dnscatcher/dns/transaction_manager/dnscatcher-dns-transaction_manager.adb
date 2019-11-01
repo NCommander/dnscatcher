@@ -223,7 +223,7 @@ package body DNSCatcher.DNS.Transaction_Manager is
                   Running := False;
                end Stop;
             or
-               delay 0.1;
+               terminate;
             end select;
             if Logger_Packet /= null
             then
